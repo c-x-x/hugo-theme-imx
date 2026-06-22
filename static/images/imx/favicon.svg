@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IMX Theme">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071a46"/>
+      <stop offset="1" stop-color="#22145f"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="18" y1="14" x2="47" y2="51" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67e8f9"/>
+      <stop offset=".5" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <path d="M16 13l16 13 16-13-7 19 7 19-16-13-16 13 7-19-7-19z" fill="url(#glass)"/>
+  <path d="M23 32l9-6 9 6-9 6-9-6z" fill="#e0f2fe" fill-opacity=".82"/>
+</svg>

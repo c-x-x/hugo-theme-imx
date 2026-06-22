@@ -1,0 +1,51 @@
+name: Bug 报告
+description: 报告可以稳定复现的主题问题
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: 感谢反馈。请尽量提供最小复现信息。
+  - type: input
+    id: hugo-version
+    attributes:
+      label: Hugo 版本
+      placeholder: hugo v0.163.1+extended
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器与系统
+      placeholder: Chrome 版本 / macOS、Windows 或 Linux
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开……
+        2. 点击……
+        3. 看到……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: 相关配置或最小仓库
+      description: 请移除密钥、邮箱等敏感信息。

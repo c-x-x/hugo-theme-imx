@@ -1,0 +1,12 @@
+name = "IMX Theme"
+license = "MIT"
+licenselink = "https://github.com/c-x-x/hugo-theme-imx/blob/main/LICENSE"
+description = "面向中文技术博客的现代 Hugo 主题，支持液态玻璃导航、响应式布局、全文搜索与自动深浅色模式。"
+homepage = "https://github.com/c-x-x/hugo-theme-imx"
+tags = ["blog", "responsive", "modern", "glassmorphism", "dark-mode", "chinese"]
+features = ["hugo modules", "responsive", "automatic dark mode", "search", "toc", "code highlighting", "giscus"]
+min_version = "0.112.0"
+
+[author]
+  name = "IMX"
+  homepage = "https://github.com/c-x-x"

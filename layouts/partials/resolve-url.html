@@ -1,0 +1,12 @@
+{{- $url := .url | default "" -}}
+{{- $absolute := .absolute | default false -}}
+{{- if or (hasPrefix $url "http://") (hasPrefix $url "https://") (hasPrefix $url "//") (hasPrefix $url "data:") -}}
+  {{- $url -}}
+{{- else -}}
+  {{- $path := strings.TrimPrefix "/" $url -}}
+  {{- if $absolute -}}
+    {{- $path | absURL -}}
+  {{- else -}}
+    {{- $path | relURL -}}
+  {{- end -}}
+{{- end -}}

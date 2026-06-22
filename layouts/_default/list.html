@@ -1,0 +1,69 @@
+{{ define "main" }}
+{{- $defaultImage := .Site.Params.defaultImage | default "/images/imx/default-cover.jpg" -}}
+
+<section class="featured-section">
+  <div class="container">
+    <h1 class="section-title">{{ .Title }}</h1>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="搜索文章..." aria-label="搜索">
+      <svg class="search-icon" width="20" height="20" fill="currentColor"><use href="#icon-search"></use></svg>
+      <div class="search-results"></div>
+    </div>
+
+    <!-- Posts Grid -->
+    <div class="featured-grid">
+      {{ range .Pages }}
+      <article class="post-card">
+        {{- $image := .Params.image | default $defaultImage -}}
+        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+
+        <div class="post-card-content">
+          <div class="post-card-meta">
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-calendar"></use></svg>
+              {{ .Date.Format "2006-01-02" }}
+            </span>
+            {{ if .Params.categories }}
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-folder"></use></svg>
+              {{ index .Params.categories 0 }}
+            </span>
+            {{ end }}
+            {{ if .ReadingTime }}
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-clock"></use></svg>
+              {{ .ReadingTime }} 分钟
+            </span>
+            {{ end }}
+            <span>{{ .WordCount }} 字</span>
+          </div>
+
+          <h3 class="post-card-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h3>
+
+          <p class="post-card-excerpt">
+            {{ if .Description }}
+              {{ .Description }}
+            {{ else }}
+              {{ .Summary | truncate 150 }}
+            {{ end }}
+          </p>
+
+          {{ if .Params.tags }}
+          <div class="post-card-tags">
+            {{ range first 3 .Params.tags }}
+            <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag">{{ . }}</a>
+            {{ end }}
+          </div>
+          {{ end }}
+        </div>
+      </article>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+{{ end }}

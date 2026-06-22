@@ -1,0 +1,39 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    {{- $avatar := .Site.Params.avatar | default "/images/imx/default-avatar.jpg" -}}
+    {{- $homeURL := .Site.Home.RelPermalink -}}
+    <a href="{{ $homeURL }}" class="navbar-brand" aria-label="{{ .Site.Title }} 首页">
+      <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="navbar-logo" width="40" height="40">
+      <span>{{ .Site.Title }}</span>
+    </a>
+
+    <ul class="navbar-menu">
+      {{- if .Site.Menus.main -}}
+        {{- $currentPage := . -}}
+        {{- range .Site.Menus.main -}}
+          {{- $active := or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) -}}
+          <li>
+            <a href="{{ .URL | relLangURL }}"{{ if $active }} class="active" aria-current="page"{{ end }}>
+              {{ .Name }}
+            </a>
+          </li>
+        {{- end -}}
+      {{- else -}}
+        <li><a href="{{ $homeURL }}">首页</a></li>
+        <li><a href="{{ "/posts/" | relLangURL }}">文章</a></li>
+        <li><a href="{{ "/categories/" | relLangURL }}">分类</a></li>
+        <li><a href="{{ "/tags/" | relLangURL }}">标签</a></li>
+        <li><a href="{{ "/about/" | relLangURL }}">关于</a></li>
+      {{- end -}}
+    </ul>
+
+    <div class="navbar-actions">
+      <button class="theme-toggle" type="button" aria-label="切换主题">
+        <svg width="20" height="20" fill="currentColor"><use href="#icon-moon"></use></svg>
+      </button>
+      <button class="mobile-menu-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+        <svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>
+      </button>
+    </div>
+  </div>
+</nav>

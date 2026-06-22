@@ -1,0 +1,133 @@
+{{ define "main" }}
+{{- $avatar := .Site.Params.avatar | default "/images/imx/default-avatar.jpg" -}}
+{{- $defaultImage := .Site.Params.defaultImage | default "/images/imx/default-cover.jpg" -}}
+{{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
+{{- $posts := where .Site.RegularPages "Type" "in" $mainSections -}}
+
+<!-- Hero Section - 特色展示区 -->
+<section class="hero">
+  <div class="hero-content">
+    <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="hero-avatar" width="120" height="120">
+    <h1 class="hero-title">{{ .Site.Title }}</h1>
+    <p class="hero-subtitle">{{ .Site.Params.subtitle }}</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+      <polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2" fill="none"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Featured Posts Section -->
+<section class="featured-section">
+  <div class="container">
+    <h2 class="section-title">精选文章</h2>
+
+    <div class="featured-grid">
+      {{ range first 3 $posts }}
+      <article class="post-card">
+        {{- $image := .Params.image | default $defaultImage -}}
+        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+
+        <div class="post-card-content">
+          <div class="post-card-meta">
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-calendar"></use></svg>
+              {{ .Date.Format "2006-01-02" }}
+            </span>
+            {{ if .Params.categories }}
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-folder"></use></svg>
+              {{ index .Params.categories 0 }}
+            </span>
+            {{ end }}
+            {{ if .ReadingTime }}
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-clock"></use></svg>
+              {{ .ReadingTime }} 分钟
+            </span>
+            {{ end }}
+            <span>
+              {{ .WordCount }} 字
+            </span>
+          </div>
+
+          <h3 class="post-card-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h3>
+
+          <p class="post-card-excerpt">
+            {{ if .Description }}
+              {{ .Description }}
+            {{ else }}
+              {{ .Summary | truncate 150 }}
+            {{ end }}
+          </p>
+
+          {{ if .Params.tags }}
+          <div class="post-card-tags">
+            {{ range first 3 .Params.tags }}
+            <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag">{{ . }}</a>
+            {{ end }}
+          </div>
+          {{ end }}
+        </div>
+      </article>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+<!-- Recent Posts Section -->
+<section class="featured-section">
+  <div class="container">
+    <h2 class="section-title">最新文章</h2>
+
+    <div class="featured-grid">
+      {{ range first 6 (after 3 $posts) }}
+      <article class="post-card">
+        {{- $image := .Params.image | default $defaultImage -}}
+        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+
+        <div class="post-card-content">
+          <div class="post-card-meta">
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-calendar"></use></svg>
+              {{ .Date.Format "2006-01-02" }}
+            </span>
+            {{ if .ReadingTime }}
+            <span>
+              <svg width="16" height="16" fill="currentColor"><use href="#icon-clock"></use></svg>
+              {{ .ReadingTime }} 分钟
+            </span>
+            {{ end }}
+          </div>
+
+          <h3 class="post-card-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h3>
+
+          <p class="post-card-excerpt">
+            {{ if .Description }}
+              {{ .Description }}
+            {{ else }}
+              {{ .Summary | truncate 120 }}
+            {{ end }}
+          </p>
+
+          {{ if .Params.tags }}
+          <div class="post-card-tags">
+            {{ range first 2 .Params.tags }}
+            <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag">{{ . }}</a>
+            {{ end }}
+          </div>
+          {{ end }}
+        </div>
+      </article>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+{{ end }}

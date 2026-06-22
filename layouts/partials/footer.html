@@ -1,0 +1,30 @@
+<footer class="footer">
+  <div class="footer-content">
+    {{ if .Site.Params.social }}
+    <div class="footer-social">
+      {{ if .Site.Params.social.github }}
+      <a href="{{ .Site.Params.social.github }}" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+        <svg width="20" height="20" fill="currentColor"><use href="#icon-github"></use></svg>
+      </a>
+      {{ end }}
+      {{ if .Site.Params.social.email }}
+      <a href="mailto:{{ .Site.Params.social.email }}" class="social-link" aria-label="Email">
+        <svg width="20" height="20" fill="currentColor"><use href="#icon-mail"></use></svg>
+      </a>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    <p class="footer-text">
+      {{ with .Site.Params.footerText }}
+        {{ . | markdownify }}
+      {{ else }}
+        &copy; {{ now.Year }} {{ .Site.Title }}
+      {{ end }}
+    </p>
+    <p class="footer-text">
+      由 <a href="https://gohugo.io" target="_blank" rel="noopener noreferrer">Hugo</a>
+      与 <a href="https://github.com/c-x-x/hugo-theme-imx" target="_blank" rel="noopener noreferrer">IMX Theme</a> 驱动
+    </p>
+  </div>
+</footer>
