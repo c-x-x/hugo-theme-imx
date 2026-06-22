@@ -266,7 +266,7 @@ li {
   --navbar-indicator-bg: rgba(0, 113, 227, 0.15);
   --navbar-indicator-border: rgba(0, 113, 227, 0.25);
   --navbar-indicator-glow: rgba(0, 113, 227, 0.3);
-  --navbar-border-radius: 32px; /* 增大圆角 */
+  --navbar-border-radius: 42px;
 }
 
 [data-theme="dark"] {
@@ -308,7 +308,7 @@ li {
 
   /* 内部高光 */
   position: relative;
-  padding: 0.5rem 1.5rem;
+  padding: 0.62rem 1.65rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -350,7 +350,7 @@ li {
 
 .navbar-brand {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-text);
   display: flex;
@@ -371,8 +371,8 @@ li {
 }
 
 .navbar-logo {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 12px; /* 增大圆角 */
   object-fit: cover;
   border: 2px solid var(--color-primary);
@@ -392,16 +392,44 @@ li {
 
 /* iOS Liquid Glass Menu */
 .navbar-menu {
+  --indicator-x: 0px;
+  --indicator-width: 0px;
+  --indicator-scale-y: 1;
+  --indicator-skew: 0deg;
+  --indicator-energy: 0;
+  --indicator-direction: 0;
+  --indicator-light-x: 50%;
+  --indicator-blur: 18px;
+  --indicator-saturation: 155%;
+  --indicator-shadow-y: 7px;
+  --indicator-shadow-blur: 18px;
+  --indicator-shadow-color: rgba(15, 23, 42, 0.1);
+  --indicator-glow-blur: 18px;
+  --indicator-glow-color: rgba(var(--color-primary-rgb), 0.13);
+  --indicator-inset-x: 0px;
+  --indicator-inset-alpha: 0.12;
+  --indicator-brightness: 1;
+  --indicator-edge-angle: 105deg;
+  --indicator-edge-blur: 0px;
+  --indicator-edge-shadow-x: 0px;
+  --indicator-edge-shadow-blur: 2px;
+  --indicator-edge-opacity: 0.16;
+  --indicator-inset-y: 6px;
+  --indicator-tint-alpha: 0.055;
+  --indicator-surface-alpha: 0.22;
+  --indicator-highlight-alpha: 0.54;
+  --indicator-opacity: 0;
   display: flex;
   flex-direction: row;
-  gap: 0.25rem;
+  gap: 0.2rem;
   align-items: center;
   list-style: none;
   position: relative;
-  padding: 0; /* 移除 padding，让滑块与外框完全重叠 */
-  border-radius: 32px; /* 外框圆角 */
+  padding: 0.32rem;
+  border-radius: 38px;
   background: rgba(0, 0, 0, 0.03);
   overflow: visible; /* 允许滑块突出 */
+  isolation: isolate;
 
   /* 增强菜单框轮廓 - 展示玻璃层次感 */
   border: 1.5px solid rgba(0, 0, 0, 0.12);
@@ -423,60 +451,94 @@ li {
   writing-mode: horizontal-tb;
 }
 
-/* Liquid Glass 滑动指示器 */
-.navbar-menu::before {
+/* Liquid Glass 滑动指示器：主体与虹彩边缘共用同一组物理变量。 */
+.navbar-menu::before,
+.navbar-menu::after {
   content: '';
   position: absolute;
-  /* 上下左右与外框完全对齐，边缘重叠 */
-  top: 0;
-  bottom: 0;
+  top: var(--indicator-inset-y, 6px);
+  bottom: var(--indicator-inset-y, 6px);
   left: 0;
-  height: auto;
   width: var(--indicator-width, 0px);
-
-  /* 液态玻璃效果 - 半透明，显示背后轮廓 */
-  background: var(--navbar-indicator-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  /* 玻璃边框 */
-  border: 1px solid var(--navbar-indicator-border);
-  border-radius: 50px; /* 椭圆形，与外框 32px 不同 */
-
-  /* 多层阴影 - 发光 + 深度 */
-  box-shadow:
-    0 0 20px var(--navbar-indicator-glow),
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-
-  transform: translate3d(var(--indicator-x, 0px), 0, 0) scaleY(var(--indicator-scale-y, 1));
+  border-radius: 999px;
+  transform:
+    translate3d(var(--indicator-x, 0px), 0, 0)
+    scaleY(var(--indicator-scale-y, 1))
+    skewX(var(--indicator-skew, 0deg));
   transform-origin: center center;
-  transition: var(
-    --indicator-transition,
-    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    width 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.12s ease,
-    box-shadow 0.18s ease
-  );
   opacity: var(--indicator-opacity, 0);
-  will-change: transform, width, opacity;
-  z-index: 0;
   pointer-events: none;
+  will-change: transform, width, opacity, filter;
 }
 
-/* 悬停时滑块放大并超出外框，显示外框轮廓 */
-.navbar-menu:hover::before {
-  --indicator-scale-y: 1.45; /* 上下对称放大，显示外框轮廓 */
+.navbar-menu::before {
+  background:
+    radial-gradient(
+      85% 36% at var(--indicator-light-x) 2%,
+      rgba(255, 255, 255, var(--indicator-highlight-alpha)),
+      rgba(255, 255, 255, 0.12) 42%,
+      transparent 72%
+    ),
+    linear-gradient(
+      118deg,
+      rgba(255, 255, 255, var(--indicator-surface-alpha)),
+      rgba(var(--color-primary-rgb), var(--indicator-tint-alpha)) 48%,
+      rgba(255, 255, 255, var(--indicator-surface-alpha))
+    );
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  backdrop-filter:
+    blur(var(--indicator-blur))
+    saturate(var(--indicator-saturation))
+    contrast(1.04);
+  -webkit-backdrop-filter:
+    blur(var(--indicator-blur))
+    saturate(var(--indicator-saturation))
+    contrast(1.04);
   box-shadow:
-    0 0 60px var(--navbar-indicator-glow),
-    0 20px 50px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+    0 var(--indicator-shadow-y)
+      var(--indicator-shadow-blur)
+      var(--indicator-shadow-color),
+    0 0 var(--indicator-glow-blur)
+      var(--indicator-glow-color),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.12),
+    inset var(--indicator-inset-x) 0 18px
+      rgba(255, 255, 255, var(--indicator-inset-alpha));
+  filter: brightness(var(--indicator-brightness));
+  z-index: 0;
+}
+
+.navbar-menu::after {
+  padding: 1.5px;
+  background:
+    conic-gradient(
+      from var(--indicator-edge-angle),
+      rgba(103, 232, 249, 0.74),
+      rgba(255, 255, 255, 0.88),
+      rgba(167, 139, 250, 0.72),
+      rgba(244, 114, 182, 0.38),
+      rgba(250, 204, 21, 0.3),
+      rgba(103, 232, 249, 0.74)
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter:
+    blur(var(--indicator-edge-blur))
+    drop-shadow(
+      var(--indicator-edge-shadow-x)
+      0
+      var(--indicator-edge-shadow-blur)
+      rgba(103, 232, 249, 0.34)
+    );
+  opacity: var(--indicator-edge-opacity);
+  z-index: 1;
 }
 
 /* 激活状态显示滑块 */
-.navbar-menu:has(a.active)::before {
+.navbar-menu:has(a.active) {
   --indicator-opacity: 1;
 }
 
@@ -485,12 +547,12 @@ li {
   color: var(--color-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  font-size: 0.95rem;
-  padding: 0.8rem 1.6rem; /* 再增大一点 */
-  border-radius: 12px;
+  font-size: 1rem;
+  padding: 0.95rem 1.9rem;
+  border-radius: 18px;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -1475,7 +1537,8 @@ li {
     background: rgba(255, 255, 255, 0.06);
   }
 
-  .navbar-menu::before {
+  .navbar-menu::before,
+  .navbar-menu::after {
     display: none;
   }
 

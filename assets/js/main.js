@@ -483,12 +483,24 @@
 
   if (navbarMenu) {
     const menuLinks = Array.from(navbarMenu.querySelectorAll('a'));
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let menuRect = null;
     let itemMetrics = [];
-    let pointerX = null;
-    let pointerFrame = null;
     let isPointerTracking = false;
     let resizeTimeout = null;
+    let indicatorFrame = null;
+    let lastFrameTime = 0;
+    const indicator = {
+      center: 0,
+      width: 0,
+      targetCenter: 0,
+      targetWidth: 0,
+      velocity: 0,
+      widthVelocity: 0,
+      direction: 0,
+      visible: false,
+      initialized: false
+    };
 
     // 设置当前激活页面，支持自定义菜单和子目录部署。
     function setActiveLink() {
@@ -555,31 +567,192 @@
         .filter(Boolean);
     }
 
-    function setIndicatorTransition(instant) {
-      if (instant) {
-        navbarMenu.style.setProperty('--indicator-transition', 'none');
-      } else {
-        navbarMenu.style.removeProperty('--indicator-transition');
+    function metricForLink(link) {
+      return itemMetrics.find(metric => metric.link === link);
+    }
+
+    function setIndicatorVisualVariable(name, value) {
+      navbarMenu.style.setProperty(name, value);
+    }
+
+    function renderIndicator() {
+      if (!menuRect || !indicator.initialized) return;
+
+      const distance = indicator.targetCenter - indicator.center;
+      const baseWidth = Math.max(indicator.width, 1);
+      const stretchLimit = Math.min(
+        menuRect.width * 0.34,
+        Math.max(indicator.targetWidth * 1.4, 56)
+      );
+      const stretch = reducedMotionQuery.matches
+        ? 0
+        : clamp(
+            Math.abs(distance) * 1.05 + Math.abs(indicator.velocity) * 0.2,
+            0,
+            stretchLimit
+          );
+      const renderedWidth = Math.min(baseWidth + stretch, menuRect.width + 8);
+      const renderedCenter = indicator.center + distance * 0.5;
+      const minLeft = -4;
+      const maxLeft = Math.max(minLeft, menuRect.width - renderedWidth + 4);
+      const left = clamp(renderedCenter - renderedWidth / 2, minLeft, maxLeft);
+      const direction = Math.abs(distance) > 0.35
+        ? Math.sign(distance)
+        : (Math.abs(indicator.velocity) > 0.08
+            ? Math.sign(indicator.velocity)
+            : indicator.direction);
+      const energy = clamp(
+        stretch / Math.max(indicator.targetWidth * 1.1, 1),
+        0,
+        1
+      );
+      const visualEnergy = isPointerTracking ? energy : energy * 0.12;
+      const widthBounce = clamp(
+        Math.abs(indicator.targetWidth - indicator.width) /
+          Math.max(indicator.targetWidth, 1),
+        0,
+        0.35
+      );
+      const indicatorInsetY = isPointerTracking
+        ? 2 - visualEnergy * 5.5
+        : 6;
+      const scaleY = isPointerTracking
+        ? 1.015 + visualEnergy * 0.15 - widthBounce * 0.06
+        : 1;
+      const skew = direction * visualEnergy * -2.4;
+      const edgeOpacity = indicator.visible
+        ? (isPointerTracking ? 0.3 + visualEnergy * 0.5 : 0.16)
+        : 0;
+
+      indicator.direction = direction || indicator.direction;
+
+      setIndicatorVisualVariable('--indicator-x', `${left.toFixed(3)}px`);
+      setIndicatorVisualVariable('--indicator-width', `${renderedWidth.toFixed(3)}px`);
+      setIndicatorVisualVariable('--indicator-inset-y', `${indicatorInsetY.toFixed(3)}px`);
+      setIndicatorVisualVariable('--indicator-scale-y', scaleY.toFixed(4));
+      setIndicatorVisualVariable('--indicator-skew', `${skew.toFixed(3)}deg`);
+      setIndicatorVisualVariable('--indicator-energy', energy.toFixed(4));
+      setIndicatorVisualVariable('--indicator-direction', String(direction || 0));
+      setIndicatorVisualVariable('--indicator-light-x', `${(50 + direction * visualEnergy * 18).toFixed(2)}%`);
+      setIndicatorVisualVariable('--indicator-blur', `${(10 + visualEnergy * 15).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-saturation', `${(115 + visualEnergy * 95).toFixed(1)}%`);
+      setIndicatorVisualVariable('--indicator-shadow-y', `${(3 + visualEnergy * 11).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-shadow-blur', `${(10 + visualEnergy * 28).toFixed(2)}px`);
+      setIndicatorVisualVariable(
+        '--indicator-shadow-color',
+        `rgba(15, 23, 42, ${(0.055 + visualEnergy * 0.125).toFixed(3)})`
+      );
+      setIndicatorVisualVariable('--indicator-glow-blur', `${(8 + visualEnergy * 34).toFixed(2)}px`);
+      setIndicatorVisualVariable(
+        '--indicator-glow-color',
+        `rgba(var(--color-primary-rgb), ${(0.045 + visualEnergy * 0.2).toFixed(3)})`
+      );
+      setIndicatorVisualVariable('--indicator-inset-x', `${(-direction * visualEnergy * 8).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-inset-alpha', (0.1 + visualEnergy * 0.14).toFixed(3));
+      setIndicatorVisualVariable('--indicator-brightness', (1 + visualEnergy * 0.06).toFixed(3));
+      setIndicatorVisualVariable('--indicator-edge-angle', `${(105 + direction * visualEnergy * 20).toFixed(2)}deg`);
+      setIndicatorVisualVariable('--indicator-edge-blur', `${(visualEnergy * 0.35).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-edge-shadow-x', `${(direction * visualEnergy * 3).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-edge-shadow-blur', `${(1 + visualEnergy * 5).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-edge-opacity', edgeOpacity.toFixed(3));
+      setIndicatorVisualVariable('--indicator-tint-alpha', (0.055 + visualEnergy * 0.095).toFixed(3));
+      setIndicatorVisualVariable('--indicator-surface-alpha', (0.22 + visualEnergy * 0.13).toFixed(3));
+      setIndicatorVisualVariable('--indicator-highlight-alpha', (0.54 + visualEnergy * 0.24).toFixed(3));
+      setIndicatorVisualVariable('--indicator-opacity', indicator.visible ? '1' : '0');
+    }
+
+    function stopIndicatorAnimation() {
+      if (indicatorFrame !== null) {
+        cancelAnimationFrame(indicatorFrame);
+        indicatorFrame = null;
+      }
+
+      lastFrameTime = 0;
+    }
+
+    function animateIndicator(timestamp) {
+      const elapsed = lastFrameTime ? timestamp - lastFrameTime : 16.667;
+      const frameScale = clamp(elapsed / 16.667, 0.5, 2);
+      const centerStiffness = isPointerTracking ? 0.34 : 0.22;
+      const centerDamping = isPointerTracking ? 0.68 : 0.72;
+      const widthStiffness = isPointerTracking ? 0.27 : 0.2;
+      const widthDamping = isPointerTracking ? 0.7 : 0.74;
+
+      lastFrameTime = timestamp;
+
+      indicator.velocity = (
+        indicator.velocity +
+        (indicator.targetCenter - indicator.center) * centerStiffness * frameScale
+      ) * Math.pow(centerDamping, frameScale);
+      indicator.center += indicator.velocity * frameScale;
+
+      indicator.widthVelocity = (
+        indicator.widthVelocity +
+        (indicator.targetWidth - indicator.width) * widthStiffness * frameScale
+      ) * Math.pow(widthDamping, frameScale);
+      indicator.width += indicator.widthVelocity * frameScale;
+
+      renderIndicator();
+
+      const settled =
+        Math.abs(indicator.targetCenter - indicator.center) < 0.04 &&
+        Math.abs(indicator.targetWidth - indicator.width) < 0.04 &&
+        Math.abs(indicator.velocity) < 0.04 &&
+        Math.abs(indicator.widthVelocity) < 0.04;
+
+      if (settled) {
+        indicator.center = indicator.targetCenter;
+        indicator.width = indicator.targetWidth;
+        indicator.velocity = 0;
+        indicator.widthVelocity = 0;
+        indicatorFrame = null;
+        lastFrameTime = 0;
+        renderIndicator();
+        return;
+      }
+
+      indicatorFrame = requestAnimationFrame(animateIndicator);
+    }
+
+    function startIndicatorAnimation() {
+      if (indicatorFrame === null) {
+        indicatorFrame = requestAnimationFrame(animateIndicator);
       }
     }
 
-    function setIndicatorPosition(left, width, options = {}) {
-      if (!Number.isFinite(left) || !Number.isFinite(width)) return;
+    function setIndicatorTarget(center, width, options = {}) {
+      if (!Number.isFinite(center) || !Number.isFinite(width)) return;
 
-      setIndicatorTransition(Boolean(options.instant));
-      navbarMenu.style.setProperty('--indicator-x', `${left.toFixed(3)}px`);
-      navbarMenu.style.setProperty('--indicator-width', `${width.toFixed(3)}px`);
-      navbarMenu.style.setProperty('--indicator-opacity', '1');
+      const instant =
+        Boolean(options.instant) ||
+        reducedMotionQuery.matches ||
+        !indicator.initialized;
+
+      indicator.targetCenter = center;
+      indicator.targetWidth = Math.max(width, 0);
+      indicator.visible = options.visible !== false;
+
+      if (instant) {
+        stopIndicatorAnimation();
+        indicator.center = center;
+        indicator.width = Math.max(width, 0);
+        indicator.velocity = 0;
+        indicator.widthVelocity = 0;
+        indicator.initialized = true;
+        renderIndicator();
+        return;
+      }
+
+      startIndicatorAnimation();
     }
 
-    function hideIndicator(instant = false) {
-      setIndicatorTransition(instant);
-      navbarMenu.style.setProperty('--indicator-width', '0px');
-      navbarMenu.style.setProperty('--indicator-opacity', '0');
-    }
-
-    function metricForLink(link) {
-      return itemMetrics.find(metric => metric.link === link);
+    function hideIndicator() {
+      stopIndicatorAnimation();
+      indicator.visible = false;
+      indicator.velocity = 0;
+      indicator.widthVelocity = 0;
+      setIndicatorVisualVariable('--indicator-opacity', '0');
+      setIndicatorVisualVariable('--indicator-edge-opacity', '0');
     }
 
     function updateLiquidIndicator(link, instant = false) {
@@ -589,23 +762,15 @@
 
       const metric = metricForLink(link);
       if (!metric) {
-        hideIndicator(instant);
+        hideIndicator();
         return;
       }
 
-      setIndicatorPosition(metric.left, metric.width, { instant });
-
-      if (instant) {
-        requestAnimationFrame(() => {
-          if (!isPointerTracking) {
-            navbarMenu.style.removeProperty('--indicator-transition');
-          }
-        });
-      }
+      setIndicatorTarget(metric.center, metric.width, { instant });
     }
 
-    // 根据鼠标位置更新滑块：中心点跟随指针，宽度在相邻菜单项之间平滑插值。
-    function updateIndicatorByPointer(clientX) {
+    // 目标点紧跟鼠标，玻璃主体由弹簧追赶；二者距离用于形成横向拉伸。
+    function updateIndicatorTargetByPointer(clientX) {
       if (!isDesktopNavbar()) return;
 
       if (!menuRect || itemMetrics.length !== menuLinks.length) {
@@ -644,24 +809,8 @@
         ? 0
         : clamp((localX - leftMetric.center) / distance, 0, 1);
       const width = leftMetric.width + (rightMetric.width - leftMetric.width) * ratio;
-      const maxLeft = menuRect.width - width;
-      const left = clamp(localX - width / 2, 0, Math.max(0, maxLeft));
 
-      setIndicatorPosition(left, width, { instant: true });
-    }
-
-    function schedulePointerUpdate(clientX) {
-      pointerX = clientX;
-
-      if (pointerFrame !== null) return;
-
-      pointerFrame = requestAnimationFrame(() => {
-        pointerFrame = null;
-
-        if (isPointerTracking && pointerX !== null) {
-          updateIndicatorByPointer(pointerX);
-        }
-      });
+      setIndicatorTarget(localX, width);
     }
 
     function restoreActiveIndicator() {
@@ -670,16 +819,18 @@
       if (activeLink) {
         updateLiquidIndicator(activeLink, false);
       } else {
-        hideIndicator(false);
+        hideIndicator();
       }
     }
 
     menuLinks.forEach(link => {
       link.addEventListener('click', () => {
-        // 移除所有 active
-        menuLinks.forEach(l => l.classList.remove('active'));
-        // 添加到点击的链接
+        menuLinks.forEach(item => {
+          item.classList.remove('active');
+          item.removeAttribute('aria-current');
+        });
         link.classList.add('active');
+        link.setAttribute('aria-current', 'page');
 
         if (isDesktopNavbar()) {
           updateLiquidIndicator(link, false);
@@ -692,26 +843,17 @@
 
       isPointerTracking = true;
       refreshNavbarMetrics();
-      navbarMenu.style.setProperty('--indicator-transition', 'none');
-      schedulePointerUpdate(event.clientX);
+      updateIndicatorTargetByPointer(event.clientX);
     });
 
     navbarMenu.addEventListener('pointermove', (event) => {
       if (!isPointerTracking || event.pointerType === 'touch') return;
 
-      schedulePointerUpdate(event.clientX);
+      updateIndicatorTargetByPointer(event.clientX);
     });
 
     function stopPointerTracking() {
       isPointerTracking = false;
-      pointerX = null;
-
-      if (pointerFrame !== null) {
-        cancelAnimationFrame(pointerFrame);
-        pointerFrame = null;
-      }
-
-      navbarMenu.style.removeProperty('--indicator-transition');
       restoreActiveIndicator();
     }
 
@@ -722,7 +864,7 @@
       setActiveLink();
 
       if (!isDesktopNavbar()) {
-        hideIndicator(true);
+        hideIndicator();
         return;
       }
 
@@ -731,7 +873,7 @@
       if (activeLink) {
         updateLiquidIndicator(activeLink, true);
       } else {
-        hideIndicator(true);
+        hideIndicator();
       }
     }
 
@@ -748,11 +890,9 @@
 
     if ('ResizeObserver' in window) {
       const navbarResizeObserver = new ResizeObserver(() => {
-        if (isPointerTracking) {
-          refreshNavbarMetrics();
-        } else {
-          initializeIndicator();
-        }
+        refreshNavbarMetrics();
+
+        if (!isPointerTracking) initializeIndicator();
       });
 
       navbarResizeObserver.observe(navbarMenu);
@@ -762,6 +902,8 @@
         }
       });
     }
+
+    reducedMotionQuery.addEventListener('change', initializeIndicator);
 
     // 页面可见性变化时重新计算（解决某些浏览器的布局问题）
     document.addEventListener('visibilitychange', () => {
