@@ -1,23 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
   <title id="title">IMX 雪花图标</title>
   <defs>
-    <radialGradient id="bg" cx="36%" cy="28%" r="82%">
-      <stop stop-color="#16457f"/>
-      <stop offset=".62" stop-color="#071a3a"/>
-      <stop offset="1" stop-color="#020817"/>
-    </radialGradient>
-    <linearGradient id="ice" x1="18" y1="10" x2="47" y2="54" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fff"/>
-      <stop offset=".4" stop-color="#a9efff"/>
-      <stop offset=".72" stop-color="#4a9dff"/>
-      <stop offset="1" stop-color="#c1adff"/>
+    <linearGradient id="glass" x1="10" y1="7" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity=".78"/>
+      <stop offset=".48" stop-color="#c7f2ff" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#4d8ee8" stop-opacity=".24"/>
+    </linearGradient>
+    <linearGradient id="ice" x1="19" y1="13" x2="45" y2="51" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".42" stop-color="#81dcff"/>
+      <stop offset="1" stop-color="#4169d8"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#8ae8ff" stroke-opacity=".38"/>
+  <path d="M32 3 57 18v28L32 61 7 46V18z" fill="url(#glass)" stroke="#2d7bd4" stroke-width="1.5"/>
+  <path d="M32 7 53 20v24L32 57 11 44V20z" fill="none" stroke="#ffffff" stroke-opacity=".52"/>
   <g fill="none" stroke="url(#ice)" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M32 9v46M12 20l40 24M12 44l40-24" stroke-width="5"/>
-    <path d="m32 9-6 7m6-7 6 7m-6 39-6-7m6 7 6-7M12 20l9 2m-9-2 4 8m36 16-9-2m9 2-4-8M12 44l4-8m-4 8 9-2m31-22-4 8m4-8-9 2" stroke-width="3"/>
+    <path d="M32 11v42" stroke-width="3.5"/>
+    <path d="M32 11v42" stroke-width="3.5" transform="rotate(60 32 32)"/>
+    <path d="M32 11v42" stroke-width="3.5" transform="rotate(120 32 32)"/>
+    <path d="m32 18-5 5m5-5 5 5m-5 23-5-5m5 5 5-5" stroke-width="2.25"/>
+    <path d="m32 18-5 5m5-5 5 5m-5 23-5-5m5 5 5-5" stroke-width="2.25" transform="rotate(60 32 32)"/>
+    <path d="m32 18-5 5m5-5 5 5m-5 23-5-5m5 5 5-5" stroke-width="2.25" transform="rotate(120 32 32)"/>
   </g>
-  <path d="m32 24 7 4v8l-7 4-7-4v-8z" fill="#0b2b5d" stroke="#e2fbff" stroke-width="2"/>
+  <path d="m32 25 6 3.5v7L32 39l-6-3.5v-7z" fill="#f3fcff" fill-opacity=".58" stroke="#397fda" stroke-width="1.5"/>
 </svg>

@@ -373,14 +373,18 @@ li {
 .navbar-logo {
   width: 36px;
   height: 36px;
-  border-radius: 12px; /* 增大圆角 */
-  object-fit: cover;
-  border: 2px solid var(--color-primary);
-  transition: var(--transition-smooth);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(25, 93, 160, 0.18));
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
 }
 
 .navbar-brand:hover .navbar-logo {
-  transform: rotate(360deg);
+  transform: translateY(-1px) scale(1.04);
+  filter:
+    brightness(1.06)
+    drop-shadow(0 5px 9px rgba(25, 93, 160, 0.24));
 }
 
 .navbar-actions {
