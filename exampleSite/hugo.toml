@@ -5,10 +5,11 @@ title = "IMX 示例站"
 enableRobotsTXT = true
 
 [params]
-  description = "一个使用 Hugo Module 安装的 IMX Theme 中文示例站"
-  subtitle = "记录技术、思考与持续发生的灵感"
+  description = "IMX 主题的中文示例站，展示安装、写作和常用配置。"
+  subtitle = "写技术，也记录思路如何成形"
   author = "IMX"
   keywords = ["Hugo", "博客", "技术", "开源主题"]
+  logo = "/images/imx/logo.svg"
   avatar = "/images/imx/default-avatar.jpg"
   defaultImage = "/images/imx/default-cover.jpg"
   defaultOGImage = "/images/imx/default-og.jpg"
@@ -27,6 +28,8 @@ enableRobotsTXT = true
     categoryId = ""
     mapping = "pathname"
     lang = "zh-CN"
+    lightTheme = "light"
+    darkTheme = "dark"
 
 [taxonomies]
   category = "categories"

@@ -1,9 +1,9 @@
 <nav class="navbar">
   <div class="navbar-container">
-    {{- $avatar := .Site.Params.avatar | default "/images/imx/default-avatar.jpg" -}}
+    {{- $logo := .Site.Params.logo | default "/images/imx/logo.svg" -}}
     {{- $homeURL := .Site.Home.RelPermalink -}}
     <a href="{{ $homeURL }}" class="navbar-brand" aria-label="{{ .Site.Title }} 首页">
-      <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="navbar-logo" width="40" height="40">
+      <img src="{{ partial "resolve-url.html" (dict "url" $logo) }}" alt="" class="navbar-logo" width="40" height="40">
       <span>{{ .Site.Title }}</span>
     </a>
 
@@ -25,6 +25,7 @@
         <li><a href="{{ "/tags/" | relLangURL }}">标签</a></li>
         <li><a href="{{ "/about/" | relLangURL }}">关于</a></li>
       {{- end -}}
+      <li class="navbar-menu-outline" aria-hidden="true"></li>
     </ul>
 
     <div class="navbar-actions">

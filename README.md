@@ -1,47 +1,52 @@
+<p align="center">
+  <img src="images/logo.svg" width="96" height="96" alt="IMX 雪花标志">
+</p>
+
 # Hugo Theme IMX
 
-IMX Theme 是一个面向中文技术博客的现代 Hugo 主题。它使用 Hugo Module 分发，提供液态玻璃导航、响应式布局、全文搜索、文章目录、代码复制、Giscus 评论，以及手动浅色、手动深色、自动三种主题模式。
+IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它包含文章列表、分类与标签、站内搜索、文章目录、代码复制和 Giscus 评论，适合技术笔记和长期写作。
 
-![IMX Theme 首页预览](images/preview-home.png)
+![首页预览](images/preview-home.png)
 
-## 功能
+## 主要功能
 
-- Hugo Module 安装与更新
-- 桌面端、平板和移动端响应式布局
-- 液态玻璃导航，以及随鼠标速度拉伸、回弹的弹性指示器
-- 手动浅色、手动深色、自动三态主题切换
-- 自动模式按东八区时间在 08:00 使用浅色、18:00 使用深色
-- 首页精选文章和最新文章
-- 分类、标签和全文搜索
-- 文章目录、阅读进度、代码高亮和一键复制
-- 可选 Giscus 评论，并同步深浅色主题
-- 默认头像、文章封面、OG 分享图和 favicon
+- 只使用 Hugo Module 安装和更新
+- 桌面端与移动端导航
+- 带弹性滑块的玻璃导航栏
+- 浅色、深色和自动三种主题模式
+- 首页、文章列表、分类、标签和关于页面
+- 基于首页 JSON 输出的站内搜索
+- 文章目录、阅读进度和代码复制
+- 可选的 Giscus 评论
 - SEO、Open Graph、Twitter Card 和 RSS
-- 无外部字体依赖
+- 内置雪花 Logo、头像、文章封面、分享图和 favicon
+- 不加载远程字体
+
+分类页和标签页：
+
+![分类页预览](images/preview-categories.png)
+
+![标签页预览](images/preview-tags.png)
 
 ## 环境要求
 
 - Hugo Extended `0.112.0` 或更高版本
 - Go `1.20` 或更高版本
 
-可通过以下命令检查环境：
-
 ```bash
 hugo version
 go version
 ```
 
-## 使用 Hugo Module 安装
+## 安装
 
-本主题只提供 Hugo Module 使用方式，不需要设置 `theme`，也不需要把源码复制到站点的 `themes` 目录。
-
-如果站点还没有 `go.mod`：
+如果站点还没有 `go.mod`，先在站点根目录执行：
 
 ```bash
 hugo mod init github.com/your-name/your-site
 ```
 
-在站点的 `hugo.toml` 中导入主题：
+在 `hugo.toml` 中导入主题：
 
 ```toml
 [module]
@@ -49,7 +54,7 @@ hugo mod init github.com/your-name/your-site
     path = "github.com/c-x-x/hugo-theme-imx"
 ```
 
-下载依赖并启动：
+下载模块并启动本地预览：
 
 ```bash
 hugo mod get
@@ -63,6 +68,8 @@ hugo mod get -u github.com/c-x-x/hugo-theme-imx
 hugo mod tidy
 ```
 
+主题不使用 `theme = "..."` 配置，也不需要复制到站点的 `themes` 目录。
+
 ## 最小配置
 
 ```toml
@@ -73,9 +80,8 @@ title = "我的博客"
 
 [params]
   description = "站点描述"
-  subtitle = "记录技术与思考"
+  subtitle = "首页副标题"
   author = "你的名字"
-  keywords = ["Hugo", "技术博客"]
   mainSections = ["posts"]
 
 [outputs]
@@ -86,7 +92,7 @@ title = "我的博客"
     path = "github.com/c-x-x/hugo-theme-imx"
 ```
 
-搜索功能依赖首页的 JSON 输出，因此请保留 `outputs.home` 中的 `JSON`。
+搜索依赖首页的 JSON 输出，请保留 `outputs.home` 中的 `JSON`。
 
 ## 导航菜单
 
@@ -117,7 +123,7 @@ title = "我的博客"
   weight = 50
 ```
 
-未配置 `menus.main` 时，主题会显示同名的五个中文默认菜单。
+未配置菜单时，主题会使用上面这五项作为默认值。
 
 ## 站点参数
 
@@ -126,48 +132,52 @@ title = "我的博客"
   description = "站点描述"
   subtitle = "首页副标题"
   author = "作者"
-  keywords = ["关键词一", "关键词二"]
+  keywords = ["Hugo", "博客"]
+  logo = "/images/logo.svg"
   avatar = "/images/avatar.jpg"
   defaultImage = "/images/default-cover.jpg"
   defaultOGImage = "/images/default-og.jpg"
   favicon = "/images/favicon.svg"
   mainSections = ["posts"]
-  footerText = "自定义页脚文字"
+  footerText = "页脚文字"
 
   [params.social]
     github = "https://github.com/your-name"
     email = "hello@example.com"
 ```
 
-以下参数未配置时会使用主题内置资源：
+`logo` 用于顶部导航，`avatar` 用于首页和关于页面。两者可以分别替换。
 
-| 参数 | 内置资源 |
+未配置图片时，主题使用以下内置资源：
+
+| 参数 | 默认值 |
 | --- | --- |
+| `logo` | `/images/imx/logo.svg` |
 | `avatar` | `/images/imx/default-avatar.jpg` |
 | `defaultImage` | `/images/imx/default-cover.jpg` |
 | `defaultOGImage` | `/images/imx/default-og.jpg` |
 | `favicon` | `/images/imx/favicon.svg` |
 
-文章没有设置 `image` 时，列表卡片会自动使用 `defaultImage`。页面没有独立图片时，社交分享元数据会使用 `defaultOGImage`。
+文章没有设置 `image` 时，列表卡片使用 `defaultImage`。页面没有独立图片时，分享元数据使用 `defaultOGImage`。
 
 ## 主题模式
 
-主题按钮按照下面的顺序循环：
+主题按钮按以下顺序切换：
 
 ```text
-手动浅色 -> 手动深色 -> 自动 -> 手动浅色
+手动浅色 -> 手动深色 -> 自动
 ```
 
-自动模式固定使用东八区时间：
+自动模式按东八区时间切换：
 
-- `08:00` 至 `17:59`：浅色
-- `18:00` 至次日 `07:59`：深色
+- `08:00` 至 `17:59` 使用浅色
+- `18:00` 至次日 `07:59` 使用深色
 
-模式保存在浏览器 `localStorage` 中，并在页面渲染前应用，减少首屏闪烁。
+选择结果保存在浏览器本地，并在页面内容绘制前应用。
 
 ## Giscus 评论
 
-Giscus 默认关闭。启用前请先在 [giscus.app](https://giscus.app/zh-CN) 获取配置：
+先在 [giscus.app](https://giscus.app/zh-CN) 为评论仓库生成配置，然后填写：
 
 ```toml
 [params.giscus]
@@ -178,7 +188,11 @@ Giscus 默认关闭。启用前请先在 [giscus.app](https://giscus.app/zh-CN) 
   categoryId = "DIC_..."
   mapping = "pathname"
   lang = "zh-CN"
+  lightTheme = "light"
+  darkTheme = "dark"
 ```
+
+评论框在首次加载时读取站点当前主题，之后会跟随主题按钮实时切换。`lightTheme` 和 `darkTheme` 也可以填写 Giscus 支持的其他主题名称或自定义主题 URL。
 
 ## 文章 Front Matter
 
@@ -194,11 +208,11 @@ toc = true
 +++
 ```
 
-`image` 可以省略，主题会使用默认文章封面。将 `toc` 设置为 `false` 可以关闭当前文章的目录。
+`image` 可以省略。将 `toc` 设置为 `false` 可关闭当前文章的目录。
 
 ## 本地开发
 
-仓库自带一个完全通过 Hugo Module 加载主题的中文示例站：
+仓库中的示例站同样通过 Hugo Module 加载主题：
 
 ```bash
 hugo server --source exampleSite
@@ -210,7 +224,7 @@ hugo server --source exampleSite
 hugo --source exampleSite --minify
 ```
 
-`exampleSite/go.mod` 使用本地 `replace` 指向仓库根目录，上传仓库后不会影响其他站点通过远程模块安装。
+`exampleSite/go.mod` 使用本地 `replace` 指向仓库根目录，仅用于开发。
 
 ## 目录结构
 
@@ -219,6 +233,7 @@ hugo-theme-imx/
 ├── archetypes/
 ├── assets/
 ├── exampleSite/
+├── images/
 ├── layouts/
 ├── static/
 ├── go.mod
@@ -226,10 +241,10 @@ hugo-theme-imx/
 └── README.md
 ```
 
-## 贡献
+## 参与维护
 
-提交问题或改动前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题请参考 [SECURITY.md](SECURITY.md)。
+提交 Issue 或 Pull Request 前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题的报告方式见 [SECURITY.md](SECURITY.md)。
 
 ## 许可证
 
-本项目使用 [MIT License](LICENSE)。
+代码和仓库内置素材按 [MIT License](LICENSE) 分发。第三方内容的授权范围见 [CREDITS.md](CREDITS.md)。

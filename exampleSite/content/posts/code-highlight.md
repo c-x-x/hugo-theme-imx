@@ -6,7 +6,7 @@ categories = ["功能介绍"]
 tags = ["代码高亮", "JavaScript"]
 +++
 
-代码块支持 Hugo 内置语法高亮，并自动显示复制按钮。
+代码块使用 Hugo 的语法高亮。鼠标移入代码块后会显示复制按钮。
 
 ```javascript
 function greet(name) {
@@ -16,4 +16,4 @@ function greet(name) {
 console.log(greet('IMX Theme'));
 ```
 
-也可以通过站点的 `markup.highlight` 配置调整行号和高亮样式。
+行号、缩进宽度和高亮方式由站点的 `markup.highlight` 配置控制。

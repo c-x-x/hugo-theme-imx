@@ -1,0 +1,59 @@
+{{ define "main" }}
+{{- $isTag := eq .Data.Singular "tag" -}}
+
+<section class="taxonomy-section taxonomy-term-section">
+  <div class="container taxonomy-container">
+    <header class="taxonomy-header taxonomy-term-header">
+      <span class="taxonomy-term-icon" aria-hidden="true">
+        <svg width="24" height="24" fill="currentColor">
+          <use href="{{ if $isTag }}#icon-tag{{ else }}#icon-folder{{ end }}"></use>
+        </svg>
+      </span>
+      <span class="taxonomy-eyebrow">{{ if $isTag }}标签{{ else }}分类{{ end }}</span>
+      <h1 class="section-title">{{ .Title }}</h1>
+      <p class="taxonomy-description">共收录 {{ len .Pages }} 篇文章</p>
+    </header>
+
+    <div class="taxonomy-post-list">
+      {{ range .Pages.ByDate.Reverse }}
+      <article class="taxonomy-post-card">
+        <div class="taxonomy-post-content">
+          {{ if .Params.categories }}
+          <div class="taxonomy-post-kicker">
+            {{ range first 1 .Params.categories }}
+            <a href="{{ printf "categories/%s/" (. | urlize) | relLangURL }}">{{ . }}</a>
+            {{ end }}
+          </div>
+          {{ end }}
+
+          <h2 class="taxonomy-post-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h2>
+
+          <p class="taxonomy-post-excerpt">
+            {{ if .Description }}
+              {{ .Description }}
+            {{ else }}
+              {{ .Summary | plainify | truncate 150 }}
+            {{ end }}
+          </p>
+
+          {{ if .Params.tags }}
+          <div class="post-card-tags taxonomy-post-tags">
+            {{ range first 4 .Params.tags }}
+            <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag">{{ . }}</a>
+            {{ end }}
+          </div>
+          {{ end }}
+        </div>
+
+        <a href="{{ .RelPermalink }}" class="taxonomy-post-link" aria-label="阅读《{{ .Title }}》">
+          <span>阅读文章</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </article>
+      {{ end }}
+    </div>
+  </div>
+</section>
+{{ end }}

@@ -1,4 +1,4 @@
-{{- $description := .Description | default .Site.Params.description | default "一个简洁、现代的 Hugo 博客" -}}
+{{- $description := .Description | default .Site.Params.description | default "一个 Hugo 博客" -}}
 {{- $keywords := .Keywords | default .Site.Params.keywords -}}
 {{- $defaultOGImage := .Site.Params.defaultOGImage | default "/images/imx/default-og.jpg" -}}
 {{- $pageImage := .Params.image | default $defaultOGImage -}}

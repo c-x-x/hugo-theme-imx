@@ -1,6 +1,6 @@
 /* ============================================
    IMX Theme - Main Stylesheet
-   优雅 + 科技感 + 个性化
+   Core layout and component styles
    ============================================ */
 
 /* 使用系统字体，避免主题依赖外部字体服务。 */
@@ -399,36 +399,42 @@ li {
   --indicator-energy: 0;
   --indicator-direction: 0;
   --indicator-light-x: 50%;
-  --indicator-blur: 18px;
-  --indicator-saturation: 155%;
-  --indicator-shadow-y: 7px;
-  --indicator-shadow-blur: 18px;
-  --indicator-shadow-color: rgba(15, 23, 42, 0.1);
-  --indicator-glow-blur: 18px;
-  --indicator-glow-color: rgba(var(--color-primary-rgb), 0.13);
+  --indicator-blur: 10px;
+  --indicator-saturation: 130%;
+  --indicator-shadow-y: 0px;
+  --indicator-shadow-blur: 0px;
+  --indicator-shadow-color: rgba(15, 23, 42, 0);
+  --indicator-glow-blur: 0px;
+  --indicator-glow-color: rgba(var(--color-primary-rgb), 0);
   --indicator-inset-x: 0px;
-  --indicator-inset-alpha: 0.12;
+  --indicator-inset-alpha: 0.08;
   --indicator-brightness: 1;
   --indicator-edge-angle: 105deg;
   --indicator-edge-blur: 0px;
   --indicator-edge-shadow-x: 0px;
-  --indicator-edge-shadow-blur: 2px;
-  --indicator-edge-opacity: 0.16;
-  --indicator-inset-y: 6px;
-  --indicator-tint-alpha: 0.055;
-  --indicator-surface-alpha: 0.22;
-  --indicator-highlight-alpha: 0.54;
+  --indicator-edge-shadow-blur: 0px;
+  --indicator-edge-opacity: 0;
+  --indicator-inset-y: 0px;
+  --indicator-tint-alpha: 0.04;
+  --indicator-surface-alpha: 0.2;
+  --indicator-highlight-alpha: 0.58;
+  --indicator-border-alpha: 0.32;
+  --indicator-bottom-alpha: 0.06;
+  --indicator-outline-rgb: 30, 41, 59;
+  --indicator-outline-alpha: 0.18;
   --indicator-opacity: 0;
+  --menu-outline-rgb: 15, 23, 42;
+  --menu-outline-alpha: 0.14;
   display: flex;
   flex-direction: row;
   gap: 0.2rem;
   align-items: center;
   list-style: none;
   position: relative;
-  padding: 0.32rem;
+  padding: 0;
   border-radius: 38px;
   background: rgba(0, 0, 0, 0.03);
-  overflow: visible; /* 允许滑块突出 */
+  overflow: visible;
   isolation: isolate;
 
   /* 增强菜单框轮廓 - 展示玻璃层次感 */
@@ -439,6 +445,8 @@ li {
 }
 
 [data-theme="dark"] .navbar-menu {
+  --indicator-outline-rgb: 255, 255, 255;
+  --menu-outline-rgb: 255, 255, 255;
   background: rgba(255, 255, 255, 0.05);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   box-shadow:
@@ -449,6 +457,25 @@ li {
 .navbar-menu li {
   display: inline-flex;
   writing-mode: horizontal-tb;
+}
+
+.navbar-menu .navbar-menu-outline {
+  position: absolute;
+  inset: -1.5px;
+  display: block;
+  border: 1.5px solid rgba(var(--menu-outline-rgb), var(--menu-outline-alpha));
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 0 0 0.35px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 3;
+}
+
+[data-theme="dark"] .navbar-menu .navbar-menu-outline {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 0 0.35px rgba(0, 0, 0, 0.18);
 }
 
 /* Liquid Glass 滑动指示器：主体与虹彩边缘共用同一组物理变量。 */
@@ -476,7 +503,7 @@ li {
     radial-gradient(
       85% 36% at var(--indicator-light-x) 2%,
       rgba(255, 255, 255, var(--indicator-highlight-alpha)),
-      rgba(255, 255, 255, 0.12) 42%,
+      rgba(255, 255, 255, 0.055) 42%,
       transparent 72%
     ),
     linear-gradient(
@@ -485,7 +512,7 @@ li {
       rgba(var(--color-primary-rgb), var(--indicator-tint-alpha)) 48%,
       rgba(255, 255, 255, var(--indicator-surface-alpha))
     );
-  border: 1px solid rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(255, 255, 255, var(--indicator-border-alpha));
   backdrop-filter:
     blur(var(--indicator-blur))
     saturate(var(--indicator-saturation))
@@ -500,8 +527,10 @@ li {
       var(--indicator-shadow-color),
     0 0 var(--indicator-glow-blur)
       var(--indicator-glow-color),
+    0 0 0 0.85px
+      rgba(var(--indicator-outline-rgb), var(--indicator-outline-alpha)),
     inset 0 1.5px 0 rgba(255, 255, 255, 0.78),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.12),
+    inset 0 -1px 0 rgba(15, 23, 42, var(--indicator-bottom-alpha)),
     inset var(--indicator-inset-x) 0 18px
       rgba(255, 255, 255, var(--indicator-inset-alpha));
   filter: brightness(var(--indicator-brightness));
@@ -548,7 +577,7 @@ li {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   font-size: 1rem;
-  padding: 0.95rem 1.9rem;
+  padding: 1.27rem 1.9rem;
   border-radius: 18px;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
@@ -567,7 +596,7 @@ li {
   color: var(--color-primary);
   font-weight: 600;
   opacity: 1;
-  text-shadow: 0 0 8px var(--navbar-indicator-glow);
+  text-shadow: none;
 }
 
 /* 悬停效果 - 轻微发光和上浮 */
@@ -575,7 +604,7 @@ li {
   color: var(--color-primary);
   opacity: 1;
   transform: translateY(-2px);
-  text-shadow: 0 2px 12px var(--navbar-indicator-glow);
+  text-shadow: 0 2px 10px rgba(var(--color-primary-rgb), 0.2);
 }
 
 /* 未选中项降低透明度 */
@@ -950,6 +979,269 @@ li {
 }
 
 /* ============================================
+   Taxonomy Pages - 分类与标签
+   ============================================ */
+
+.taxonomy-section {
+  padding: 4.5rem 2rem 6rem;
+}
+
+.taxonomy-container {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.taxonomy-header {
+  max-width: 680px;
+  margin: 0 auto 3.25rem;
+  text-align: center;
+}
+
+.taxonomy-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.taxonomy-header .section-title {
+  margin-bottom: 1.15rem;
+}
+
+.taxonomy-description {
+  color: var(--color-text-secondary);
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+
+.taxonomy-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.taxonomy-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 52px;
+  padding: 0.72rem 0.8rem 0.72rem 1.25rem;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+  border-radius: 999px;
+  background: rgba(var(--color-primary-rgb), 0.08);
+  color: var(--color-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    0 4px 14px rgba(var(--color-primary-rgb), 0.06);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.taxonomy-tag-pill small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.taxonomy-tag-pill:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--color-primary-rgb), 0.36);
+  background: rgba(var(--color-primary-rgb), 0.13);
+  color: var(--color-primary);
+  box-shadow: 0 12px 28px rgba(var(--color-primary-rgb), 0.14);
+}
+
+.taxonomy-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.taxonomy-category-card {
+  display: flex;
+  align-items: center;
+  min-height: 104px;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.taxonomy-category-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--color-primary-rgb), 0.34);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+}
+
+.taxonomy-category-icon,
+.taxonomy-term-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary);
+}
+
+.taxonomy-category-content {
+  display: grid;
+  gap: 0.3rem;
+  margin-left: 1rem;
+}
+
+.taxonomy-category-content strong {
+  font-size: 1.12rem;
+  line-height: 1.3;
+}
+
+.taxonomy-category-content small {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.taxonomy-category-arrow {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 1.35rem;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.taxonomy-category-card:hover .taxonomy-category-arrow {
+  color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+.taxonomy-term-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.taxonomy-term-icon {
+  margin-bottom: 1rem;
+}
+
+.taxonomy-post-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.taxonomy-post-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.65rem 1.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.taxonomy-post-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--color-primary-rgb), 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.taxonomy-post-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.taxonomy-post-kicker {
+  margin-bottom: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.taxonomy-post-kicker a {
+  color: var(--color-primary);
+}
+
+.taxonomy-post-title {
+  margin-bottom: 0.55rem;
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+
+.taxonomy-post-title a {
+  color: var(--color-text);
+}
+
+.taxonomy-post-title a:hover {
+  color: var(--color-primary);
+}
+
+.taxonomy-post-excerpt {
+  max-width: 760px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.taxonomy-post-tags {
+  margin-top: 1rem;
+}
+
+.taxonomy-post-tags .tag {
+  padding: 0.38rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.taxonomy-post-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.taxonomy-post-link span:last-child {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.taxonomy-post-link:hover span:last-child {
+  transform: translateX(4px);
+}
+
+/* ============================================
    Sidebar - 可收起的侧边栏
    ============================================ */
 
@@ -1269,6 +1561,44 @@ li {
   box-shadow: var(--shadow-sm);
 }
 
+.comments-section {
+  margin-top: 2rem;
+}
+
+.comments-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.comments-title {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+
+.comments-wrapper {
+  padding: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.giscus,
+.giscus-frame,
+.giscus-host {
+  width: 100%;
+}
+
+.giscus-host {
+  min-height: 160px;
+}
+
 .article-content h2,
 .article-content h3,
 .article-content h4,
@@ -1538,7 +1868,8 @@ li {
   }
 
   .navbar-menu::before,
-  .navbar-menu::after {
+  .navbar-menu::after,
+  .navbar-menu .navbar-menu-outline {
     display: none;
   }
 
@@ -1660,6 +1991,67 @@ li {
     font-size: 0.95rem;
   }
 
+  .taxonomy-section {
+    padding: 2.8rem 1rem 4rem;
+  }
+
+  .taxonomy-header {
+    margin-bottom: 2rem;
+  }
+
+  .taxonomy-description {
+    font-size: 0.94rem;
+  }
+
+  .taxonomy-tag-cloud {
+    gap: 0.65rem;
+  }
+
+  .taxonomy-tag-pill {
+    min-height: 46px;
+    padding: 0.6rem 0.65rem 0.6rem 1rem;
+    font-size: 0.96rem;
+  }
+
+  .taxonomy-tag-pill small {
+    min-width: 30px;
+    height: 30px;
+  }
+
+  .taxonomy-category-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .taxonomy-category-card {
+    min-height: 90px;
+    padding: 1rem 1.1rem;
+  }
+
+  .taxonomy-category-icon,
+  .taxonomy-term-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .taxonomy-post-card {
+    display: block;
+    padding: 1.25rem;
+  }
+
+  .taxonomy-post-title {
+    font-size: 1.18rem;
+  }
+
+  .taxonomy-post-excerpt {
+    font-size: 0.94rem;
+  }
+
+  .taxonomy-post-link {
+    margin-top: 1.1rem;
+  }
+
   .layout-with-sidebar {
     flex-direction: column;
     padding: 0 1rem 1rem;
@@ -1731,6 +2123,14 @@ li {
     width: 100%;
     padding: 1.15rem;
     border-radius: 14px;
+  }
+
+  .comments-container {
+    padding: 1rem;
+  }
+
+  .comments-wrapper {
+    padding: 1rem;
   }
 
   .article-content h2,

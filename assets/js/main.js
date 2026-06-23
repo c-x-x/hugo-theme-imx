@@ -485,6 +485,8 @@
     const menuLinks = Array.from(navbarMenu.querySelectorAll('a'));
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let menuRect = null;
+    let indicatorOriginX = 0;
+    let indicatorAreaWidth = 0;
     let itemMetrics = [];
     let isPointerTracking = false;
     let resizeTimeout = null;
@@ -497,6 +499,9 @@
       targetWidth: 0,
       velocity: 0,
       widthVelocity: 0,
+      lift: 0,
+      liftTarget: 0,
+      liftVelocity: 0,
       direction: 0,
       visible: false,
       initialized: false
@@ -549,12 +554,17 @@
 
     function refreshNavbarMetrics() {
       menuRect = navbarMenu.getBoundingClientRect();
+      const menuStyle = window.getComputedStyle(navbarMenu);
+      const borderLeft = parseFloat(menuStyle.borderLeftWidth) || 0;
+      const borderRight = parseFloat(menuStyle.borderRightWidth) || 0;
+      indicatorOriginX = menuRect.left + borderLeft;
+      indicatorAreaWidth = Math.max(menuRect.width - borderLeft - borderRight, 0);
       itemMetrics = menuLinks
         .map(link => {
           const item = link.parentElement;
           if (!item) return null;
           const itemRect = item.getBoundingClientRect();
-          const left = itemRect.left - menuRect.left;
+          const left = itemRect.left - indicatorOriginX;
           const width = itemRect.width;
 
           return {
@@ -581,7 +591,7 @@
       const distance = indicator.targetCenter - indicator.center;
       const baseWidth = Math.max(indicator.width, 1);
       const stretchLimit = Math.min(
-        menuRect.width * 0.34,
+        indicatorAreaWidth * 0.34,
         Math.max(indicator.targetWidth * 1.4, 56)
       );
       const stretch = reducedMotionQuery.matches
@@ -591,10 +601,10 @@
             0,
             stretchLimit
           );
-      const renderedWidth = Math.min(baseWidth + stretch, menuRect.width + 8);
+      const renderedWidth = Math.min(baseWidth + stretch, indicatorAreaWidth + 8);
       const renderedCenter = indicator.center + distance * 0.5;
       const minLeft = -4;
-      const maxLeft = Math.max(minLeft, menuRect.width - renderedWidth + 4);
+      const maxLeft = Math.max(minLeft, indicatorAreaWidth - renderedWidth + 4);
       const left = clamp(renderedCenter - renderedWidth / 2, minLeft, maxLeft);
       const direction = Math.abs(distance) > 0.35
         ? Math.sign(distance)
@@ -606,22 +616,23 @@
         0,
         1
       );
-      const visualEnergy = isPointerTracking ? energy : energy * 0.12;
+      const lift = clamp(indicator.lift, 0, 1.12);
+      const visualEnergy = lift * energy;
       const widthBounce = clamp(
         Math.abs(indicator.targetWidth - indicator.width) /
           Math.max(indicator.targetWidth, 1),
         0,
         0.35
       );
-      const indicatorInsetY = isPointerTracking
-        ? 2 - visualEnergy * 5.5
-        : 6;
-      const scaleY = isPointerTracking
-        ? 1.015 + visualEnergy * 0.15 - widthBounce * 0.06
-        : 1;
+      const indicatorInsetY = -lift * 2.75 - visualEnergy * 2.75;
+      const scaleY =
+        1 +
+        lift * 0.045 +
+        visualEnergy * 0.11 -
+        widthBounce * 0.04 * lift;
       const skew = direction * visualEnergy * -2.4;
       const edgeOpacity = indicator.visible
-        ? (isPointerTracking ? 0.3 + visualEnergy * 0.5 : 0.16)
+        ? lift * (0.22 + energy * 0.5)
         : 0;
 
       indicator.direction = direction || indicator.direction;
@@ -634,30 +645,34 @@
       setIndicatorVisualVariable('--indicator-energy', energy.toFixed(4));
       setIndicatorVisualVariable('--indicator-direction', String(direction || 0));
       setIndicatorVisualVariable('--indicator-light-x', `${(50 + direction * visualEnergy * 18).toFixed(2)}%`);
-      setIndicatorVisualVariable('--indicator-blur', `${(10 + visualEnergy * 15).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-saturation', `${(115 + visualEnergy * 95).toFixed(1)}%`);
-      setIndicatorVisualVariable('--indicator-shadow-y', `${(3 + visualEnergy * 11).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-shadow-blur', `${(10 + visualEnergy * 28).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-blur', `${(10 + lift * 14 + visualEnergy * 10).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-saturation', `${(130 + lift * 50 + visualEnergy * 65).toFixed(1)}%`);
+      setIndicatorVisualVariable('--indicator-shadow-y', `${(lift * (8 + energy * 5)).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-shadow-blur', `${(lift * (18 + energy * 20)).toFixed(2)}px`);
       setIndicatorVisualVariable(
         '--indicator-shadow-color',
-        `rgba(15, 23, 42, ${(0.055 + visualEnergy * 0.125).toFixed(3)})`
+        `rgba(15, 23, 42, ${(lift * (0.09 + energy * 0.09)).toFixed(3)})`
       );
-      setIndicatorVisualVariable('--indicator-glow-blur', `${(8 + visualEnergy * 34).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-glow-blur', `${(lift * (12 + energy * 28)).toFixed(2)}px`);
       setIndicatorVisualVariable(
         '--indicator-glow-color',
-        `rgba(var(--color-primary-rgb), ${(0.045 + visualEnergy * 0.2).toFixed(3)})`
+        `rgba(var(--color-primary-rgb), ${(lift * (0.05 + energy * 0.15)).toFixed(3)})`
       );
       setIndicatorVisualVariable('--indicator-inset-x', `${(-direction * visualEnergy * 8).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-inset-alpha', (0.1 + visualEnergy * 0.14).toFixed(3));
-      setIndicatorVisualVariable('--indicator-brightness', (1 + visualEnergy * 0.06).toFixed(3));
+      setIndicatorVisualVariable('--indicator-inset-alpha', (0.08 + lift * 0.07 + visualEnergy * 0.08).toFixed(3));
+      setIndicatorVisualVariable('--indicator-brightness', (1 + lift * 0.05 + visualEnergy * 0.04).toFixed(3));
       setIndicatorVisualVariable('--indicator-edge-angle', `${(105 + direction * visualEnergy * 20).toFixed(2)}deg`);
       setIndicatorVisualVariable('--indicator-edge-blur', `${(visualEnergy * 0.35).toFixed(2)}px`);
       setIndicatorVisualVariable('--indicator-edge-shadow-x', `${(direction * visualEnergy * 3).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-edge-shadow-blur', `${(1 + visualEnergy * 5).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-edge-shadow-blur', `${(lift * (2 + energy * 4)).toFixed(2)}px`);
       setIndicatorVisualVariable('--indicator-edge-opacity', edgeOpacity.toFixed(3));
-      setIndicatorVisualVariable('--indicator-tint-alpha', (0.055 + visualEnergy * 0.095).toFixed(3));
-      setIndicatorVisualVariable('--indicator-surface-alpha', (0.22 + visualEnergy * 0.13).toFixed(3));
-      setIndicatorVisualVariable('--indicator-highlight-alpha', (0.54 + visualEnergy * 0.24).toFixed(3));
+      setIndicatorVisualVariable('--indicator-tint-alpha', (0.04 + lift * 0.02 + visualEnergy * 0.06).toFixed(3));
+      setIndicatorVisualVariable('--indicator-surface-alpha', (0.2 + lift * 0.22 + visualEnergy * 0.08).toFixed(3));
+      setIndicatorVisualVariable('--indicator-highlight-alpha', (0.58 + lift * 0.18 + visualEnergy * 0.14).toFixed(3));
+      setIndicatorVisualVariable('--indicator-border-alpha', (0.32 + lift * 0.24).toFixed(3));
+      setIndicatorVisualVariable('--indicator-bottom-alpha', (0.06 + lift * 0.06).toFixed(3));
+      setIndicatorVisualVariable('--indicator-outline-alpha', (0.18 + lift * 0.16 + visualEnergy * 0.12).toFixed(3));
+      setIndicatorVisualVariable('--menu-outline-alpha', (0.14 + lift * 0.16).toFixed(3));
       setIndicatorVisualVariable('--indicator-opacity', indicator.visible ? '1' : '0');
     }
 
@@ -677,6 +692,8 @@
       const centerDamping = isPointerTracking ? 0.68 : 0.72;
       const widthStiffness = isPointerTracking ? 0.27 : 0.2;
       const widthDamping = isPointerTracking ? 0.7 : 0.74;
+      const liftStiffness = 0.16;
+      const liftDamping = 0.74;
 
       lastFrameTime = timestamp;
 
@@ -692,19 +709,29 @@
       ) * Math.pow(widthDamping, frameScale);
       indicator.width += indicator.widthVelocity * frameScale;
 
+      indicator.liftVelocity = (
+        indicator.liftVelocity +
+        (indicator.liftTarget - indicator.lift) * liftStiffness * frameScale
+      ) * Math.pow(liftDamping, frameScale);
+      indicator.lift += indicator.liftVelocity * frameScale;
+
       renderIndicator();
 
       const settled =
         Math.abs(indicator.targetCenter - indicator.center) < 0.04 &&
         Math.abs(indicator.targetWidth - indicator.width) < 0.04 &&
         Math.abs(indicator.velocity) < 0.04 &&
-        Math.abs(indicator.widthVelocity) < 0.04;
+        Math.abs(indicator.widthVelocity) < 0.04 &&
+        Math.abs(indicator.liftTarget - indicator.lift) < 0.002 &&
+        Math.abs(indicator.liftVelocity) < 0.002;
 
       if (settled) {
         indicator.center = indicator.targetCenter;
         indicator.width = indicator.targetWidth;
         indicator.velocity = 0;
         indicator.widthVelocity = 0;
+        indicator.lift = indicator.liftTarget;
+        indicator.liftVelocity = 0;
         indicatorFrame = null;
         lastFrameTime = 0;
         renderIndicator();
@@ -746,11 +773,27 @@
       startIndicatorAnimation();
     }
 
+    function setIndicatorLift(target, instant = false) {
+      indicator.liftTarget = clamp(target, 0, 1);
+
+      if (instant || reducedMotionQuery.matches) {
+        indicator.lift = indicator.liftTarget;
+        indicator.liftVelocity = 0;
+        renderIndicator();
+        return;
+      }
+
+      startIndicatorAnimation();
+    }
+
     function hideIndicator() {
       stopIndicatorAnimation();
       indicator.visible = false;
       indicator.velocity = 0;
       indicator.widthVelocity = 0;
+      indicator.lift = 0;
+      indicator.liftTarget = 0;
+      indicator.liftVelocity = 0;
       setIndicatorVisualVariable('--indicator-opacity', '0');
       setIndicatorVisualVariable('--indicator-edge-opacity', '0');
     }
@@ -779,7 +822,7 @@
 
       if (!menuRect || itemMetrics.length === 0) return;
 
-      const localX = clamp(clientX - menuRect.left, 0, menuRect.width);
+      const localX = clamp(clientX - indicatorOriginX, 0, indicatorAreaWidth);
       let leftMetric = itemMetrics[0];
       let rightMetric = itemMetrics[itemMetrics.length - 1];
 
@@ -842,6 +885,7 @@
       if (!isDesktopNavbar() || event.pointerType === 'touch') return;
 
       isPointerTracking = true;
+      setIndicatorLift(1);
       refreshNavbarMetrics();
       updateIndicatorTargetByPointer(event.clientX);
     });
@@ -854,6 +898,7 @@
 
     function stopPointerTracking() {
       isPointerTracking = false;
+      setIndicatorLift(0);
       restoreActiveIndicator();
     }
 

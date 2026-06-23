@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">IMX 雪花标志</title>
+  <defs>
+    <radialGradient id="bg" cx="38%" cy="28%" r="82%">
+      <stop stop-color="#153d75"/>
+      <stop offset=".58" stop-color="#081b3d"/>
+      <stop offset="1" stop-color="#030b1d"/>
+    </radialGradient>
+    <linearGradient id="ice" x1="35" y1="22" x2="92" y2="105" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".3" stop-color="#b9f3ff"/>
+      <stop offset=".64" stop-color="#48a7ff"/>
+      <stop offset="1" stop-color="#b8a9ff"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)"/>
+  <rect x="5" y="5" width="118" height="118" rx="29" fill="none" stroke="#7ddfff" stroke-opacity=".34" stroke-width="2"/>
+  <g fill="none" stroke="url(#ice)" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M64 19v90M25 41l78 45M25 86l78-45" stroke-width="8"/>
+    <path d="M64 19 53 31M64 19l11 12M64 109l-11-12M64 109l11-12" stroke-width="5"/>
+    <path d="m25 41 16 3M25 41l6 15M103 86l-16-3M103 86l-6-15" stroke-width="5"/>
+    <path d="m25 86 6-15M25 86l16-3M103 41l-6 15M103 41l-16 3" stroke-width="5"/>
+  </g>
+  <path d="m64 48 14 8v16l-14 8-14-8V56z" fill="#09295a" stroke="#d9f9ff" stroke-width="3"/>
+  <path d="m64 51 10.5 6-10.5 6-10.5-6z" fill="#8eeaff" fill-opacity=".72"/>
+  <path d="m64 63 10.5-6v12L64 75z" fill="#4a91ff" fill-opacity=".62"/>
+  <path d="m64 63-10.5-6v12L64 75z" fill="#d9f9ff" fill-opacity=".76"/>
+</svg>

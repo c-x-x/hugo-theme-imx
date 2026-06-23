@@ -1,12 +1,12 @@
 name: Bug 报告
-description: 报告可以稳定复现的主题问题
+description: 报告可以复现的问题
 title: "[Bug] "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
-      value: 感谢反馈。请尽量提供最小复现信息。
+      value: 请先删除配置中的令牌、邮箱和其他敏感信息。
   - type: input
     id: hugo-version
     attributes:
@@ -25,7 +25,7 @@ body:
     id: problem
     attributes:
       label: 问题描述
-      description: 实际发生了什么？
+      description: 请说明实际结果和影响范围。
     validations:
       required: true
   - type: textarea
@@ -48,4 +48,9 @@ body:
     id: config
     attributes:
       label: 相关配置或最小仓库
-      description: 请移除密钥、邮箱等敏感信息。
+      description: 只提供复现所需内容。
+  - type: textarea
+    id: logs
+    attributes:
+      label: 控制台或构建日志
+      description: 如有，请粘贴与问题直接相关的部分。

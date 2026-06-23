@@ -1,5 +1,5 @@
 name: 功能建议
-description: 提议一个适用于通用主题的能力
+description: 说明使用场景和期望行为
 title: "[Feature] "
 labels:
   - enhancement
@@ -8,13 +8,14 @@ body:
     id: scenario
     attributes:
       label: 使用场景
-      description: 这个功能解决什么问题？
+      description: 目前哪里不方便，谁会用到？
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
       label: 建议方案
+      description: 请描述结果，不要求提供实现细节。
     validations:
       required: true
   - type: textarea

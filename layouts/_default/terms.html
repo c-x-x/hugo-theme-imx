@@ -1,0 +1,46 @@
+{{ define "main" }}
+{{- $isTags := eq .Data.Singular "tag" -}}
+{{- $terms := .Data.Terms.ByCount -}}
+
+<section class="taxonomy-section {{ if $isTags }}taxonomy-section-tags{{ else }}taxonomy-section-categories{{ end }}">
+  <div class="container taxonomy-container">
+    <header class="taxonomy-header">
+      <span class="taxonomy-eyebrow">{{ if $isTags }}Topics{{ else }}Collections{{ end }}</span>
+      <h1 class="section-title">{{ .Title }}</h1>
+      <p class="taxonomy-description">
+        {{ if $isTags }}
+          按主题浏览文章，找到正在关注的技术与灵感。
+        {{ else }}
+          将文章按领域整理，用更清晰的方式进入不同内容。
+        {{ end }}
+      </p>
+    </header>
+
+    {{ if $isTags }}
+    <div class="taxonomy-tag-cloud" aria-label="全部标签">
+      {{ range $terms }}
+      <a href="{{ .Page.RelPermalink }}" class="taxonomy-tag-pill">
+        <span>{{ .Page.LinkTitle }}</span>
+        <small>{{ .Count }}</small>
+      </a>
+      {{ end }}
+    </div>
+    {{ else }}
+    <div class="taxonomy-category-grid">
+      {{ range $terms }}
+      <a href="{{ .Page.RelPermalink }}" class="taxonomy-category-card">
+        <span class="taxonomy-category-icon" aria-hidden="true">
+          <svg width="26" height="26" fill="currentColor"><use href="#icon-folder"></use></svg>
+        </span>
+        <span class="taxonomy-category-content">
+          <strong>{{ .Page.LinkTitle }}</strong>
+          <small>{{ .Count }} 篇文章</small>
+        </span>
+        <span class="taxonomy-category-arrow" aria-hidden="true">→</span>
+      </a>
+      {{ end }}
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
