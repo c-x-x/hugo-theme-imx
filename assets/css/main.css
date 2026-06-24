@@ -267,6 +267,9 @@ li {
   --navbar-indicator-border: rgba(0, 113, 227, 0.25);
   --navbar-indicator-glow: rgba(0, 113, 227, 0.3);
   --navbar-border-radius: 34px;
+  --floating-action-edge: 2rem;
+  --floating-action-toggle-size: 50px;
+  --floating-action-comment-size: 48px;
 }
 
 [data-theme="dark"] {
@@ -1330,10 +1333,10 @@ li {
 
 .sidebar-toggle {
   position: fixed;
-  right: 2rem;
+  right: var(--floating-action-edge);
   bottom: 2rem;
-  width: 50px;
-  height: 50px;
+  width: var(--floating-action-toggle-size);
+  height: var(--floating-action-toggle-size);
   border-radius: 50%;
   background: var(--color-bg-glass);
   backdrop-filter: var(--blur-glass);
@@ -1411,10 +1414,13 @@ li {
 /* 评论跳转按钮 - 固定在右下角，在目录切换按钮上方 */
 .comment-jump-btn {
   position: fixed;
-  right: 2rem;
+  right: calc(
+    var(--floating-action-edge) +
+    (var(--floating-action-toggle-size) - var(--floating-action-comment-size)) / 2
+  );
   bottom: 7rem;
-  width: 48px;
-  height: 48px;
+  width: var(--floating-action-comment-size);
+  height: var(--floating-action-comment-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1440,8 +1446,11 @@ li {
 
 /* 移动端调整 */
 @media (max-width: 1024px) {
+  :root {
+    --floating-action-edge: 1.5rem;
+  }
+
   .comment-jump-btn {
-    right: 1.5rem;
     bottom: 6rem;
   }
 }
@@ -1811,6 +1820,12 @@ li {
    ============================================ */
 
 @media (max-width: 768px) {
+  :root {
+    --floating-action-edge: 1rem;
+    --floating-action-toggle-size: 46px;
+    --floating-action-comment-size: 44px;
+  }
+
   html {
     font-size: 14px;
   }
@@ -2217,18 +2232,12 @@ li {
   }
 
   .comment-jump-btn {
-    right: 1rem;
     bottom: 5.9rem;
-    width: 44px;
-    height: 44px;
     border-radius: 14px;
   }
 
   .sidebar-toggle {
-    right: 1rem;
     bottom: 1.2rem;
-    width: 46px;
-    height: 46px;
   }
 
   .sidebar-toggle.active {
