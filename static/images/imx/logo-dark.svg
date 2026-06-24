@@ -1,11 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IMX snowflake logo">
-  <style>
-    .mark { stroke: #000; }
-    @media (prefers-color-scheme: dark) {
-      .mark { stroke: #fff; }
-    }
-  </style>
-  <g class="mark" fill="none" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="none" stroke="#fff" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round">
     <path d="M32 9v46"/>
     <path d="M12.08 20.5 51.92 43.5"/>
     <path d="M12.08 43.5 51.92 20.5"/>

@@ -1,73 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
-  <title id="title">IMX 雪花标志</title>
-  <defs>
-    <linearGradient id="glass" x1="22" y1="16" x2="105" y2="112" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffffff" stop-opacity=".62"/>
-      <stop offset=".42" stop-color="#d9f6ff" stop-opacity=".28"/>
-      <stop offset="1" stop-color="#60a5fa" stop-opacity=".16"/>
-    </linearGradient>
-    <linearGradient id="edge" x1="28" y1="17" x2="99" y2="109" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#f8fdff"/>
-      <stop offset=".3" stop-color="#8be8ff"/>
-      <stop offset=".7" stop-color="#3b82f6"/>
-      <stop offset="1" stop-color="#8b5cf6"/>
-    </linearGradient>
-    <linearGradient id="flake" x1="43" y1="28" x2="85" y2="100" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffffff"/>
-      <stop offset=".34" stop-color="#9eeaff"/>
-      <stop offset=".72" stop-color="#3184e8"/>
-      <stop offset="1" stop-color="#6d5de7"/>
-    </linearGradient>
-    <filter id="shadow" x="-24%" y="-24%" width="148%" height="160%">
-      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#0b3d76" flood-opacity=".18"/>
-    </filter>
-  </defs>
-
-  <g filter="url(#shadow)">
-    <path
-      d="M64 8 109 34v60l-45 26-45-26V34z"
-      fill="url(#glass)"
-      stroke="url(#edge)"
-      stroke-width="2.5"/>
-    <path
-      d="M64 14 103 37v54l-39 23-39-23V37z"
-      fill="none"
-      stroke="#ffffff"
-      stroke-opacity=".38"/>
-
-    <g
-      fill="none"
-      stroke="url(#flake)"
-      stroke-width="5.5"
-      stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="M64 24v80"/>
-      <path d="M64 24v80" transform="rotate(60 64 64)"/>
-      <path d="M64 24v80" transform="rotate(120 64 64)"/>
-    </g>
-
-    <g
-      fill="none"
-      stroke="url(#flake)"
-      stroke-width="3.75"
-      stroke-linecap="round"
-      stroke-linejoin="round">
-      <path d="m64 38-10 10m10-10 10 10M64 90 54 80m10 10 10-10"/>
-      <path
-        d="m64 38-10 10m10-10 10 10M64 90 54 80m10 10 10-10"
-        transform="rotate(60 64 64)"/>
-      <path
-        d="m64 38-10 10m10-10 10 10M64 90 54 80m10 10 10-10"
-        transform="rotate(120 64 64)"/>
-    </g>
-
-    <path
-      d="m64 51 12 7v13l-12 7-12-7V58z"
-      fill="#eefbff"
-      fill-opacity=".46"
-      stroke="url(#edge)"
-      stroke-width="2.5"/>
-    <path d="m64 55 8 5-8 5-8-5z" fill="#ffffff" fill-opacity=".7"/>
-    <path d="m64 65 8-5v9l-8 5z" fill="#3b82f6" fill-opacity=".32"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IMX snowflake logo">
+  <g fill="none" stroke="#000" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 9v46"/>
+    <path d="M12.08 20.5 51.92 43.5"/>
+    <path d="M12.08 43.5 51.92 20.5"/>
+    <path d="m32 16-5.5 5.5"/>
+    <path d="m32 16 5.5 5.5"/>
+    <path d="m32 48-5.5-5.5"/>
+    <path d="m32 48 5.5-5.5"/>
+    <path d="m18.14 24 7.51-2.01"/>
+    <path d="m18.14 24 2.01 7.51"/>
+    <path d="m45.86 40-7.51 2.01"/>
+    <path d="m45.86 40-2.01-7.51"/>
+    <path d="m18.14 40 2.01-7.51"/>
+    <path d="m18.14 40 7.51 2.01"/>
+    <path d="m45.86 24-2.01 7.51"/>
+    <path d="m45.86 24-7.51-2.01"/>
+    <path d="M32 25.5 37.63 28.75v6.5L32 38.5l-5.63-3.25v-6.5L32 25.5z"/>
   </g>
 </svg>

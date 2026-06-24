@@ -1,9 +1,17 @@
 <nav class="navbar">
   <div class="navbar-container">
-    {{- $logo := .Site.Params.logo | default "/images/imx/logo.svg" -}}
+    {{- $defaultLogoLight := "/images/imx/logo.svg" -}}
+    {{- $defaultLogoDark := "/images/imx/logo-dark.svg" -}}
+    {{- $logo := .Site.Params.logo | default $defaultLogoLight -}}
+    {{- $logoLightParam := or .Site.Params.logoLight .Site.Params.logolight -}}
+    {{- $logoDarkParam := or .Site.Params.logoDark .Site.Params.logodark -}}
+    {{- $logoLight := $logoLightParam | default $logo -}}
+    {{- $logoDark := $logoDarkParam | default (cond (eq $logo $defaultLogoLight) $defaultLogoDark $logo) -}}
+    {{- $logoLightURL := partial "resolve-url.html" (dict "url" $logoLight) -}}
+    {{- $logoDarkURL := partial "resolve-url.html" (dict "url" $logoDark) -}}
     {{- $homeURL := .Site.Home.RelPermalink -}}
     <a href="{{ $homeURL }}" class="navbar-brand" aria-label="{{ .Site.Title }} 首页">
-      <img src="{{ partial "resolve-url.html" (dict "url" $logo) }}" alt="" class="navbar-logo" width="40" height="40">
+      <img src="{{ $logoLightURL }}" data-logo-light="{{ $logoLightURL }}" data-logo-dark="{{ $logoDarkURL }}" alt="" class="navbar-logo" width="40" height="40">
       <span>{{ .Site.Title }}</span>
     </a>
 
@@ -30,11 +38,21 @@
 
     <div class="navbar-actions">
       <button class="theme-toggle" type="button" aria-label="切换主题">
-        <svg width="20" height="20" fill="currentColor"><use href="#icon-moon"></use></svg>
+        <svg class="theme-toggle-icon theme-toggle-icon-sun" width="20" height="20" fill="currentColor"><use href="#icon-sun"></use></svg>
+        <svg class="theme-toggle-icon theme-toggle-icon-moon" width="20" height="20" fill="currentColor"><use href="#icon-moon"></use></svg>
+        <span class="theme-toggle-auto-badge" aria-hidden="true">A</span>
       </button>
       <button class="mobile-menu-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
         <svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>
       </button>
     </div>
   </div>
+  <script>
+    (function () {
+      var theme = document.documentElement.dataset.theme;
+      document.querySelectorAll('[data-logo-light][data-logo-dark]').forEach(function (logo) {
+        logo.src = theme === 'dark' ? logo.dataset.logoDark : logo.dataset.logoLight;
+      });
+    }());
+  </script>
 </nav>

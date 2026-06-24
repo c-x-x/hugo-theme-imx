@@ -8,6 +8,7 @@
   // Theme Toggle - 主题切换
   // ============================================
   const themeToggle = document.querySelector('.theme-toggle');
+  const themeLogos = document.querySelectorAll('[data-logo-light][data-logo-dark]');
   const htmlElement = document.documentElement;
   const mobileQuery = window.matchMedia('(max-width: 768px)');
   const THEME_MODE_KEY = 'themeMode';
@@ -78,6 +79,25 @@
   function setTheme(theme) {
     htmlElement.setAttribute('data-theme', theme);
     setStorageItem(THEME_KEY, theme);
+    updateThemeAssets(theme);
+  }
+
+  function updateThemeAssets(theme) {
+    const favicons = window.__IMX_FAVICONS__;
+    const favicon = document.querySelector('link[data-imx-favicon]');
+    const faviconHref = favicons && (theme === 'dark' ? favicons.dark : favicons.light);
+
+    if (favicon && faviconHref) {
+      favicon.setAttribute('href', faviconHref);
+    }
+
+    themeLogos.forEach((logo) => {
+      const logoSource = theme === 'dark' ? logo.dataset.logoDark : logo.dataset.logoLight;
+
+      if (logoSource && logo.getAttribute('src') !== logoSource) {
+        logo.setAttribute('src', logoSource);
+      }
+    });
   }
 
   // 更新主题图标
@@ -86,16 +106,14 @@
       return;
     }
 
-    const icon = mode === 'auto'
-      ? 'icon-clock'
-      : (theme === 'dark' ? 'icon-sun' : 'icon-moon');
+    const icon = theme === 'dark' ? 'icon-moon' : 'icon-sun';
     const labelMap = {
       light: '主题模式：手动浅色，点击切换为深色',
       dark: '主题模式：手动深色，点击切换为自动',
       auto: `主题模式：自动（当前${theme === 'dark' ? '深色' : '浅色'}），点击切换为手动浅色`
     };
 
-    themeToggle.innerHTML = `<svg width="20" height="20" fill="currentColor"><use href="#${icon}"></use></svg>`;
+    themeToggle.innerHTML = `<svg class="theme-toggle-icon" width="20" height="20" fill="currentColor"><use href="#${icon}"></use></svg><span class="theme-toggle-auto-badge" aria-hidden="true">A</span>`;
     themeToggle.setAttribute('aria-label', labelMap[mode]);
     themeToggle.setAttribute('title', labelMap[mode]);
     themeToggle.dataset.themeMode = mode;

@@ -246,7 +246,7 @@ li {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 100px; /* 为浮动导航栏留出空间 */
+  padding-top: 86px; /* 为浮动导航栏留出空间 */
 }
 
 /* ============================================
@@ -266,7 +266,7 @@ li {
   --navbar-indicator-bg: rgba(0, 113, 227, 0.15);
   --navbar-indicator-border: rgba(0, 113, 227, 0.25);
   --navbar-indicator-glow: rgba(0, 113, 227, 0.3);
-  --navbar-border-radius: 42px;
+  --navbar-border-radius: 34px;
 }
 
 [data-theme="dark"] {
@@ -280,7 +280,7 @@ li {
 
 .navbar {
   position: fixed;
-  top: 20px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -301,18 +301,18 @@ li {
 
   /* 多层阴影营造深度 */
   box-shadow:
-    0 8px 32px var(--navbar-glass-shadow),
+    0 7px 26px var(--navbar-glass-shadow),
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 
   /* 内部高光 */
   position: relative;
-  padding: 0.62rem 1.65rem;
+  padding: 0.44rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: 1.45rem;
   transition: var(--transition-smooth);
 
   /* 降级方案 */
@@ -350,15 +350,15 @@ li {
 
 .navbar-brand {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--color-text);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.42rem;
   transition: var(--transition-smooth);
-  padding: 0.5rem 0.75rem;
-  border-radius: 16px; /* 增大圆角 */
+  padding: 0.34rem 0.55rem;
+  border-radius: 14px;
   letter-spacing: -0.01em;
   white-space: nowrap;
   flex: 0 0 auto;
@@ -367,30 +367,28 @@ li {
 .navbar-brand:hover {
   color: var(--color-primary);
   background: var(--navbar-indicator-bg);
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .navbar-logo {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
-  filter: drop-shadow(0 3px 6px rgba(25, 93, 160, 0.18));
+  opacity: 0.92;
   transition:
     transform 0.25s ease,
-    filter 0.25s ease;
+    opacity 0.25s ease;
 }
 
 .navbar-brand:hover .navbar-logo {
   transform: translateY(-1px) scale(1.04);
-  filter:
-    brightness(1.06)
-    drop-shadow(0 5px 9px rgba(25, 93, 160, 0.24));
+  opacity: 1;
 }
 
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex: 0 0 auto;
 }
 
@@ -431,12 +429,12 @@ li {
   --menu-outline-alpha: 0.14;
   display: flex;
   flex-direction: row;
-  gap: 0.2rem;
+  gap: 0.12rem;
   align-items: center;
   list-style: none;
   position: relative;
   padding: 0;
-  border-radius: 38px;
+  border-radius: 30px;
   background: rgba(0, 0, 0, 0.03);
   overflow: visible;
   isolation: isolate;
@@ -580,9 +578,9 @@ li {
   color: var(--color-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  font-size: 1rem;
-  padding: 1.27rem 1.9rem;
-  border-radius: 18px;
+  font-size: 0.92rem;
+  padding: 0.92rem 1.45rem;
+  border-radius: 16px;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   z-index: 2;
@@ -636,8 +634,8 @@ li {
 
 /* Theme Toggle Button */
 .theme-toggle {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.04);
@@ -646,21 +644,75 @@ li {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   transition: var(--transition-smooth);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+.theme-toggle-icon {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+}
+
+.theme-toggle-icon-moon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-icon-sun {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-icon-moon {
+  display: block;
+}
+
 [data-theme="dark"] .theme-toggle {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.theme-toggle-auto-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 1px 5px rgba(var(--color-primary-rgb), 0.14);
+  color: var(--color-primary);
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 11px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.72);
+  transform-origin: center;
+  transition: var(--transition-smooth);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .theme-toggle-auto-badge {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  color: var(--color-primary-dark);
+}
+
+.theme-toggle[data-theme-mode="auto"] .theme-toggle-auto-badge,
+[data-theme-mode="auto"] .theme-toggle .theme-toggle-auto-badge {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .theme-toggle[data-theme-mode="auto"] {
   color: var(--color-primary);
   box-shadow:
     0 0 0 1px rgba(var(--color-primary-rgb), 0.18),
-    0 4px 16px rgba(var(--color-primary-rgb), 0.12);
+    0 3px 12px rgba(var(--color-primary-rgb), 0.1);
 }
 
 .theme-toggle:hover {
@@ -1781,10 +1833,10 @@ li {
   .navbar-container {
     position: relative;
     width: 100%;
-    min-height: 58px;
-    padding: 0.55rem 0.7rem;
-    gap: 0.65rem;
-    border-radius: 22px;
+    min-height: 54px;
+    padding: 0.48rem 0.62rem;
+    gap: 0.55rem;
+    border-radius: 20px;
     backdrop-filter: var(--navbar-blur) saturate(200%);
     -webkit-backdrop-filter: var(--navbar-blur) saturate(200%);
   }
@@ -1792,13 +1844,13 @@ li {
   .navbar-brand {
     min-width: 0;
     flex: 1;
-    font-size: 1rem;
-    padding: 0.35rem 0.5rem;
+    font-size: 0.96rem;
+    padding: 0.3rem 0.45rem;
   }
 
   .navbar-logo {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 10px;
     flex: 0 0 auto;
   }
@@ -1858,8 +1910,8 @@ li {
   .navbar-menu a {
     width: 100%;
     justify-content: center;
-    padding: 0.72rem 0.85rem;
-    font-size: 0.92rem;
+    padding: 0.66rem 0.8rem;
+    font-size: 0.9rem;
     border-radius: 14px;
     background: rgba(var(--color-primary-rgb), 0.06);
     border: 1px solid transparent;
@@ -1895,8 +1947,8 @@ li {
 
   .theme-toggle,
   .mobile-menu-toggle {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     flex: 0 0 auto;
   }
 
@@ -2210,18 +2262,18 @@ li {
   }
 
   .navbar-container {
-    padding: 0.5rem 0.6rem;
-    gap: 0.45rem;
+    padding: 0.45rem 0.55rem;
+    gap: 0.4rem;
   }
 
   .navbar-brand {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   .theme-toggle,
   .mobile-menu-toggle {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .navbar-menu {

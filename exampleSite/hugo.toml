@@ -10,10 +10,12 @@ enableRobotsTXT = true
   author = "IMX"
   keywords = ["Hugo", "博客", "技术", "开源主题"]
   logo = "/images/imx/logo.svg"
+  logoDark = "/images/imx/logo-dark.svg"
   avatar = "/images/imx/default-avatar.jpg"
   defaultImage = "/images/imx/default-cover.jpg"
   defaultOGImage = "/images/imx/default-og.jpg"
   favicon = "/images/imx/favicon.svg"
+  faviconDark = "/images/imx/favicon-dark.svg"
   mainSections = ["posts"]
   footerText = "IMX 示例站"
 

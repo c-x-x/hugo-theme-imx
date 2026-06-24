@@ -134,10 +134,12 @@ title = "我的博客"
   author = "作者"
   keywords = ["Hugo", "博客"]
   logo = "/images/logo.svg"
+  logoDark = "/images/logo-dark.svg"
   avatar = "/images/avatar.jpg"
   defaultImage = "/images/default-cover.jpg"
   defaultOGImage = "/images/default-og.jpg"
   favicon = "/images/favicon.svg"
+  faviconDark = "/images/favicon-dark.svg"
   mainSections = ["posts"]
   footerText = "页脚文字"
 
@@ -146,17 +148,19 @@ title = "我的博客"
     email = "hello@example.com"
 ```
 
-`logo` 用于顶部导航，`avatar` 用于首页和关于页面。两者可以分别替换。
+`logo` 用于顶部导航，`avatar` 用于首页和关于页面。`logoDark` 和 `faviconDark` 可为深色模式提供单独素材；未配置时，自定义的 `logo` 和 `favicon` 会在深浅色中复用同一份文件。
 
 未配置图片时，主题使用以下内置资源：
 
 | 参数 | 默认值 |
 | --- | --- |
 | `logo` | `/images/imx/logo.svg` |
+| `logoDark` | `/images/imx/logo-dark.svg` |
 | `avatar` | `/images/imx/default-avatar.jpg` |
 | `defaultImage` | `/images/imx/default-cover.jpg` |
 | `defaultOGImage` | `/images/imx/default-og.jpg` |
 | `favicon` | `/images/imx/favicon.svg` |
+| `faviconDark` | `/images/imx/favicon-dark.svg` |
 
 文章没有设置 `image` 时，列表卡片使用 `defaultImage`。页面没有独立图片时，分享元数据使用 `defaultOGImage`。
 

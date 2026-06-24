@@ -2,7 +2,15 @@
 {{- $keywords := .Keywords | default .Site.Params.keywords -}}
 {{- $defaultOGImage := .Site.Params.defaultOGImage | default "/images/imx/default-og.jpg" -}}
 {{- $pageImage := .Params.image | default $defaultOGImage -}}
-{{- $favicon := .Site.Params.favicon | default "/images/imx/favicon.svg" -}}
+{{- $defaultFaviconLight := "/images/imx/favicon.svg" -}}
+{{- $defaultFaviconDark := "/images/imx/favicon-dark.svg" -}}
+{{- $favicon := .Site.Params.favicon | default $defaultFaviconLight -}}
+{{- $faviconLightParam := or .Site.Params.faviconLight .Site.Params.faviconlight -}}
+{{- $faviconDarkParam := or .Site.Params.faviconDark .Site.Params.favicondark -}}
+{{- $faviconLight := $faviconLightParam | default $favicon -}}
+{{- $faviconDark := $faviconDarkParam | default (cond (eq $favicon $defaultFaviconLight) $defaultFaviconDark $favicon) -}}
+{{- $faviconLightURL := partial "resolve-url.html" (dict "url" $faviconLight) -}}
+{{- $faviconDarkURL := partial "resolve-url.html" (dict "url" $faviconDark) -}}
 {{- $pageTitle := .Site.Title -}}
 {{- if not .IsHome -}}
   {{- $pageTitle = printf "%s | %s" .Title .Site.Title -}}
@@ -38,12 +46,28 @@
   <meta name="twitter:image" content="{{ partial "resolve-url.html" (dict "url" $pageImage "absolute" true) }}">
 
   <!-- Favicon -->
-  <link rel="icon" href="{{ partial "resolve-url.html" (dict "url" $favicon) }}">
+  <link rel="icon" href="{{ $faviconLightURL }}" data-imx-favicon>
   <link rel="apple-touch-icon" href="{{ partial "resolve-url.html" (dict "url" (.Site.Params.avatar | default "/images/imx/default-avatar.jpg")) }}">
+  <script>
+    window.__IMX_FAVICONS__ = {
+      light: {{ $faviconLightURL | jsonify | safeJS }},
+      dark: {{ $faviconDarkURL | jsonify | safeJS }}
+    };
+  </script>
 
   <!-- Apply the saved theme before rendering to avoid a light-theme flash. -->
   <script>
     (function () {
+      function updateFavicon(theme) {
+        var favicons = window.__IMX_FAVICONS__;
+        var favicon = document.querySelector('link[data-imx-favicon]');
+        var href = favicons && (theme === 'dark' ? favicons.dark : favicons.light);
+
+        if (favicon && href) {
+          favicon.setAttribute('href', href);
+        }
+      }
+
       try {
         const modes = ['light', 'dark', 'auto'];
         const storedMode = localStorage.getItem('themeMode');
@@ -58,8 +82,10 @@
 
         document.documentElement.dataset.themeMode = mode;
         document.documentElement.dataset.theme = theme;
+        updateFavicon(theme);
       } catch (error) {
         document.documentElement.dataset.theme = 'light';
+        updateFavicon('light');
       }
     }());
   </script>
