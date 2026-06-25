@@ -658,6 +658,7 @@ li {
   flex: 0 0 auto;
   width: 17px;
   height: 17px;
+  transition: transform 0.25s ease;
 }
 
 .theme-toggle-icon-moon {
@@ -718,11 +719,17 @@ li {
     0 3px 12px rgba(var(--color-primary-rgb), 0.1);
 }
 
-.theme-toggle:hover {
-  background: var(--color-primary);
-  color: white;
-  transform: rotate(180deg) scale(1.1);
-  box-shadow: 0 4px 16px var(--navbar-indicator-glow);
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: scale(1.06);
+    box-shadow: 0 4px 16px var(--navbar-indicator-glow);
+  }
+
+  .theme-toggle:hover .theme-toggle-icon {
+    transform: rotate(180deg) scale(1.04);
+  }
 }
 
 .theme-toggle:focus-visible,
@@ -1886,7 +1893,7 @@ li {
     gap: 0.45rem;
     padding: 0.65rem;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: var(--navbar-blur) saturate(190%);
     -webkit-backdrop-filter: var(--navbar-blur) saturate(190%);
     border: 1px solid var(--navbar-glass-border);
@@ -1904,7 +1911,7 @@ li {
   }
 
   [data-theme="dark"] .navbar-menu {
-    background: rgba(15, 23, 42, 0.92);
+    background: rgba(15, 23, 42, 0.96);
   }
 
   .navbar-menu.active {
@@ -1928,14 +1935,14 @@ li {
     padding: 0.66rem 0.8rem;
     font-size: 0.9rem;
     border-radius: 14px;
-    background: rgba(var(--color-primary-rgb), 0.06);
+    background: rgba(255, 255, 255, 0.74);
     border: 1px solid transparent;
     opacity: 0.86;
     transform: none;
   }
 
   [data-theme="dark"] .navbar-menu a {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .navbar-menu::before,
@@ -1949,7 +1956,7 @@ li {
   }
 
   .navbar-menu a.active {
-    background: var(--navbar-indicator-bg);
+    background: rgba(var(--color-primary-rgb), 0.16);
     border-color: var(--navbar-indicator-border);
     box-shadow:
       0 0 18px rgba(var(--color-primary-rgb), 0.18),

@@ -33,6 +33,26 @@
     }
   }
 
+  function getSameOriginPath(url) {
+    try {
+      const rawURL = String(url || '').trim();
+
+      if (!rawURL) {
+        return null;
+      }
+
+      const parsedURL = new URL(rawURL, window.location.href);
+
+      if (parsedURL.origin !== window.location.origin) {
+        return null;
+      }
+
+      return `${parsedURL.pathname}${parsedURL.search}${parsedURL.hash}`;
+    } catch (error) {
+      return null;
+    }
+  }
+
   // 获取保存的主题模式，兼容旧版 theme 存储
   function getThemeMode() {
     const savedMode = getStorageItem(THEME_MODE_KEY);
@@ -189,7 +209,7 @@
 
       sidebar.classList.remove('active');
       sidebarToggle.classList.remove('active');
-      const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      const isCollapsed = getStorageItem('sidebarCollapsed') === 'true';
       sidebar.classList.toggle('collapsed', isCollapsed);
       updateSidebarIcon(!isCollapsed);
     }
@@ -208,7 +228,7 @@
       sidebarToggle.classList.remove('active');
       const isCollapsed = sidebar.classList.contains('collapsed');
       sidebar.classList.toggle('collapsed', !isCollapsed);
-      localStorage.setItem('sidebarCollapsed', !isCollapsed);
+      setStorageItem('sidebarCollapsed', !isCollapsed);
       updateSidebarIcon(isCollapsed);
     });
 
@@ -227,7 +247,10 @@
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight - windowHeight;
       const scrolled = window.scrollY;
-      const progress = (scrolled / documentHeight) * 100;
+      const progress = documentHeight <= 0
+        ? 0
+        : Math.min(Math.max((scrolled / documentHeight) * 100, 0), 100);
+
       progressBar.style.width = progress + '%';
     });
   }
@@ -293,7 +316,7 @@
         return response.json();
       })
       .then(data => {
-        searchIndex = data;
+        searchIndex = Array.isArray(data) ? data : [];
       })
       .catch(() => console.warn('IMX Theme: 未找到搜索索引，请确认首页启用了 JSON 输出。'));
 
@@ -305,8 +328,8 @@
       }
 
       const results = searchIndex.filter(item => {
-        const title = item.title.toLowerCase();
-        const content = item.content.toLowerCase();
+        const title = String(item.title || '').toLowerCase();
+        const content = String(item.content || '').toLowerCase();
         const searchTerm = query.toLowerCase();
         return title.includes(searchTerm) || content.includes(searchTerm);
       }).slice(0, 10);
@@ -316,16 +339,48 @@
 
     // 显示搜索结果
     function displayResults(results, query) {
+      searchResults.textContent = '';
+
       if (results.length === 0) {
-        searchResults.innerHTML = '<div class="search-result-item">未找到相关内容</div>';
+        const emptyResult = document.createElement('div');
+        emptyResult.className = 'search-result-item';
+        emptyResult.textContent = '未找到相关内容';
+        searchResults.appendChild(emptyResult);
       } else {
-        searchResults.innerHTML = results.map(result => `
-          <a href="${result.permalink}" class="search-result-item">
-            <h3>${highlightText(result.title, query)}</h3>
-            <p>${highlightText(result.summary || '', query)}</p>
-          </a>
-        `).join('');
+        const fragment = document.createDocumentFragment();
+        let visibleCount = 0;
+
+        results.forEach(result => {
+          const permalink = getSameOriginPath(result.permalink);
+
+          if (!permalink) {
+            return;
+          }
+
+          const link = document.createElement('a');
+          const title = document.createElement('h3');
+          const summary = document.createElement('p');
+
+          link.href = permalink;
+          link.className = 'search-result-item';
+          title.innerHTML = highlightText(result.title, query);
+          summary.innerHTML = highlightText(result.summary || '', query);
+
+          link.append(title, summary);
+          fragment.appendChild(link);
+          visibleCount += 1;
+        });
+
+        if (visibleCount === 0) {
+          const emptyResult = document.createElement('div');
+          emptyResult.className = 'search-result-item';
+          emptyResult.textContent = '未找到相关内容';
+          searchResults.appendChild(emptyResult);
+        } else {
+          searchResults.appendChild(fragment);
+        }
       }
+
       searchResults.classList.add('active');
     }
 
@@ -364,15 +419,25 @@
   // Code Copy Button - 代码复制按钮
   // ============================================
   document.querySelectorAll('.highlight').forEach((block, index) => {
+    const codeElement = block.querySelector('code');
+
+    if (!codeElement) {
+      return;
+    }
+
     // 添加复制按钮
     const button = document.createElement('button');
     button.className = 'copy-code-button';
     button.textContent = '复制';
 
     button.addEventListener('click', () => {
-      const code = block.querySelector('code').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        button.textContent = '已复制!';
+      copyText(codeElement.textContent || '').then(() => {
+        button.textContent = '已复制';
+        setTimeout(() => {
+          button.textContent = '复制';
+        }, 2000);
+      }).catch(() => {
+        button.textContent = '复制失败';
         setTimeout(() => {
           button.textContent = '复制';
         }, 2000);
@@ -382,9 +447,9 @@
     block.appendChild(button);
 
     // 添加语言标签（右下角）
-    const codeElement = block.querySelector('code[data-lang]');
-    if (codeElement) {
-      const lang = codeElement.getAttribute('data-lang') || 'bash';
+    const langElement = block.querySelector('code[data-lang]');
+    if (langElement) {
+      const lang = langElement.getAttribute('data-lang') || 'bash';
       const langLabel = document.createElement('span');
       langLabel.className = 'code-lang-label';
       langLabel.textContent = lang;
@@ -397,6 +462,35 @@
       block.appendChild(langLabel);
     }
   });
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise((resolve, reject) => {
+      const textarea = document.createElement('textarea');
+
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        if (document.execCommand('copy')) {
+          resolve();
+        } else {
+          reject(new Error('Copy command failed'));
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        textarea.remove();
+      }
+    });
+  }
 
   // ============================================
   // Mobile Menu Toggle - 移动端菜单
@@ -487,10 +581,19 @@
   // ============================================
   // External Links - 外部链接在新标签打开
   // ============================================
-  document.querySelectorAll('a[href^="http"]').forEach(link => {
-    if (!link.href.includes(window.location.hostname)) {
-      link.setAttribute('target', '_blank');
-      link.setAttribute('rel', 'noopener noreferrer');
+  document.querySelectorAll('a[href]').forEach(link => {
+    try {
+      const linkURL = new URL(link.href, window.location.href);
+
+      if (
+        (linkURL.protocol === 'http:' || linkURL.protocol === 'https:') &&
+        linkURL.origin !== window.location.origin
+      ) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    } catch (error) {
+      // Ignore malformed href values and leave them untouched.
     }
   });
 

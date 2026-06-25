@@ -78,7 +78,7 @@ enableRobotsTXT = true
     ordered = false
 
   [markup.goldmark.renderer]
-    unsafe = true
+    unsafe = false
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
