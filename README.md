@@ -54,17 +54,18 @@ hugo mod init github.com/your-name/your-site
     path = "github.com/c-x-x/hugo-theme-imx"
 ```
 
-下载模块并启动本地预览：
+安装当前正式版并启动本地预览：
 
 ```bash
-hugo mod get
+hugo mod get github.com/c-x-x/hugo-theme-imx@v1.0.0
+hugo mod tidy
 hugo server
 ```
 
 更新主题：
 
 ```bash
-hugo mod get -u github.com/c-x-x/hugo-theme-imx
+hugo mod get github.com/c-x-x/hugo-theme-imx@latest
 hugo mod tidy
 ```
 
