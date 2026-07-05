@@ -133,7 +133,6 @@
     let heroPointerFrame = 0;
     let heroPointerX = 0;
     let heroPointerY = 0;
-    let navbarPointerActive = false;
 
     function createGlyphRow(width) {
       const length = 2 * Math.ceil(width / 8.68);
@@ -259,7 +258,7 @@
     }
 
     function canAnimateHomeEntry() {
-      return heroVisible && documentVisible && !navbarPointerActive && !reduceMotionQuery.matches;
+      return heroVisible && documentVisible && !reduceMotionQuery.matches;
     }
 
     function stopGlyphAnimation() {
@@ -589,7 +588,7 @@
     }
 
     function resumeHomeEntryMotion() {
-      if (!heroVisible || !documentVisible || navbarPointerActive) {
+      if (!heroVisible || !documentVisible) {
         return;
       }
 
@@ -599,16 +598,6 @@
         initTypedSubtitle();
       }
     }
-
-    document.addEventListener('imx:navbar-pointer-active', () => {
-      navbarPointerActive = true;
-      stopGlyphAnimation();
-    });
-
-    document.addEventListener('imx:navbar-pointer-idle', () => {
-      navbarPointerActive = false;
-      requestCanvasRender();
-    });
 
     if ('IntersectionObserver' in window) {
       const heroObserver = new IntersectionObserver((entries) => {
@@ -2092,7 +2081,6 @@
       if (!isDesktopNavbar() || event.pointerType === 'touch') return;
 
       isPointerTracking = true;
-      document.dispatchEvent(new Event('imx:navbar-pointer-active'));
       setIndicatorLift(1);
       refreshNavbarMetrics();
       schedulePointerTarget(event.clientX);
@@ -2112,7 +2100,6 @@
       }
       setIndicatorLift(0);
       restoreActiveIndicator();
-      document.dispatchEvent(new Event('imx:navbar-pointer-idle'));
     }
 
     navbarMenu.addEventListener('pointerleave', stopPointerTracking, { passive: true });

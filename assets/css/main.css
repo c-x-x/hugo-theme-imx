@@ -601,8 +601,8 @@ body.is-home[data-theme="dark"] .navbar-menu {
   justify-content: center;
   gap: 0;
   min-height: 54px;
-  min-width: 54px;
-  padding: 0;
+  min-width: 72px;
+  padding: 0 0.46rem;
   overflow: hidden;
   border: 1px solid var(--navbar-glass-border);
   border-radius: 999px;
@@ -629,14 +629,14 @@ body.is-home[data-theme="dark"] .navbar-menu {
   z-index: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.58), transparent 34%),
+    radial-gradient(ellipse 64% 72% at 35% 22%, rgba(255, 255, 255, 0.58), transparent 36%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 54%);
   pointer-events: none;
 }
 
 [data-theme="dark"] .navbar-actions::after {
   background:
-    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.12), transparent 34%),
+    radial-gradient(ellipse 64% 72% at 35% 22%, rgba(255, 255, 255, 0.12), transparent 36%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 56%);
 }
 
@@ -839,8 +839,8 @@ body.is-home[data-theme="dark"] .navbar-menu {
 
 .navbar.is-home-dock-merged .navbar-actions {
     justify-self: end;
-    min-width: 48px;
-    padding: 0;
+    min-width: 62px;
+    padding: 0 0.28rem;
     gap: 0;
   }
 
@@ -1746,7 +1746,7 @@ body.is-home[data-theme="dark"] .navbar-menu {
     position: absolute;
     grid-column: auto;
     grid-row: auto;
-    top: calc(100svh - 3.7rem);
+    top: calc(100svh - clamp(12rem, 25vh, 14rem));
     margin-top: 0;
     transform: translateY(-50%);
   }
@@ -1786,7 +1786,7 @@ body.is-home[data-theme="dark"] .navbar-menu {
 
   .hero-brand-row,
   .hero-actions {
-    top: calc(100svh - 2.85rem);
+    top: calc(100svh - clamp(9rem, 22vh, 11rem));
   }
 }
 
@@ -3050,6 +3050,7 @@ body.is-home[data-theme="dark"] .navbar-menu {
 
   .navbar-actions {
     min-height: auto;
+    min-width: auto;
     padding: 0;
     border: 0;
     background: transparent;
