@@ -658,6 +658,8 @@
     let dockAttracting = false;
     const dockMergeEnter = 0.86;
     const dockMergeExit = 0.74;
+    const edgeSnapRange = 0.2;
+    const edgeSnapOverscrollRange = 0.08;
 
     function getPageTop(element) {
       return element.getBoundingClientRect().top + window.scrollY;
@@ -869,9 +871,9 @@
 
       let targetY = null;
 
-      if (progress >= 0 && progress <= 0.3) {
+      if (progress >= 0 && progress <= edgeSnapRange) {
         targetY = currentMetrics.heroTop;
-      } else if (progress >= 0.7 && progress < 1.16) {
+      } else if (progress >= 1 - edgeSnapRange && progress < 1 + edgeSnapOverscrollRange) {
         targetY = Math.max(0, currentMetrics.featuredTop - currentMetrics.dockOffset);
       }
 

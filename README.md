@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="images/logo.svg" width="96" height="96" alt="IMX 雪花标志">
+  <img src="images/logo.svg" width="96" height="96" alt="IMX 最新雪花标志">
 </p>
 
 # Hugo Theme IMX
 
 IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它包含文章列表、分类与标签、站内搜索、文章目录、代码复制和 Giscus 评论，适合技术笔记和长期写作。
 
-![首页预览](images/preview-home.png)
+![最新首页预览](images/preview-home.png)
 
 ## 主要功能
 
@@ -24,9 +24,9 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 分类页和标签页：
 
-![分类页预览](images/preview-categories.png)
+![最新分类页预览](images/preview-categories.png)
 
-![标签页预览](images/preview-tags.png)
+![最新标签页预览](images/preview-tags.png)
 
 ## 环境要求
 
