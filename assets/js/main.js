@@ -15,7 +15,10 @@
   const THEME_KEY = 'theme';
   const THEME_MODES = ['light', 'dark', 'auto'];
   const EAST_8_OFFSET = 8 * 60 * 60 * 1000;
+  const isSafariBrowser = /^((?!android|chrome|crios|fxios|edg|opr).)*safari/i.test(navigator.userAgent);
   let autoThemeTimer = null;
+
+  htmlElement.classList.toggle('is-safari-browser', isSafariBrowser);
 
   function getStorageItem(key) {
     try {
@@ -31,6 +34,54 @@
     } catch (error) {
       // Ignore storage errors so theme switching still works in restricted contexts.
     }
+  }
+
+  function onMediaQueryChange(query, callback) {
+    if (query.addEventListener) {
+      query.addEventListener('change', callback);
+      return;
+    }
+
+    if (query.addListener) {
+      query.addListener(callback);
+    }
+  }
+
+  const springResult = { value: 0, velocity: 0 };
+
+  function advanceSpring(value, velocity, target, frequency, dampingRatio, deltaTime) {
+    const omega = Math.max(0.001, frequency * Math.PI * 2);
+    const zeta = Math.max(0.001, dampingRatio);
+    const time = Math.min(Math.max(deltaTime, 0), 0.08);
+    const displacement = value - target;
+
+    if (time === 0) {
+      springResult.value = value;
+      springResult.velocity = velocity;
+      return;
+    }
+
+    if (zeta < 1) {
+      const dampedOmega = omega * Math.sqrt(1 - zeta * zeta);
+      const decay = Math.exp(-zeta * omega * time);
+      const cos = Math.cos(dampedOmega * time);
+      const sin = Math.sin(dampedOmega * time);
+      const c2 = (velocity + zeta * omega * displacement) / dampedOmega;
+      const nextDisplacement = decay * (displacement * cos + c2 * sin);
+      const nextVelocity = decay * (
+        -zeta * omega * (displacement * cos + c2 * sin) +
+        (-displacement * dampedOmega * sin + c2 * dampedOmega * cos)
+      );
+
+      springResult.value = target + nextDisplacement;
+      springResult.velocity = nextVelocity;
+      return;
+    }
+
+    const decay = Math.exp(-omega * time);
+    const c2 = velocity + omega * displacement;
+    springResult.value = target + (displacement + c2 * time) * decay;
+    springResult.velocity = (velocity - omega * c2 * time) * decay;
   }
 
   function getSameOriginPath(url) {
@@ -51,6 +102,886 @@
     } catch (error) {
       return null;
     }
+  }
+
+  function initHomeEntryHero() {
+    const hero = document.querySelector('[data-home-entry]');
+
+    if (!hero) {
+      return;
+    }
+
+    const glyphCanvas = hero.querySelector('[data-home-glyph-canvas]');
+    const typedSubtitle = hero.querySelector('[data-home-typed]');
+    const glyphAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789{}[]()<>/\\=+*$#@%&:;._-';
+    const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let renderFrame = 0;
+    let heroResizeFrame = 0;
+    let typedTimer = 0;
+    let glyphFrame = 0;
+    let glyphContext = null;
+    let glyphRows = [];
+    let glyphWidth = 1;
+    let glyphHeight = 1;
+    let glyphSpeed = 0.85;
+    let glyphTargetSpeed = 0.85;
+    let glyphPointer = { x: 1, y: 1 };
+    let glyphMaskGradient = null;
+    let heroVisible = true;
+    let documentVisible = !document.hidden;
+    let typedActive = false;
+    let heroPointerFrame = 0;
+    let heroPointerX = 0;
+    let heroPointerY = 0;
+    let navbarPointerActive = false;
+
+    function createGlyphRow(width) {
+      const length = 2 * Math.ceil(width / 8.68);
+      let row = '';
+
+      for (let index = 0; index < length; index += 1) {
+        if (Math.random() < 0.13) {
+          row += ' ';
+          continue;
+        }
+
+        row += glyphAlphabet[Math.floor(Math.random() * glyphAlphabet.length)];
+      }
+
+      return row;
+    }
+
+    function prepareCanvas(canvas) {
+      const rect = hero.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+
+      if (canvas.width !== Math.round(width * ratio)) {
+        canvas.width = Math.round(width * ratio);
+      }
+
+      if (canvas.height !== Math.round(height * ratio)) {
+        canvas.height = Math.round(height * ratio);
+      }
+
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        glyphContext = null;
+        return null;
+      }
+
+      glyphContext = context;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+
+      return { context, width, height };
+    }
+
+    function drawGlyphFrame() {
+      glyphFrame = 0;
+
+      if (!glyphCanvas) {
+        return;
+      }
+
+      const context = glyphContext || glyphCanvas.getContext('2d');
+
+      if (!context) {
+        return;
+      }
+
+      if (!glyphContext) {
+        glyphContext = context;
+      }
+
+      const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+      const rowColor = isDark ? '244, 244, 245' : '24, 32, 48';
+      const accentColor = isDark ? '161, 161, 170' : '37, 99, 235';
+
+      context.clearRect(0, 0, glyphWidth, glyphHeight);
+      context.font = '650 15px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
+      context.textBaseline = 'top';
+      context.textAlign = 'left';
+      glyphSpeed += (glyphTargetSpeed - glyphSpeed) * 0.055;
+
+      glyphRows.forEach((row) => {
+        row.x += row.speed * glyphSpeed;
+
+        if (row.x < -row.width / 2) {
+          row.x += row.width / 2;
+        }
+
+        context.fillStyle = `rgba(${rowColor}, ${row.alpha})`;
+        context.fillText(row.content, row.x, row.y);
+      });
+
+      context.save();
+      context.globalCompositeOperation = 'destination-in';
+
+      if (!glyphMaskGradient) {
+        glyphMaskGradient = context.createLinearGradient(0, 0, glyphWidth, 0);
+        glyphMaskGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        glyphMaskGradient.addColorStop(glyphWidth < 768 ? 0.08 : 0.16, 'rgba(0, 0, 0, 1)');
+        glyphMaskGradient.addColorStop(glyphWidth < 768 ? 0.92 : 0.84, 'rgba(0, 0, 0, 1)');
+        glyphMaskGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      }
+
+      context.fillStyle = glyphMaskGradient;
+      context.fillRect(0, 0, glyphWidth, glyphHeight);
+      context.restore();
+
+      context.save();
+      context.globalCompositeOperation = 'lighter';
+
+      const glow = context.createRadialGradient(
+        glyphPointer.x,
+        glyphPointer.y,
+        0,
+        glyphPointer.x,
+        glyphPointer.y,
+        0.34 * Math.max(glyphWidth, glyphHeight)
+      );
+      glow.addColorStop(0, `rgba(${accentColor}, ${isDark ? 0.09 : 0.045})`);
+      glow.addColorStop(0.48, `rgba(${accentColor}, ${isDark ? 0.03 : 0.015})`);
+      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      context.fillStyle = glow;
+      context.fillRect(0, 0, glyphWidth, glyphHeight);
+      context.restore();
+
+      if (canAnimateHomeEntry()) {
+        glyphFrame = window.requestAnimationFrame(drawGlyphFrame);
+      }
+    }
+
+    function canAnimateHomeEntry() {
+      return heroVisible && documentVisible && !navbarPointerActive && !reduceMotionQuery.matches;
+    }
+
+    function stopGlyphAnimation() {
+      window.cancelAnimationFrame(glyphFrame);
+      glyphFrame = 0;
+    }
+
+    function setupGlyphCanvas() {
+      if (!glyphCanvas) {
+        return;
+      }
+
+      window.cancelAnimationFrame(glyphFrame);
+      glyphFrame = 0;
+
+      const canvasState = prepareCanvas(glyphCanvas);
+
+      if (!canvasState) {
+        return;
+      }
+
+      const { context, width, height } = canvasState;
+      const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+
+      glyphWidth = width;
+      glyphHeight = height;
+      glyphPointer = { x: 0.62 * width, y: 0.36 * height };
+      glyphMaskGradient = null;
+      glyphSpeed = 0.85;
+      glyphTargetSpeed = 0.85;
+      context.font = '650 15px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
+      glyphRows = Array.from({ length: Math.ceil(height / 18) + 2 }, (_, rowIndex) => {
+        const content = createGlyphRow(width);
+
+        return {
+          alpha: (Math.random() * 0.24 + (isDark ? 0.22 : 0.2)).toFixed(3),
+          content,
+          speed: -(Math.random() * 0.44 + 0.34),
+          width: context.measureText(content).width,
+          x: -(Math.random() * width),
+          y: 18 * rowIndex
+        };
+      });
+
+      if (canAnimateHomeEntry()) {
+        drawGlyphFrame();
+      }
+    }
+
+    function updateGlyphPointer(clientX, clientY, rect = null) {
+      if (!glyphCanvas) {
+        return;
+      }
+
+      const glyphRect = rect || glyphCanvas.getBoundingClientRect();
+
+      if (!glyphRect.width || !glyphRect.height) {
+        return;
+      }
+
+      glyphPointer = {
+        x: clientX - glyphRect.left,
+        y: clientY - glyphRect.top
+      };
+
+      const halfWidth = glyphWidth / 2;
+      glyphTargetSpeed = halfWidth > 0
+        ? 0.55 + 2.6 * Math.abs((glyphPointer.x - halfWidth) / halfWidth)
+        : 0.85;
+    }
+
+    function getSubtitleTypoPlan(chars) {
+      const typoMap = {
+        写: '学',
+        技: '记',
+        术: '书',
+        记: '纪',
+        录: '路',
+        思: '斯',
+        路: '录',
+        何: '和',
+        成: '呈',
+        形: '型',
+        文: '问',
+        章: '张'
+      };
+      const mappedIndex = chars.findIndex((char, index) => (
+        index > 0 &&
+        index < chars.length - 1 &&
+        Object.prototype.hasOwnProperty.call(typoMap, char)
+      ));
+      const typoIndex = mappedIndex >= 0
+        ? mappedIndex
+        : Math.max(1, Math.min(chars.length - 2, Math.floor(chars.length * 0.45)));
+      const original = chars[typoIndex] || '';
+      let wrongChar = typoMap[original];
+
+      if (!wrongChar) {
+        if (/^[a-z]$/i.test(original)) {
+          wrongChar = original === 'x' ? 'z' : 'x';
+        } else if (/^\d$/.test(original)) {
+          wrongChar = original === '9' ? '8' : '9';
+        } else {
+          wrongChar = '的';
+        }
+      }
+
+      if (wrongChar === original) {
+        wrongChar = '的';
+      }
+
+      return { typoIndex, wrongChar };
+    }
+
+    function stopTypedSubtitle(resetText) {
+      window.clearTimeout(typedTimer);
+      typedTimer = 0;
+      typedActive = false;
+
+      if (resetText && typedSubtitle) {
+        const text = typedSubtitle.dataset.homeTypedText || typedSubtitle.getAttribute('aria-label') || '';
+        typedSubtitle.textContent = text;
+      }
+    }
+
+    function initTypedSubtitle() {
+      if (!typedSubtitle) {
+        return;
+      }
+
+      const originalText = typedSubtitle.dataset.homeTypedText || typedSubtitle.textContent.trim();
+
+      if (!originalText) {
+        return;
+      }
+
+      typedSubtitle.dataset.homeTypedText = originalText;
+      typedSubtitle.setAttribute('aria-label', originalText);
+      typedSubtitle.setAttribute('aria-live', 'off');
+
+      if (reduceMotionQuery.matches || !heroVisible || !documentVisible) {
+        stopTypedSubtitle(false);
+        typedSubtitle.textContent = originalText;
+        return;
+      }
+
+      const chars = Array.from(originalText);
+
+      if (chars.length < 3) {
+        typedSubtitle.textContent = originalText;
+        return;
+      }
+
+      stopTypedSubtitle(false);
+      typedActive = true;
+
+      const { typoIndex, wrongChar } = getSubtitleTypoPlan(chars);
+      const current = [];
+      let index = 0;
+      let typoFixed = false;
+
+      function setSubtitleText() {
+        typedSubtitle.textContent = current.join('');
+      }
+
+      function schedule(callback, delay) {
+        typedTimer = window.setTimeout(callback, delay);
+      }
+
+      function typeNext() {
+        if (!typedActive) {
+          return;
+        }
+
+        if (index >= chars.length) {
+          schedule(deleteNext, 1850);
+          return;
+        }
+
+        if (!typoFixed && index === typoIndex) {
+          current.push(wrongChar);
+          setSubtitleText();
+          typoFixed = true;
+
+          schedule(() => {
+            if (!typedActive) {
+              return;
+            }
+
+            current.pop();
+            setSubtitleText();
+
+            schedule(() => {
+              if (!typedActive) {
+                return;
+              }
+
+              current.push(chars[index]);
+              index += 1;
+              setSubtitleText();
+              schedule(typeNext, 95 + Math.random() * 70);
+            }, 180);
+          }, 520);
+          return;
+        }
+
+        current.push(chars[index]);
+        index += 1;
+        setSubtitleText();
+        schedule(typeNext, chars[index - 1] === '，' ? 260 : 82 + Math.random() * 70);
+      }
+
+      function deleteNext() {
+        if (!typedActive) {
+          return;
+        }
+
+        if (current.length === 0) {
+          index = 0;
+          typoFixed = false;
+          schedule(typeNext, 560);
+          return;
+        }
+
+        current.pop();
+        setSubtitleText();
+        schedule(deleteNext, 34 + Math.random() * 24);
+      }
+
+      typedSubtitle.textContent = '';
+      schedule(typeNext, 880);
+    }
+
+    function requestCanvasRender() {
+      window.cancelAnimationFrame(renderFrame);
+
+      if (!canAnimateHomeEntry()) {
+        renderFrame = 0;
+        return;
+      }
+
+      renderFrame = window.requestAnimationFrame(() => {
+        renderFrame = 0;
+        setupGlyphCanvas();
+      });
+    }
+
+    function requestHeroResizeRefresh() {
+      if (heroResizeFrame) {
+        return;
+      }
+
+      heroResizeFrame = window.requestAnimationFrame(() => {
+        heroResizeFrame = 0;
+        setInitialRevealPoint();
+        requestCanvasRender();
+      });
+    }
+
+    function setHeroPoint(clientX, clientY, propertyX, propertyY, rect = hero.getBoundingClientRect()) {
+      if (!rect.width || !rect.height) {
+        return;
+      }
+
+      const x = Math.min(Math.max(((clientX - rect.left) / rect.width) * 100, 0), 100);
+      const y = Math.min(Math.max(((clientY - rect.top) / rect.height) * 100, 0), 100);
+
+      hero.style.setProperty(propertyX, `${x.toFixed(2)}%`);
+      hero.style.setProperty(propertyY, `${y.toFixed(2)}%`);
+    }
+
+    function setInitialRevealPoint() {
+      const anchor = hero.querySelector('.hero-avatar') || hero.querySelector('.hero-title');
+      const rect = anchor ? anchor.getBoundingClientRect() : hero.getBoundingClientRect();
+
+      setHeroPoint(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        '--imx-home-entry-x',
+        '--imx-home-entry-y'
+      );
+    }
+
+    setInitialRevealPoint();
+    requestCanvasRender();
+    initTypedSubtitle();
+
+    window.requestAnimationFrame(() => {
+      hero.classList.add('imx-home-entry-started');
+    });
+
+    hero.addEventListener('pointermove', event => {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+
+      heroPointerX = event.clientX;
+      heroPointerY = event.clientY;
+
+      if (heroPointerFrame) {
+        return;
+      }
+
+      heroPointerFrame = window.requestAnimationFrame(() => {
+        heroPointerFrame = 0;
+        const rect = hero.getBoundingClientRect();
+
+        setHeroPoint(
+          heroPointerX,
+          heroPointerY,
+          '--imx-home-pointer-x',
+          '--imx-home-pointer-y',
+          rect
+        );
+        updateGlyphPointer(heroPointerX, heroPointerY, rect);
+      });
+    });
+
+    window.addEventListener('resize', requestHeroResizeRefresh);
+
+    const themeObserver = new MutationObserver(requestCanvasRender);
+    themeObserver.observe(htmlElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    function pauseHomeEntryMotion() {
+      stopGlyphAnimation();
+      stopTypedSubtitle(true);
+    }
+
+    function resumeHomeEntryMotion() {
+      if (!heroVisible || !documentVisible || navbarPointerActive) {
+        return;
+      }
+
+      requestCanvasRender();
+
+      if (!typedActive) {
+        initTypedSubtitle();
+      }
+    }
+
+    document.addEventListener('imx:navbar-pointer-active', () => {
+      navbarPointerActive = true;
+      stopGlyphAnimation();
+    });
+
+    document.addEventListener('imx:navbar-pointer-idle', () => {
+      navbarPointerActive = false;
+      requestCanvasRender();
+    });
+
+    if ('IntersectionObserver' in window) {
+      const heroObserver = new IntersectionObserver((entries) => {
+        const [entry] = entries;
+
+        heroVisible = Boolean(entry && entry.isIntersecting);
+
+        if (!heroVisible) {
+          pauseHomeEntryMotion();
+          return;
+        }
+
+        resumeHomeEntryMotion();
+      }, { rootMargin: '120px 0px 120px 0px' });
+
+      heroObserver.observe(hero);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      documentVisible = !document.hidden;
+
+      if (!documentVisible) {
+        pauseHomeEntryMotion();
+        return;
+      }
+
+      resumeHomeEntryMotion();
+    });
+
+    onMediaQueryChange(reduceMotionQuery, () => {
+      stopGlyphAnimation();
+      requestCanvasRender();
+      initTypedSubtitle();
+    });
+  }
+
+  function initHomeMagneticDock() {
+    const hero = document.querySelector('[data-home-entry]');
+    const featured = document.querySelector('#featured-posts');
+    const navbar = document.querySelector('.navbar');
+    const navbarMenu = navbar ? navbar.querySelector('.navbar-menu') : null;
+    if (!hero || !featured || !navbar) {
+      return;
+    }
+
+    const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let ticking = false;
+    let merged = false;
+    let snapTimer = 0;
+    let snapFrame = 0;
+    let snapping = false;
+    let pendingSnapTarget = null;
+    let metricsDirty = true;
+    let metrics = null;
+    let lastDockAttraction = -1;
+    let lastDockBrandShift = '0px';
+    let lastDockActionsShift = '0px';
+    let dockAttracting = false;
+    const dockMergeEnter = 0.86;
+    const dockMergeExit = 0.74;
+
+    function getPageTop(element) {
+      return element.getBoundingClientRect().top + window.scrollY;
+    }
+
+    function getDockOffset() {
+      const rect = navbar.getBoundingClientRect();
+      return Math.max(84, Math.round(rect.height + 30));
+    }
+
+    function refreshMetrics() {
+      const heroTop = getPageTop(hero);
+      const featuredTop = getPageTop(featured);
+      const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : { width: 0 };
+      const attractDistance = Math.min(
+        300,
+        Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58)
+      );
+
+      metrics = {
+        attractDistance,
+        dockOffset: getDockOffset(),
+        featuredTop,
+        heroTop
+      };
+      metricsDirty = false;
+
+      return metrics;
+    }
+
+    function getMetrics() {
+      return metricsDirty || !metrics ? refreshMetrics() : metrics;
+    }
+
+    function signalNavigationLayoutChange() {
+      window.dispatchEvent(new Event('imx:navigation-layout-change'));
+    }
+
+    function smoothStep(edge0, edge1, value) {
+      const point = Math.min(Math.max((value - edge0) / (edge1 - edge0), 0), 1);
+
+      return point * point * (3 - 2 * point);
+    }
+
+    function getDockAttraction(progress) {
+      if (mobileQuery.matches || reduceMotionQuery.matches) {
+        return 0;
+      }
+
+      return smoothStep(0.08, 0.86, progress);
+    }
+
+    function resetDockAttraction() {
+      if (
+        lastDockAttraction === 0 &&
+        lastDockBrandShift === '0px' &&
+        lastDockActionsShift === '0px' &&
+        !dockAttracting
+      ) {
+        return;
+      }
+
+      lastDockAttraction = 0;
+
+      if (lastDockBrandShift !== '0px') {
+        lastDockBrandShift = '0px';
+        navbar.style.setProperty('--home-dock-brand-shift', '0px');
+      }
+
+      if (lastDockActionsShift !== '0px') {
+        lastDockActionsShift = '0px';
+        navbar.style.setProperty('--home-dock-actions-shift', '0px');
+      }
+
+      if (dockAttracting) {
+        dockAttracting = false;
+        navbar.classList.remove('is-home-dock-attracting');
+      }
+    }
+
+    function writeDockAttraction(attraction, currentMetrics) {
+      const normalizedAttraction = Math.round(attraction * 1000) / 1000;
+
+      if (normalizedAttraction === lastDockAttraction) {
+        return;
+      }
+
+      lastDockAttraction = normalizedAttraction;
+
+      const shift = currentMetrics.attractDistance * normalizedAttraction;
+      const nextDockAttracting = !merged && normalizedAttraction > 0.002 && normalizedAttraction < 0.998;
+      const brandShift = `${shift.toFixed(2)}px`;
+      const actionsShift = `${(-shift).toFixed(2)}px`;
+
+      if (brandShift !== lastDockBrandShift) {
+        lastDockBrandShift = brandShift;
+        navbar.style.setProperty('--home-dock-brand-shift', brandShift);
+      }
+
+      if (actionsShift !== lastDockActionsShift) {
+        lastDockActionsShift = actionsShift;
+        navbar.style.setProperty('--home-dock-actions-shift', actionsShift);
+      }
+
+      if (nextDockAttracting !== dockAttracting) {
+        dockAttracting = nextDockAttracting;
+        navbar.classList.toggle('is-home-dock-attracting', dockAttracting);
+      }
+    }
+
+    function setDockAttractionValue(attraction, currentMetrics) {
+      writeDockAttraction(Math.min(Math.max(attraction, 0), 1), currentMetrics);
+    }
+
+    function setDockAttraction(progress, currentMetrics) {
+      setDockAttractionValue(getDockAttraction(progress), currentMetrics);
+    }
+
+    function setMergedState(nextMerged) {
+      if (merged === nextMerged) {
+        return false;
+      }
+
+      merged = nextMerged;
+      navbar.classList.remove('is-dock-flipping', 'is-home-dock-fusing');
+      navbar.classList.toggle('is-home-dock-merged', merged);
+      document.body.classList.toggle('imx-home-dock-merged', merged);
+
+      if (merged && dockAttracting) {
+        dockAttracting = false;
+        navbar.classList.remove('is-home-dock-attracting');
+      }
+
+      metricsDirty = true;
+      signalNavigationLayoutChange();
+
+      return true;
+    }
+
+    function smoothSnapEase(value) {
+      return value * value * value * (value * (value * 6 - 15) + 10);
+    }
+
+    function cancelSnap() {
+      if (snapTimer) {
+        window.clearTimeout(snapTimer);
+        snapTimer = 0;
+      }
+      pendingSnapTarget = null;
+
+      if (snapFrame) {
+        window.cancelAnimationFrame(snapFrame);
+        snapFrame = 0;
+      }
+
+      if (snapping) {
+        snapping = false;
+      }
+    }
+
+    function animateScrollTo(targetY) {
+      if (snapFrame) {
+        window.cancelAnimationFrame(snapFrame);
+        snapFrame = 0;
+      }
+
+      const startY = window.scrollY;
+      const distance = targetY - startY;
+      const duration = reduceMotionQuery.matches ? 0 : Math.min(560, Math.max(300, Math.abs(distance) * 0.44));
+      const startTime = performance.now();
+
+      if (Math.abs(distance) < 2 || duration === 0) {
+        window.scrollTo({ left: 0, top: targetY, behavior: 'auto' });
+        snapping = false;
+        requestSync();
+        return;
+      }
+
+      snapping = true;
+
+      function step(timestamp) {
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const eased = smoothSnapEase(progress);
+
+        window.scrollTo({ left: 0, top: startY + distance * eased, behavior: 'auto' });
+
+        if (progress < 1) {
+          snapFrame = window.requestAnimationFrame(step);
+          return;
+        }
+
+        snapFrame = 0;
+        snapping = false;
+        requestSync();
+      }
+
+      snapFrame = window.requestAnimationFrame(step);
+    }
+
+    function scheduleEdgeSnap(scrollY, currentMetrics, progress) {
+      if (mobileQuery.matches || snapping) {
+        if (snapTimer) {
+          window.clearTimeout(snapTimer);
+          snapTimer = 0;
+        }
+        pendingSnapTarget = null;
+        return;
+      }
+
+      let targetY = null;
+
+      if (progress >= 0 && progress <= 0.3) {
+        targetY = currentMetrics.heroTop;
+      } else if (progress >= 0.7 && progress < 1.16) {
+        targetY = Math.max(0, currentMetrics.featuredTop - currentMetrics.dockOffset);
+      }
+
+      if (targetY === null || Math.abs(targetY - scrollY) < 2) {
+        if (snapTimer) {
+          window.clearTimeout(snapTimer);
+          snapTimer = 0;
+        }
+        pendingSnapTarget = null;
+        return;
+      }
+
+      if (pendingSnapTarget !== null && Math.abs(pendingSnapTarget - targetY) < 1 && snapTimer) {
+        return;
+      }
+
+      if (snapTimer) {
+        window.clearTimeout(snapTimer);
+      }
+
+      pendingSnapTarget = targetY;
+      snapTimer = window.setTimeout(() => {
+        pendingSnapTarget = null;
+        snapTimer = 0;
+        animateScrollTo(targetY);
+      }, 180);
+    }
+
+    function sync() {
+      ticking = false;
+
+      if (mobileQuery.matches) {
+        cancelSnap();
+        setMergedState(false);
+        resetDockAttraction();
+        return;
+      }
+
+      const scrollY = window.scrollY;
+      const currentMetrics = getMetrics();
+      const heroRange = Math.max(currentMetrics.featuredTop - currentMetrics.heroTop, window.innerHeight);
+      const progress = (scrollY - currentMetrics.heroTop) / heroRange;
+      const nextMerged = merged ? progress > dockMergeExit : progress >= dockMergeEnter;
+      let mergedChanged = false;
+
+      setDockAttraction(progress, currentMetrics);
+      mergedChanged = setMergedState(nextMerged);
+
+      const snapMetrics = mergedChanged ? getMetrics() : currentMetrics;
+      scheduleEdgeSnap(scrollY, snapMetrics, progress);
+    }
+
+    function requestSync() {
+      if (ticking) {
+        return;
+      }
+
+      ticking = true;
+      window.requestAnimationFrame(sync);
+    }
+
+    window.addEventListener('wheel', (event) => {
+      if (event.deltaY !== 0) {
+        cancelSnap();
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchstart', cancelSnap, { passive: true });
+    window.addEventListener('keydown', (event) => {
+      if (
+        event.key === 'ArrowDown' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'PageDown' ||
+        event.key === 'PageUp' ||
+        event.key === 'Home' ||
+        event.key === 'End' ||
+        event.key === ' '
+      ) {
+        cancelSnap();
+      }
+    });
+
+    window.addEventListener('scroll', requestSync, { passive: true });
+    window.addEventListener('resize', () => {
+      metricsDirty = true;
+      lastDockAttraction = -1;
+      requestSync();
+    });
+    onMediaQueryChange(mobileQuery, () => {
+      metricsDirty = true;
+      lastDockAttraction = -1;
+      requestSync();
+    });
+    onMediaQueryChange(reduceMotionQuery, () => {
+      lastDockAttraction = -1;
+      requestSync();
+    });
+
+    requestSync();
   }
 
   // 获取保存的主题模式，兼容旧版 theme 存储
@@ -173,6 +1104,8 @@
 
   // 初始化主题
   applyThemeMode(getThemeMode(), { persist: false });
+  initHomeEntryHero();
+  initHomeMagneticDock();
 
   // 主题切换事件
   if (themeToggle) {
@@ -232,7 +1165,7 @@
       updateSidebarIcon(isCollapsed);
     });
 
-    mobileQuery.addEventListener('change', () => {
+    onMediaQueryChange(mobileQuery, () => {
       syncSidebarMode();
     });
   }
@@ -243,15 +1176,52 @@
   const progressBar = document.querySelector('.reading-progress');
 
   if (progressBar) {
-    window.addEventListener('scroll', () => {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight - windowHeight;
-      const scrolled = window.scrollY;
-      const progress = documentHeight <= 0
-        ? 0
-        : Math.min(Math.max((scrolled / documentHeight) * 100, 0), 100);
+    let progressFrame = 0;
+    let progressDocumentHeight = 0;
+    let progressBoundsDirty = true;
+    let lastProgressScale = '';
 
-      progressBar.style.width = progress + '%';
+    function updateProgressBounds() {
+      const windowHeight = window.innerHeight;
+      progressDocumentHeight = document.documentElement.scrollHeight - windowHeight;
+      progressBoundsDirty = false;
+    }
+
+    function renderReadingProgress() {
+      progressFrame = 0;
+
+      if (progressBoundsDirty) {
+        updateProgressBounds();
+      }
+
+      const scrolled = window.scrollY;
+      const progress = progressDocumentHeight <= 0
+        ? 0
+        : Math.min(Math.max((scrolled / progressDocumentHeight) * 100, 0), 100);
+
+      const nextProgressScale = `scaleX(${(progress / 100).toFixed(4)})`;
+
+      if (nextProgressScale !== lastProgressScale) {
+        lastProgressScale = nextProgressScale;
+        progressBar.style.transform = nextProgressScale;
+      }
+    }
+
+    function requestReadingProgress() {
+      if (progressFrame) {
+        return;
+      }
+
+      progressFrame = window.requestAnimationFrame(renderReadingProgress);
+    }
+
+    updateProgressBounds();
+    requestReadingProgress();
+
+    window.addEventListener('scroll', requestReadingProgress, { passive: true });
+    window.addEventListener('resize', () => {
+      progressBoundsDirty = true;
+      requestReadingProgress();
     });
   }
 
@@ -268,22 +1238,34 @@
   const headings = document.querySelectorAll('.article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6');
 
   if (tocLinks.length > 0 && headings.length > 0) {
+    const tocLinkByHash = new Map();
+    let activeTocLink = null;
     const observerOptions = {
       rootMargin: '-100px 0px -66%',
       threshold: 0
     };
 
+    tocLinks.forEach(link => {
+      const href = link.getAttribute('href');
+
+      if (href) {
+        tocLinkByHash.set(href, link);
+      }
+    });
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const id = entry.target.getAttribute('id');
-          if (id) {
-            tocLinks.forEach(link => {
-              link.classList.remove('active');
-              if (link.getAttribute('href') === '#' + id) {
-                link.classList.add('active');
-              }
-            });
+          const nextActiveLink = id ? tocLinkByHash.get(`#${id}`) : null;
+
+          if (nextActiveLink && nextActiveLink !== activeTocLink) {
+            if (activeTocLink) {
+              activeTocLink.classList.remove('active');
+            }
+
+            nextActiveLink.classList.add('active');
+            activeTocLink = nextActiveLink;
           }
         }
       });
@@ -327,10 +1309,11 @@
         return;
       }
 
+      const searchTerm = query.toLowerCase();
       const results = searchIndex.filter(item => {
         const title = String(item.title || '').toLowerCase();
         const content = String(item.content || '').toLowerCase();
-        const searchTerm = query.toLowerCase();
+
         return title.includes(searchTerm) || content.includes(searchTerm);
       }).slice(0, 10);
 
@@ -528,6 +1511,7 @@
     // 添加复制按钮
     const button = document.createElement('button');
     button.className = 'copy-code-button';
+    button.type = 'button';
     button.textContent = '复制';
 
     button.addEventListener('click', () => {
@@ -616,7 +1600,7 @@
       }
     });
 
-    window.addEventListener('resize', () => {
+    onMediaQueryChange(mobileQuery, () => {
       if (!mobileQuery.matches) {
         setMobileMenu(false);
       }
@@ -641,26 +1625,6 @@
     });
 
     images.forEach(img => imageObserver.observe(img));
-  }
-
-  // ============================================
-  // Animation on Scroll - 滚动动画
-  // ============================================
-  const animatedElements = document.querySelectorAll('.post-card, .sidebar-widget');
-
-  if ('IntersectionObserver' in window && animatedElements.length > 0) {
-    const animationObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in');
-          animationObserver.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.1
-    });
-
-    animatedElements.forEach(el => animationObserver.observe(el));
   }
 
   // ============================================
@@ -694,10 +1658,16 @@
     let indicatorOriginX = 0;
     let indicatorAreaWidth = 0;
     let itemMetrics = [];
+    let metricByLink = new Map();
     let isPointerTracking = false;
     let resizeTimeout = null;
+    let metricsFrame = null;
+    let pointerFrame = null;
+    let pointerClientX = 0;
     let indicatorFrame = null;
     let lastFrameTime = 0;
+    let activeMenuLink = null;
+    const indicatorVisualCache = new Map();
     const indicator = {
       center: 0,
       width: 0,
@@ -747,6 +1717,9 @@
         activeLink.setAttribute('aria-current', 'page');
       }
 
+      activeMenuLink = activeLink;
+      navbarMenu.classList.toggle('has-active', Boolean(activeLink));
+
       return Boolean(activeLink);
     }
 
@@ -781,13 +1754,20 @@
           };
         })
         .filter(Boolean);
+      metricByLink = new Map(itemMetrics.map(metric => [metric.link, metric]));
+
     }
 
     function metricForLink(link) {
-      return itemMetrics.find(metric => metric.link === link);
+      return metricByLink.get(link);
     }
 
     function setIndicatorVisualVariable(name, value) {
+      if (indicatorVisualCache.get(name) === value) {
+        return;
+      }
+
+      indicatorVisualCache.set(name, value);
       navbarMenu.style.setProperty(name, value);
     }
 
@@ -803,18 +1783,21 @@
       const stretch = reducedMotionQuery.matches
         ? 0
         : clamp(
-            Math.abs(distance) * 1.05 + Math.abs(indicator.velocity) * 0.2,
+            Math.abs(distance) * 1.05 + Math.abs(indicator.velocity) * 0.016,
             0,
             stretchLimit
           );
       const renderedWidth = Math.min(baseWidth + stretch, indicatorAreaWidth + 8);
+      const baseElementWidth = Math.max(indicator.targetWidth, 1);
       const renderedCenter = indicator.center + distance * 0.5;
       const minLeft = -4;
       const maxLeft = Math.max(minLeft, indicatorAreaWidth - renderedWidth + 4);
-      const left = clamp(renderedCenter - renderedWidth / 2, minLeft, maxLeft);
+      const visualLeft = clamp(renderedCenter - renderedWidth / 2, minLeft, maxLeft);
+      const visualCenter = visualLeft + renderedWidth / 2;
+      const left = visualCenter - baseElementWidth / 2;
       const direction = Math.abs(distance) > 0.35
         ? Math.sign(distance)
-        : (Math.abs(indicator.velocity) > 0.08
+        : (Math.abs(indicator.velocity) > 6
             ? Math.sign(indicator.velocity)
             : indicator.direction);
       const energy = clamp(
@@ -830,12 +1813,12 @@
         0,
         0.35
       );
-      const indicatorInsetY = -lift * 2.75 - visualEnergy * 2.75;
+      const scaleX = clamp(renderedWidth / baseElementWidth, 0.72, 2.35);
       const scaleY =
         1 +
-        lift * 0.045 +
-        visualEnergy * 0.11 -
-        widthBounce * 0.04 * lift;
+        lift * 0.105 +
+        visualEnergy * 0.07 -
+        widthBounce * 0.03 * lift;
       const skew = direction * visualEnergy * -2.4;
       const edgeOpacity = indicator.visible
         ? lift * (0.22 + energy * 0.5)
@@ -843,42 +1826,12 @@
 
       indicator.direction = direction || indicator.direction;
 
-      setIndicatorVisualVariable('--indicator-x', `${left.toFixed(3)}px`);
-      setIndicatorVisualVariable('--indicator-width', `${renderedWidth.toFixed(3)}px`);
-      setIndicatorVisualVariable('--indicator-inset-y', `${indicatorInsetY.toFixed(3)}px`);
+      setIndicatorVisualVariable('--indicator-x', `${left.toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-width', `${baseElementWidth.toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-scale-x', scaleX.toFixed(4));
       setIndicatorVisualVariable('--indicator-scale-y', scaleY.toFixed(4));
-      setIndicatorVisualVariable('--indicator-skew', `${skew.toFixed(3)}deg`);
-      setIndicatorVisualVariable('--indicator-energy', energy.toFixed(4));
-      setIndicatorVisualVariable('--indicator-direction', String(direction || 0));
-      setIndicatorVisualVariable('--indicator-light-x', `${(50 + direction * visualEnergy * 18).toFixed(2)}%`);
-      setIndicatorVisualVariable('--indicator-blur', `${(10 + lift * 14 + visualEnergy * 10).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-saturation', `${(130 + lift * 50 + visualEnergy * 65).toFixed(1)}%`);
-      setIndicatorVisualVariable('--indicator-shadow-y', `${(lift * (8 + energy * 5)).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-shadow-blur', `${(lift * (18 + energy * 20)).toFixed(2)}px`);
-      setIndicatorVisualVariable(
-        '--indicator-shadow-color',
-        `rgba(15, 23, 42, ${(lift * (0.09 + energy * 0.09)).toFixed(3)})`
-      );
-      setIndicatorVisualVariable('--indicator-glow-blur', `${(lift * (12 + energy * 28)).toFixed(2)}px`);
-      setIndicatorVisualVariable(
-        '--indicator-glow-color',
-        `rgba(var(--color-primary-rgb), ${(lift * (0.05 + energy * 0.15)).toFixed(3)})`
-      );
-      setIndicatorVisualVariable('--indicator-inset-x', `${(-direction * visualEnergy * 8).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-inset-alpha', (0.08 + lift * 0.07 + visualEnergy * 0.08).toFixed(3));
-      setIndicatorVisualVariable('--indicator-brightness', (1 + lift * 0.05 + visualEnergy * 0.04).toFixed(3));
-      setIndicatorVisualVariable('--indicator-edge-angle', `${(105 + direction * visualEnergy * 20).toFixed(2)}deg`);
-      setIndicatorVisualVariable('--indicator-edge-blur', `${(visualEnergy * 0.35).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-edge-shadow-x', `${(direction * visualEnergy * 3).toFixed(2)}px`);
-      setIndicatorVisualVariable('--indicator-edge-shadow-blur', `${(lift * (2 + energy * 4)).toFixed(2)}px`);
+      setIndicatorVisualVariable('--indicator-skew', `${skew.toFixed(2)}deg`);
       setIndicatorVisualVariable('--indicator-edge-opacity', edgeOpacity.toFixed(3));
-      setIndicatorVisualVariable('--indicator-tint-alpha', (0.04 + lift * 0.02 + visualEnergy * 0.06).toFixed(3));
-      setIndicatorVisualVariable('--indicator-surface-alpha', (0.2 + lift * 0.22 + visualEnergy * 0.08).toFixed(3));
-      setIndicatorVisualVariable('--indicator-highlight-alpha', (0.58 + lift * 0.18 + visualEnergy * 0.14).toFixed(3));
-      setIndicatorVisualVariable('--indicator-border-alpha', (0.32 + lift * 0.24).toFixed(3));
-      setIndicatorVisualVariable('--indicator-bottom-alpha', (0.06 + lift * 0.06).toFixed(3));
-      setIndicatorVisualVariable('--indicator-outline-alpha', (0.18 + lift * 0.16 + visualEnergy * 0.12).toFixed(3));
-      setIndicatorVisualVariable('--menu-outline-alpha', (0.14 + lift * 0.16).toFixed(3));
       setIndicatorVisualVariable('--indicator-opacity', indicator.visible ? '1' : '0');
     }
 
@@ -893,43 +1846,56 @@
 
     function animateIndicator(timestamp) {
       const elapsed = lastFrameTime ? timestamp - lastFrameTime : 16.667;
-      const frameScale = clamp(elapsed / 16.667, 0.5, 2);
-      const centerStiffness = isPointerTracking ? 0.34 : 0.22;
-      const centerDamping = isPointerTracking ? 0.68 : 0.72;
-      const widthStiffness = isPointerTracking ? 0.27 : 0.2;
-      const widthDamping = isPointerTracking ? 0.7 : 0.74;
-      const liftStiffness = 0.16;
-      const liftDamping = 0.74;
+      const deltaTime = clamp(elapsed / 1000, 1 / 120, 1 / 24);
+      const centerFrequency = isPointerTracking ? 7.6 : 6.2;
+      const centerDamping = isPointerTracking ? 0.74 : 0.78;
+      const widthFrequency = isPointerTracking ? 6.2 : 5.4;
+      const widthDamping = isPointerTracking ? 0.78 : 0.82;
+
+      advanceSpring(
+        indicator.center,
+        indicator.velocity,
+        indicator.targetCenter,
+        centerFrequency,
+        centerDamping,
+        deltaTime
+      );
+      indicator.center = springResult.value;
+      indicator.velocity = springResult.velocity;
+
+      advanceSpring(
+        indicator.width,
+        indicator.widthVelocity,
+        indicator.targetWidth,
+        widthFrequency,
+        widthDamping,
+        deltaTime
+      );
+      indicator.width = springResult.value;
+      indicator.widthVelocity = springResult.velocity;
+
+      advanceSpring(
+        indicator.lift,
+        indicator.liftVelocity,
+        indicator.liftTarget,
+        5.2,
+        0.82,
+        deltaTime
+      );
+      indicator.lift = springResult.value;
+      indicator.liftVelocity = springResult.velocity;
 
       lastFrameTime = timestamp;
-
-      indicator.velocity = (
-        indicator.velocity +
-        (indicator.targetCenter - indicator.center) * centerStiffness * frameScale
-      ) * Math.pow(centerDamping, frameScale);
-      indicator.center += indicator.velocity * frameScale;
-
-      indicator.widthVelocity = (
-        indicator.widthVelocity +
-        (indicator.targetWidth - indicator.width) * widthStiffness * frameScale
-      ) * Math.pow(widthDamping, frameScale);
-      indicator.width += indicator.widthVelocity * frameScale;
-
-      indicator.liftVelocity = (
-        indicator.liftVelocity +
-        (indicator.liftTarget - indicator.lift) * liftStiffness * frameScale
-      ) * Math.pow(liftDamping, frameScale);
-      indicator.lift += indicator.liftVelocity * frameScale;
 
       renderIndicator();
 
       const settled =
         Math.abs(indicator.targetCenter - indicator.center) < 0.04 &&
         Math.abs(indicator.targetWidth - indicator.width) < 0.04 &&
-        Math.abs(indicator.velocity) < 0.04 &&
-        Math.abs(indicator.widthVelocity) < 0.04 &&
+        Math.abs(indicator.velocity) < 3 &&
+        Math.abs(indicator.widthVelocity) < 3 &&
         Math.abs(indicator.liftTarget - indicator.lift) < 0.002 &&
-        Math.abs(indicator.liftVelocity) < 0.002;
+        Math.abs(indicator.liftVelocity) < 0.08;
 
       if (settled) {
         indicator.center = indicator.targetCenter;
@@ -960,15 +1926,28 @@
         Boolean(options.instant) ||
         reducedMotionQuery.matches ||
         !indicator.initialized;
+      const nextWidth = Math.max(width, 0);
+      const targetDelta = center - indicator.targetCenter;
+      const widthDelta = nextWidth - indicator.targetWidth;
+
+      if (
+        !instant &&
+        indicator.visible &&
+        options.visible !== false &&
+        Math.abs(targetDelta) < 0.25 &&
+        Math.abs(widthDelta) < 0.25
+      ) {
+        return;
+      }
 
       indicator.targetCenter = center;
-      indicator.targetWidth = Math.max(width, 0);
+      indicator.targetWidth = nextWidth;
       indicator.visible = options.visible !== false;
 
       if (instant) {
         stopIndicatorAnimation();
         indicator.center = center;
-        indicator.width = Math.max(width, 0);
+        indicator.width = nextWidth;
         indicator.velocity = 0;
         indicator.widthVelocity = 0;
         indicator.initialized = true;
@@ -976,11 +1955,15 @@
         return;
       }
 
+      indicator.velocity += clamp(targetDelta * (isPointerTracking ? 2.4 : 4.2), -760, 760);
+      indicator.widthVelocity += clamp(widthDelta * 2.8, -420, 420);
+
       startIndicatorAnimation();
     }
 
     function setIndicatorLift(target, instant = false) {
       indicator.liftTarget = clamp(target, 0, 1);
+      navbarMenu.classList.toggle('is-indicator-lifted', indicator.liftTarget > 0.05);
 
       if (instant || reducedMotionQuery.matches) {
         indicator.lift = indicator.liftTarget;
@@ -1002,12 +1985,21 @@
       indicator.liftVelocity = 0;
       setIndicatorVisualVariable('--indicator-opacity', '0');
       setIndicatorVisualVariable('--indicator-edge-opacity', '0');
+      setIndicatorVisualVariable('--indicator-x', '0px');
+      setIndicatorVisualVariable('--indicator-width', '0px');
+      setIndicatorVisualVariable('--indicator-scale-x', '1');
+      setIndicatorVisualVariable('--indicator-inset-y', '0px');
+      setIndicatorVisualVariable('--indicator-scale-y', '1');
+      setIndicatorVisualVariable('--indicator-skew', '0deg');
+      navbarMenu.classList.remove('is-indicator-lifted');
     }
 
-    function updateLiquidIndicator(link, instant = false) {
+    function updateLiquidIndicator(link, instant = false, options = {}) {
       if (!isDesktopNavbar()) return;
 
-      refreshNavbarMetrics();
+      if (!options.skipMetricsRefresh) {
+        refreshNavbarMetrics();
+      }
 
       const metric = metricForLink(link);
       if (!metric) {
@@ -1032,24 +2024,20 @@
       let leftMetric = itemMetrics[0];
       let rightMetric = itemMetrics[itemMetrics.length - 1];
 
-      for (let index = 0; index < itemMetrics.length - 1; index += 1) {
-        const current = itemMetrics[index];
-        const next = itemMetrics[index + 1];
+      if (localX <= leftMetric.center) {
+        rightMetric = leftMetric;
+      } else if (localX >= rightMetric.center) {
+        leftMetric = rightMetric;
+      } else {
+        for (let index = 0; index < itemMetrics.length - 1; index += 1) {
+          const current = itemMetrics[index];
+          const next = itemMetrics[index + 1];
 
-        if (localX >= current.center && localX <= next.center) {
-          leftMetric = current;
-          rightMetric = next;
-          break;
-        }
-
-        if (localX < itemMetrics[0].center) {
-          rightMetric = itemMetrics[0];
-          break;
-        }
-
-        if (localX > itemMetrics[itemMetrics.length - 1].center) {
-          leftMetric = itemMetrics[itemMetrics.length - 1];
-          break;
+          if (localX >= current.center && localX <= next.center) {
+            leftMetric = current;
+            rightMetric = next;
+            break;
+          }
         }
       }
 
@@ -1062,11 +2050,22 @@
       setIndicatorTarget(localX, width);
     }
 
-    function restoreActiveIndicator() {
-      const activeLink = navbarMenu.querySelector('a.active');
+    function schedulePointerTarget(clientX) {
+      pointerClientX = clientX;
 
-      if (activeLink) {
-        updateLiquidIndicator(activeLink, false);
+      if (pointerFrame !== null) {
+        return;
+      }
+
+      pointerFrame = window.requestAnimationFrame(() => {
+        pointerFrame = null;
+        updateIndicatorTargetByPointer(pointerClientX);
+      });
+    }
+
+    function restoreActiveIndicator(skipMetricsRefresh = false, instant = false) {
+      if (activeMenuLink) {
+        updateLiquidIndicator(activeMenuLink, instant, { skipMetricsRefresh });
       } else {
         hideIndicator();
       }
@@ -1080,6 +2079,8 @@
         });
         link.classList.add('active');
         link.setAttribute('aria-current', 'page');
+        activeMenuLink = link;
+        navbarMenu.classList.add('has-active');
 
         if (isDesktopNavbar()) {
           updateLiquidIndicator(link, false);
@@ -1091,27 +2092,33 @@
       if (!isDesktopNavbar() || event.pointerType === 'touch') return;
 
       isPointerTracking = true;
+      document.dispatchEvent(new Event('imx:navbar-pointer-active'));
       setIndicatorLift(1);
       refreshNavbarMetrics();
-      updateIndicatorTargetByPointer(event.clientX);
-    });
+      schedulePointerTarget(event.clientX);
+    }, { passive: true });
 
     navbarMenu.addEventListener('pointermove', (event) => {
       if (!isPointerTracking || event.pointerType === 'touch') return;
 
-      updateIndicatorTargetByPointer(event.clientX);
-    });
+      schedulePointerTarget(event.clientX);
+    }, { passive: true });
 
     function stopPointerTracking() {
       isPointerTracking = false;
+      if (pointerFrame !== null) {
+        window.cancelAnimationFrame(pointerFrame);
+        pointerFrame = null;
+      }
       setIndicatorLift(0);
       restoreActiveIndicator();
+      document.dispatchEvent(new Event('imx:navbar-pointer-idle'));
     }
 
-    navbarMenu.addEventListener('pointerleave', stopPointerTracking);
-    navbarMenu.addEventListener('pointercancel', stopPointerTracking);
+    navbarMenu.addEventListener('pointerleave', stopPointerTracking, { passive: true });
+    navbarMenu.addEventListener('pointercancel', stopPointerTracking, { passive: true });
 
-    function initializeIndicator() {
+    function initializeIndicator(skipMetricsRefresh = false) {
       setActiveLink();
 
       if (!isDesktopNavbar()) {
@@ -1119,10 +2126,8 @@
         return;
       }
 
-      const activeLink = navbarMenu.querySelector('a.active');
-
-      if (activeLink) {
-        updateLiquidIndicator(activeLink, true);
+      if (activeMenuLink) {
+        updateLiquidIndicator(activeMenuLink, true, { skipMetricsRefresh });
       } else {
         hideIndicator();
       }
@@ -1130,31 +2135,32 @@
 
     initializeIndicator();
 
-    // 窗口大小改变时重新计算 - 防抖优化
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
+    function scheduleNavbarMetricsRefresh() {
+      if (metricsFrame !== null) {
+        return;
+      }
+
+      metricsFrame = window.requestAnimationFrame(() => {
+        metricsFrame = null;
         refreshNavbarMetrics();
-        initializeIndicator();
-      }, 100);
-    });
-
-    if ('ResizeObserver' in window) {
-      const navbarResizeObserver = new ResizeObserver(() => {
-        refreshNavbarMetrics();
-
-        if (!isPointerTracking) initializeIndicator();
-      });
-
-      navbarResizeObserver.observe(navbarMenu);
-      menuLinks.forEach(link => {
-        if (link.parentElement) {
-          navbarResizeObserver.observe(link.parentElement);
-        }
+        if (!isPointerTracking) restoreActiveIndicator(true, true);
       });
     }
 
-    reducedMotionQuery.addEventListener('change', initializeIndicator);
+    // 窗口大小改变时重新计算 - rAF 合并，避免 resize/融合动画期间抖动。
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(scheduleNavbarMetricsRefresh, 80);
+    });
+    window.addEventListener('imx:navigation-layout-change', scheduleNavbarMetricsRefresh);
+
+    if ('ResizeObserver' in window) {
+      const navbarResizeObserver = new ResizeObserver(scheduleNavbarMetricsRefresh);
+
+      navbarResizeObserver.observe(navbarMenu);
+    }
+
+    onMediaQueryChange(reducedMotionQuery, () => initializeIndicator());
 
     // 页面可见性变化时重新计算（解决某些浏览器的布局问题）
     document.addEventListener('visibilitychange', () => {

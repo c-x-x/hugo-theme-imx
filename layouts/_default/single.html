@@ -34,7 +34,7 @@
     </div>
 
     {{ if .Params.tags }}
-    <div class="post-card-tags" style="justify-content: center; margin-top: 1rem;">
+    <div class="post-card-tags article-tags">
       {{ range .Params.tags }}
       <a href="{{ printf "tags/%s/" (. | urlize) | relLangURL }}" class="tag">{{ . }}</a>
       {{ end }}

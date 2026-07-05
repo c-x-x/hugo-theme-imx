@@ -5,11 +5,34 @@
 {{- $posts := where .Site.RegularPages "Type" "in" $mainSections -}}
 
 <!-- Hero Section - 特色展示区 -->
-<section class="hero">
-  <div class="hero-content">
-    <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="hero-avatar" width="120" height="120">
-    <h1 class="hero-title">{{ .Site.Title }}</h1>
-    <p class="hero-subtitle">{{ .Site.Params.subtitle }}</p>
+<section class="hero imx-home-entry-hero" data-home-entry data-home-title="{{ .Site.Title }}">
+  <canvas class="imx-home-entry-layer imx-home-entry-glyph-canvas imx-home-entry-reveal-layer" data-home-glyph-canvas aria-hidden="true"></canvas>
+  <div class="imx-home-entry-layer imx-home-entry-ambient imx-home-entry-reveal-layer" aria-hidden="true"></div>
+  <div class="imx-home-entry-layer imx-home-entry-grid imx-home-entry-reveal-layer" aria-hidden="true"></div>
+  <div class="imx-home-entry-layer imx-home-entry-haze" aria-hidden="true"></div>
+  <span class="imx-home-entry-ripple-ring" aria-hidden="true"></span>
+
+  <div class="hero-content imx-home-entry-content">
+    <div class="hero-copy-stack">
+      {{ range first 1 $posts }}
+      <a href="{{ .RelPermalink }}" class="hero-entry-card">
+        <span class="hero-entry-dot" aria-hidden="true"></span>
+        <span class="hero-entry-label">最新文章</span>
+        <span class="hero-entry-title">{{ .Title }}</span>
+      </a>
+      {{ end }}
+
+      <p class="hero-subtitle" data-home-typed>{{ .Site.Params.subtitle }}</p>
+    </div>
+
+    <div class="hero-brand-row">
+      <h1 class="hero-title">{{ .Site.Title }}</h1>
+      <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="hero-avatar" width="96" height="96">
+    </div>
+    <div class="hero-actions">
+      <a href="#featured-posts" class="hero-action hero-action-primary">开始阅读</a>
+      <a href="{{ "posts/" | relLangURL }}" class="hero-action hero-action-secondary">全部文章</a>
+    </div>
   </div>
 
   <div class="scroll-indicator">
@@ -20,7 +43,7 @@
 </section>
 
 <!-- Featured Posts Section -->
-<section class="featured-section">
+<section class="featured-section" id="featured-posts">
   <div class="container">
     <h2 class="section-title">精选文章</h2>
 

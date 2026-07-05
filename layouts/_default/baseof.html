@@ -4,13 +4,19 @@
 {{- $pageImage := .Params.image | default $defaultOGImage -}}
 {{- $defaultFaviconLight := "/images/imx/favicon.svg" -}}
 {{- $defaultFaviconDark := "/images/imx/favicon-dark.svg" -}}
-{{- $favicon := .Site.Params.favicon | default $defaultFaviconLight -}}
+{{- $faviconParam := .Site.Params.favicon -}}
+{{- $favicon := $faviconParam | default $defaultFaviconLight -}}
 {{- $faviconLightParam := or .Site.Params.faviconLight .Site.Params.faviconlight -}}
 {{- $faviconDarkParam := or .Site.Params.faviconDark .Site.Params.favicondark -}}
 {{- $faviconLight := $faviconLightParam | default $favicon -}}
 {{- $faviconDark := $faviconDarkParam | default (cond (eq $favicon $defaultFaviconLight) $defaultFaviconDark $favicon) -}}
-{{- $faviconLightURL := partial "resolve-url.html" (dict "url" $faviconLight) -}}
-{{- $faviconDarkURL := partial "resolve-url.html" (dict "url" $faviconDark) -}}
+{{- $faviconLightIsDefault := eq $faviconLight $defaultFaviconLight -}}
+{{- $faviconDarkIsDefault := eq $faviconDark $defaultFaviconDark -}}
+{{- $faviconAssetVersion := "20260704-snowflake-4" -}}
+{{- $faviconLightBaseURL := partial "resolve-url.html" (dict "url" $faviconLight) -}}
+{{- $faviconDarkBaseURL := partial "resolve-url.html" (dict "url" $faviconDark) -}}
+{{- $faviconLightURL := cond $faviconLightIsDefault (printf "%s?v=%s" $faviconLightBaseURL $faviconAssetVersion) $faviconLightBaseURL -}}
+{{- $faviconDarkURL := cond $faviconDarkIsDefault (printf "%s?v=%s" $faviconDarkBaseURL $faviconAssetVersion) $faviconDarkBaseURL -}}
 {{- $pageTitle := .Site.Title -}}
 {{- if not .IsHome -}}
   {{- $pageTitle = printf "%s | %s" .Title .Site.Title -}}
@@ -155,10 +161,10 @@
     </symbol>
   </svg>
 </head>
-<body data-search-index="{{ "index.json" | relLangURL }}">
+<body class="{{ if .IsHome }}is-home{{ end }}" data-search-index="{{ "index.json" | relLangURL }}">
   {{ partial "header.html" . }}
 
-  <main class="main-wrapper">
+  <main class="main-wrapper{{ if .IsHome }} main-wrapper-home{{ end }}">
     {{ block "main" . }}{{ end }}
   </main>
 
