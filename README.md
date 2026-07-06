@@ -57,10 +57,12 @@ hugo mod init github.com/your-name/your-site
 安装当前正式版并启动本地预览：
 
 ```bash
-hugo mod get github.com/c-x-x/hugo-theme-imx@v1.0.0
+hugo mod get github.com/c-x-x/hugo-theme-imx@v1.0.1
 hugo mod tidy
 hugo server
 ```
+
+是不是发现和展示图不一样，别担心，这是我保留的最初始的经典版本，如果你喜欢可以使用这个，反之可以更新
 
 更新主题：
 
