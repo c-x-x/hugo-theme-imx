@@ -113,7 +113,129 @@
 
     const glyphCanvas = hero.querySelector('[data-home-glyph-canvas]');
     const typedSubtitle = hero.querySelector('[data-home-typed]');
-    const glyphAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789{}[]()<>/\\=+*$#@%&:;._-';
+    const javaGlyphAnnotations = [
+      '@Override',
+      '@Deprecated',
+      '@SuppressWarnings("unchecked")',
+      '@FunctionalInterface',
+      '@Test',
+      '@Bean',
+      '@Autowired',
+      '@Service',
+      '@Repository',
+      '@RestController',
+      '@GetMapping',
+      '@PostMapping',
+      '@Transactional',
+      '@Entity',
+      '@Column(nullable = false)'
+    ];
+    const javaGlyphFragments = [
+      'public final class',
+      'private static final',
+      'protected void',
+      'record Result<T>',
+      'interface Repository<T>',
+      'enum Status',
+      'extends AbstractService',
+      'implements Serializable',
+      'throws IOException',
+      'try {',
+      '} catch (Exception ex) {',
+      '} finally {',
+      'return Optional.empty();',
+      'return ResponseEntity.ok(data);',
+      'new HashMap<>()',
+      'List<String>',
+      'Map<String, Object>',
+      'Optional<User>',
+      'CompletableFuture<Result>',
+      'Stream<Order>',
+      'LocalDateTime.now()',
+      'BigDecimal.ZERO',
+      'Objects.requireNonNull(value)',
+      'users.stream().map(User::name).toList()',
+      'items.forEach(System.out::println)',
+      'filter(item -> item.isActive())',
+      'switch (status) {',
+      'case READY -> start();',
+      'case FAILED -> retry();',
+      'default -> log.info("idle");',
+      'if (value != null && value.isValid())',
+      'for (int i = 0; i < size; i++)',
+      'while (iterator.hasNext())',
+      'synchronized (lock)',
+      'var builder = new Builder();',
+      'String.format("%s:%d", host, port)',
+      'Path.of("src/main/java")',
+      'Files.readString(path)',
+      'LOGGER.debug("{}", event)'
+    ];
+    const javaGlyphKeywords = [
+      'abstract',
+      'assert',
+      'boolean',
+      'break',
+      'case',
+      'catch',
+      'class',
+      'continue',
+      'default',
+      'else',
+      'extends',
+      'false',
+      'final',
+      'finally',
+      'for',
+      'if',
+      'implements',
+      'import',
+      'instanceof',
+      'new',
+      'null',
+      'package',
+      'private',
+      'protected',
+      'public',
+      'return',
+      'static',
+      'super',
+      'switch',
+      'this',
+      'throw',
+      'throws',
+      'true',
+      'try',
+      'var',
+      'void',
+      'while'
+    ];
+    const javaGlyphSymbols = [
+      '::',
+      '->',
+      '==',
+      '!=',
+      '<=',
+      '>=',
+      '&&',
+      '||',
+      '++',
+      '--',
+      '+=',
+      '-=',
+      '?:',
+      '<T>',
+      '<K, V>',
+      '[]',
+      '{}',
+      '()',
+      ';',
+      ',',
+      '.',
+      '...',
+      '/* */',
+      '//'
+    ];
     const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let renderFrame = 0;
     let heroResizeFrame = 0;
@@ -134,17 +256,30 @@
     let heroPointerX = 0;
     let heroPointerY = 0;
 
+    function pickRandom(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
     function createGlyphRow(width) {
       const length = 2 * Math.ceil(width / 8.68);
       let row = '';
 
-      for (let index = 0; index < length; index += 1) {
-        if (Math.random() < 0.13) {
-          row += ' ';
-          continue;
+      while (row.length < length) {
+        const roll = Math.random();
+        const indent = Math.random() < 0.18 ? '  ' : '';
+        let fragment;
+
+        if (roll < 0.18) {
+          fragment = pickRandom(javaGlyphAnnotations);
+        } else if (roll < 0.66) {
+          fragment = pickRandom(javaGlyphFragments);
+        } else if (roll < 0.88) {
+          fragment = `${pickRandom(javaGlyphKeywords)} ${pickRandom(javaGlyphSymbols)} ${pickRandom(javaGlyphKeywords)}`;
+        } else {
+          fragment = `${pickRandom(javaGlyphSymbols)} ${pickRandom(javaGlyphSymbols)} ${pickRandom(javaGlyphKeywords)}`;
         }
 
-        row += glyphAlphabet[Math.floor(Math.random() * glyphAlphabet.length)];
+        row += `${indent}${fragment}${Math.random() < 0.46 ? ';' : ''}  `;
       }
 
       return row;
@@ -639,6 +774,8 @@
     const featured = document.querySelector('#featured-posts');
     const navbar = document.querySelector('.navbar');
     const navbarMenu = navbar ? navbar.querySelector('.navbar-menu') : null;
+    const navbarBrand = navbar ? navbar.querySelector('.navbar-brand') : null;
+    const navbarActions = navbar ? navbar.querySelector('.navbar-actions') : null;
     if (!hero || !featured || !navbar) {
       return;
     }
@@ -673,14 +810,34 @@
     function refreshMetrics() {
       const heroTop = getPageTop(hero);
       const featuredTop = getPageTop(featured);
-      const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : { width: 0 };
-      const attractDistance = Math.min(
-        300,
-        Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58)
-      );
+      const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : null;
+      const brandRect = navbarBrand ? navbarBrand.getBoundingClientRect() : null;
+      const actionsRect = navbarActions ? navbarActions.getBoundingClientRect() : null;
+      const currentBrandShift = parseFloat(lastDockBrandShift) || 0;
+      const currentActionsShift = parseFloat(lastDockActionsShift) || 0;
+      const visualGap = Math.max(10, Math.min(18, window.innerWidth * 0.014));
+      const fallbackDistance = menuRect
+        ? Math.min(300, Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58))
+        : 0;
+      const brandBaseRight = brandRect ? brandRect.right - currentBrandShift : 0;
+      const actionsBaseLeft = actionsRect ? actionsRect.left - currentActionsShift : window.innerWidth;
+      const menuLeft = menuRect ? menuRect.left : 0;
+      const menuRight = menuRect ? menuRect.right : window.innerWidth;
+      const brandDistance = brandRect && menuRect
+        ? Math.min(360, Math.max(0, menuLeft - brandBaseRight - visualGap))
+        : fallbackDistance;
+      const actionsDistance = actionsRect && menuRect
+        ? Math.min(360, Math.max(0, actionsBaseLeft - menuRight - visualGap))
+        : fallbackDistance;
+      const widthRatio = brandRect && actionsRect && actionsRect.width > 0
+        ? brandRect.width / actionsRect.width
+        : 1;
+      const actionsLead = Math.min(1.62, Math.max(1.12, 1 + (widthRatio - 1) * 0.18));
 
       metrics = {
-        attractDistance,
+        actionsDistance,
+        actionsLead,
+        brandDistance,
         dockOffset: getDockOffset(),
         featuredTop,
         heroTop
@@ -749,10 +906,10 @@
 
       lastDockAttraction = normalizedAttraction;
 
-      const shift = currentMetrics.attractDistance * normalizedAttraction;
+      const actionsAttraction = 1 - Math.pow(1 - normalizedAttraction, currentMetrics.actionsLead || 1.24);
       const nextDockAttracting = !merged && normalizedAttraction > 0.002 && normalizedAttraction < 0.998;
-      const brandShift = `${shift.toFixed(2)}px`;
-      const actionsShift = `${(-shift).toFixed(2)}px`;
+      const brandShift = `${(currentMetrics.brandDistance * normalizedAttraction).toFixed(2)}px`;
+      const actionsShift = `${(-currentMetrics.actionsDistance * actionsAttraction).toFixed(2)}px`;
 
       if (brandShift !== lastDockBrandShift) {
         lastDockBrandShift = brandShift;
@@ -1093,8 +1250,272 @@
     scheduleAutoThemeSync(safeMode);
   }
 
+  function initNavbarClock() {
+    const clockElements = document.querySelectorAll('[data-beijing-clock]');
+
+    if (!clockElements.length) {
+      return;
+    }
+
+    const clockFormatter = new Intl.DateTimeFormat('zh-CN', {
+      hour: '2-digit',
+      hour12: false,
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Shanghai'
+    });
+    let clockTimer = 0;
+    let regionText = '定位中';
+    let regionFullText = '定位中';
+    const chinaRegionNames = {
+      Anhui: '安徽',
+      Beijing: '北京',
+      Chongqing: '重庆',
+      Fujian: '福建',
+      Gansu: '甘肃',
+      Guangdong: '广东',
+      Guangxi: '广西',
+      Guizhou: '贵州',
+      Hainan: '海南',
+      Hebei: '河北',
+      Heilongjiang: '黑龙江',
+      Henan: '河南',
+      Hubei: '湖北',
+      Hunan: '湖南',
+      'Inner Mongolia': '内蒙古',
+      Jiangsu: '江苏',
+      Jiangxi: '江西',
+      Jilin: '吉林',
+      Liaoning: '辽宁',
+      Ningxia: '宁夏',
+      Qinghai: '青海',
+      Shaanxi: '陕西',
+      Shandong: '山东',
+      Shanghai: '上海',
+      Shanxi: '山西',
+      Sichuan: '四川',
+      Tianjin: '天津',
+      Tibet: '西藏',
+      Xinjiang: '新疆',
+      Yunnan: '云南',
+      Zhejiang: '浙江',
+      'Hong Kong': '香港',
+      Macau: '澳门',
+      Taiwan: '台湾'
+    };
+    const chinaCityNames = {
+      Beijing: '北京',
+      Changsha: '长沙',
+      Chengdu: '成都',
+      Chongqing: '重庆',
+      Guangzhou: '广州',
+      Hangzhou: '杭州',
+      Nanjing: '南京',
+      Shanghai: '上海',
+      Shenzhen: '深圳',
+      Suzhou: '苏州',
+      Tianjin: '天津',
+      Wuhan: '武汉',
+      "Xi'an": '西安',
+      Xian: '西安'
+    };
+    const countryNames = {
+      Canada: '加拿大',
+      China: '中国',
+      France: '法国',
+      Germany: '德国',
+      'Hong Kong': '香港',
+      India: '印度',
+      Japan: '日本',
+      Macau: '澳门',
+      Singapore: '新加坡',
+      Taiwan: '台湾',
+      'United Kingdom': '英国',
+      'United States': '美国',
+      'United States of America': '美国',
+      USA: '美国'
+    };
+    const countryCodeNames = {
+      CA: '加拿大',
+      CN: '中国',
+      DE: '德国',
+      FR: '法国',
+      GB: '英国',
+      HK: '香港',
+      IN: '印度',
+      JP: '日本',
+      MO: '澳门',
+      SG: '新加坡',
+      TW: '台湾',
+      UK: '英国',
+      US: '美国',
+      USA: '美国'
+    };
+    function cleanPlaceName(value) {
+      return String(value || '')
+        .replace(/\s+/g, ' ')
+        .replace(/ Province$/i, '')
+        .replace(/ City$/i, '')
+        .trim();
+    }
+
+    function getCountryName(country, countryCode) {
+      const cleanCountry = cleanPlaceName(country);
+      const cleanCode = String(countryCode || '').toUpperCase();
+
+      return countryNames[cleanCountry] || countryCodeNames[cleanCode] || cleanCountry || cleanCode;
+    }
+
+    function withoutCountryPrefix(value, countryName) {
+      const place = cleanPlaceName(value);
+
+      return place
+        .replace(new RegExp(`^${countryName}\\s*`, 'i'), '')
+        .replace(/^United States(?: of America)?\s*/i, '')
+        .replace(/^USA\s*/i, '')
+        .replace(/^US\s+/i, '')
+        .replace(/^美国\s*/, '')
+        .replace(/州$/i, '')
+        .trim();
+    }
+
+    function compactChinaPlace(value, aliases) {
+      const place = cleanPlaceName(value);
+      const normalized = aliases[place] || place;
+
+      return normalized
+        .replace(/壮族自治区|回族自治区|维吾尔自治区|自治区|特别行政区|省|市/g, '')
+        .trim();
+    }
+
+    function formatRegion(data) {
+      if (!data || data.success === false) {
+        return null;
+      }
+
+      const city = data.city || data.cityName || '';
+      const region = data.region || data.region_name || data.regionName || data.province || '';
+      const country = data.country || data.country_name || data.countryName || '';
+      const countryCode = String(data.country_code || data.countryCode || data.countryCode2 || '').toUpperCase();
+
+      if (country === '中国' || country === 'China' || country === 'CN' || countryCode === 'CN') {
+        const shortRegion = [
+          compactChinaPlace(region, chinaRegionNames),
+          compactChinaPlace(city, chinaCityNames)
+        ].filter(Boolean).filter((item, index, array) => array.indexOf(item) === index).join('');
+
+        return {
+          full: shortRegion,
+          short: shortRegion
+        };
+      }
+
+      const countryName = getCountryName(country, countryCode);
+      const cleanRegion = withoutCountryPrefix(region, countryName);
+      const cleanCity = withoutCountryPrefix(city, countryName);
+      const fullRegion = [
+        countryName,
+        cleanRegion,
+        cleanCity
+      ].filter(Boolean).filter((item, index, array) => array.indexOf(item) === index).join(' ');
+
+      return {
+        full: fullRegion,
+        short: fullRegion
+      };
+    }
+
+    async function fetchRegionJSON(url) {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeout = controller ? window.setTimeout(() => controller.abort(), 2800) : 0;
+
+      try {
+        const response = await window.fetch(url, {
+          cache: 'no-store',
+          signal: controller ? controller.signal : undefined
+        });
+
+        if (!response.ok) {
+          return null;
+        }
+
+        return await response.json();
+      } catch (error) {
+        return null;
+      } finally {
+        if (timeout) {
+          window.clearTimeout(timeout);
+        }
+      }
+    }
+
+    function updateNavbarClock() {
+      const time = clockFormatter.format(new Date());
+      const text = regionText ? `${time} · ${regionText}` : time;
+      const label = regionFullText && regionFullText !== regionText ? `${time} · ${regionFullText}` : text;
+
+      clockElements.forEach((element) => {
+        element.textContent = text;
+        element.setAttribute('aria-label', label);
+        element.setAttribute('title', label);
+      });
+    }
+
+    function startClockTimer() {
+      window.clearInterval(clockTimer);
+      updateNavbarClock();
+      clockTimer = window.setInterval(updateNavbarClock, 1000);
+    }
+
+    async function loadRegion() {
+      if (!window.fetch) {
+        regionText = '地区未知';
+        regionFullText = '地区未知';
+        updateNavbarClock();
+        return;
+      }
+
+      const regionAPIs = [
+        'https://ipwho.is/?lang=zh-CN',
+        'https://ipapi.co/json/',
+        'https://freeipapi.com/api/json',
+        'https://api.ip.sb/geoip'
+      ];
+
+      for (let index = 0; index < regionAPIs.length; index += 1) {
+        const data = await fetchRegionJSON(regionAPIs[index]);
+        const nextRegion = formatRegion(data);
+
+        if (nextRegion && (nextRegion.full || nextRegion.short)) {
+          regionText = nextRegion.full || nextRegion.short;
+          regionFullText = nextRegion.full || nextRegion.short;
+          updateNavbarClock();
+          return;
+        }
+      }
+
+      regionText = '地区未知';
+      regionFullText = '地区未知';
+      updateNavbarClock();
+    }
+
+    startClockTimer();
+    loadRegion();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        window.clearInterval(clockTimer);
+        clockTimer = 0;
+        return;
+      }
+
+      startClockTimer();
+    });
+  }
+
   // 初始化主题
   applyThemeMode(getThemeMode(), { persist: false });
+  initNavbarClock();
   initHomeEntryHero();
   initHomeMagneticDock();
 
