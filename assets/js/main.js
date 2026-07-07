@@ -11,6 +11,7 @@
   const themeLogos = document.querySelectorAll('[data-logo-light][data-logo-dark]');
   const htmlElement = document.documentElement;
   const mobileQuery = window.matchMedia('(max-width: 768px)');
+  const sidebarOverlayQuery = window.matchMedia('(max-width: 768px)');
   const THEME_MODE_KEY = 'themeMode';
   const THEME_KEY = 'theme';
   const THEME_MODES = ['light', 'dark', 'auto'];
@@ -796,15 +797,9 @@
     const dockMergeEnter = 0.86;
     const dockMergeExit = 0.74;
     const edgeSnapRange = 0.2;
-    const edgeSnapOverscrollRange = 0.08;
 
     function getPageTop(element) {
       return element.getBoundingClientRect().top + window.scrollY;
-    }
-
-    function getDockOffset() {
-      const rect = navbar.getBoundingClientRect();
-      return Math.max(84, Math.round(rect.height + 30));
     }
 
     function refreshMetrics() {
@@ -838,7 +833,6 @@
         actionsDistance,
         actionsLead,
         brandDistance,
-        dockOffset: getDockOffset(),
         featuredTop,
         heroTop
       };
@@ -1030,8 +1024,6 @@
 
       if (progress >= 0 && progress <= edgeSnapRange) {
         targetY = currentMetrics.heroTop;
-      } else if (progress >= 1 - edgeSnapRange && progress < 1 + edgeSnapOverscrollRange) {
-        targetY = Math.max(0, currentMetrics.featuredTop - currentMetrics.dockOffset);
       }
 
       if (targetY === null || Math.abs(targetY - scrollY) < 2) {
@@ -1132,7 +1124,7 @@
     requestSync();
   }
 
-  // 获取保存的主题模式，兼容旧版 theme 存储
+  // 获取保存的主题模式；没有明确选择时默认跟随自动模式
   function getThemeMode() {
     const savedMode = getStorageItem(THEME_MODE_KEY);
 
@@ -1140,8 +1132,7 @@
       return savedMode;
     }
 
-    const legacyTheme = getStorageItem(THEME_KEY);
-    return legacyTheme === 'dark' ? 'dark' : 'light';
+    return 'auto';
   }
 
   // 按东八区时间计算自动主题：18:00 后深色，08:00 后浅色
@@ -1175,9 +1166,15 @@
   }
 
   // 设置实际主题
-  function setTheme(theme) {
+  function setTheme(theme, options = {}) {
+    const { persistTheme = true } = options;
+
     htmlElement.setAttribute('data-theme', theme);
-    setStorageItem(THEME_KEY, theme);
+
+    if (persistTheme) {
+      setStorageItem(THEME_KEY, theme);
+    }
+
     updateThemeAssets(theme);
   }
 
@@ -1236,11 +1233,11 @@
   // 设置主题模式
   function applyThemeMode(mode, options = {}) {
     const { persist = true } = options;
-    const safeMode = THEME_MODES.includes(mode) ? mode : 'light';
+    const safeMode = THEME_MODES.includes(mode) ? mode : 'auto';
     const theme = safeMode === 'auto' ? getAutoTheme() : safeMode;
 
     htmlElement.setAttribute('data-theme-mode', safeMode);
-    setTheme(theme);
+    setTheme(theme, { persistTheme: persist });
 
     if (persist) {
       setStorageItem(THEME_MODE_KEY, safeMode);
@@ -1513,11 +1510,28 @@
     });
   }
 
+  function initArticleMarkdownLayout() {
+    const articleContent = document.querySelector('.article-content');
+
+    if (!articleContent) {
+      return;
+    }
+
+    const emojiMarkerPattern = /^(?:✅|☑️|✔️|❌|✖️|⚠️|💡|📌|⭐|✨|🚀|🔧|📁|📂|🎯|📝|📖|📚|🔥|👉)/u;
+
+    articleContent.querySelectorAll('ul > li').forEach((item) => {
+      if (emojiMarkerPattern.test(item.textContent.trim())) {
+        item.classList.add('article-list-emoji');
+      }
+    });
+  }
+
   // 初始化主题
   applyThemeMode(getThemeMode(), { persist: false });
   initNavbarClock();
   initHomeEntryHero();
   initHomeMagneticDock();
+  initArticleMarkdownLayout();
 
   // 主题切换事件
   if (themeToggle) {
@@ -1535,6 +1549,7 @@
   // ============================================
   const sidebarToggle = document.querySelector('.sidebar-toggle');
   const sidebar = document.querySelector('.sidebar');
+  const articlePage = document.querySelector('.article-page');
 
   if (sidebarToggle && sidebar) {
     function updateSidebarIcon(isOpen) {
@@ -1543,11 +1558,20 @@
         : '<svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>';
     }
 
+    function setArticleTocCollapsed(isCollapsed) {
+      if (!articlePage) {
+        return;
+      }
+
+      articlePage.classList.toggle('article-page-toc-collapsed', !sidebarOverlayQuery.matches && isCollapsed);
+    }
+
     function syncSidebarMode() {
-      if (mobileQuery.matches) {
+      if (sidebarOverlayQuery.matches) {
         sidebar.classList.remove('collapsed');
         sidebar.classList.remove('active');
         sidebarToggle.classList.remove('active');
+        setArticleTocCollapsed(false);
         updateSidebarIcon(false);
         return;
       }
@@ -1556,13 +1580,14 @@
       sidebarToggle.classList.remove('active');
       const isCollapsed = getStorageItem('sidebarCollapsed') === 'true';
       sidebar.classList.toggle('collapsed', isCollapsed);
+      setArticleTocCollapsed(isCollapsed);
       updateSidebarIcon(!isCollapsed);
     }
 
     syncSidebarMode();
 
     sidebarToggle.addEventListener('click', () => {
-      if (mobileQuery.matches) {
+      if (sidebarOverlayQuery.matches) {
         const isOpen = !sidebar.classList.contains('active');
         sidebar.classList.toggle('active', isOpen);
         sidebarToggle.classList.toggle('active', isOpen);
@@ -1572,12 +1597,18 @@
 
       sidebarToggle.classList.remove('active');
       const isCollapsed = sidebar.classList.contains('collapsed');
-      sidebar.classList.toggle('collapsed', !isCollapsed);
-      setStorageItem('sidebarCollapsed', !isCollapsed);
+      const nextCollapsed = !isCollapsed;
+      sidebar.classList.toggle('collapsed', nextCollapsed);
+      setArticleTocCollapsed(nextCollapsed);
+      setStorageItem('sidebarCollapsed', nextCollapsed);
       updateSidebarIcon(isCollapsed);
     });
 
     onMediaQueryChange(mobileQuery, () => {
+      syncSidebarMode();
+    });
+
+    onMediaQueryChange(sidebarOverlayQuery, () => {
       syncSidebarMode();
     });
   }
@@ -1911,12 +1942,16 @@
     const languageLabel = CODE_LANGUAGE_LABELS[language] || language.toUpperCase();
     const tabSize = CODE_LANGUAGE_TAB_SIZES[language] || 2;
     const header = document.createElement('div');
+    const windowControls = document.createElement('span');
     const langLabel = document.createElement('span');
 
     block.dataset.codeLang = language;
     block.style.setProperty('--code-tab-size', String(tabSize));
     codeElement.style.tabSize = tabSize;
     header.className = 'code-block-header';
+    windowControls.className = 'code-window-controls';
+    windowControls.setAttribute('aria-hidden', 'true');
+    windowControls.innerHTML = '<span></span><span></span><span></span>';
     langLabel.className = 'code-lang-label';
     langLabel.textContent = languageLabel;
 
@@ -1940,7 +1975,7 @@
       });
     });
 
-    header.append(langLabel, button);
+    header.append(windowControls, langLabel, button);
     block.insertBefore(header, block.firstChild);
   });
 

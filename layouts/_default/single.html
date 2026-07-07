@@ -1,6 +1,7 @@
 {{ define "main" }}
+{{- $showToc := and .TableOfContents (ne .Params.toc false) -}}
 
-<article>
+<article class="article-page{{ if not $showToc }} article-page-no-toc{{ end }}">
   <!-- Article Header -->
   <header class="article-header">
     <h1 class="article-title">{{ .Title }}</h1>
@@ -51,7 +52,7 @@
     </div>
 
     <!-- Table of Contents Sidebar -->
-    {{ if and .TableOfContents (ne .Params.toc false) }}
+    {{ if $showToc }}
     <aside class="sidebar">
       <div class="toc">
         <h3 class="toc-title">目录</h3>
@@ -71,7 +72,7 @@
   {{ end }}
 
   <!-- Sidebar Toggle Button -->
-  {{ if and .TableOfContents (ne .Params.toc false) }}
+  {{ if $showToc }}
   <button class="sidebar-toggle" aria-label="切换侧边栏">
     <svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>
   </button>

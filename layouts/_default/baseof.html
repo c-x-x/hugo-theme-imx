@@ -22,7 +22,7 @@
   {{- $pageTitle = printf "%s | %s" .Title .Site.Title -}}
 {{- end -}}
 <!DOCTYPE html>
-<html lang="{{ .Site.Language.Lang | default "zh-CN" }}" data-theme="light" data-theme-mode="light">
+<html lang="{{ .Site.Language.Lang | default "zh-CN" }}" data-theme="light" data-theme-mode="auto">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,10 +77,9 @@
       try {
         const modes = ['light', 'dark', 'auto'];
         const storedMode = localStorage.getItem('themeMode');
-        const legacyTheme = localStorage.getItem('theme');
         const mode = modes.includes(storedMode)
           ? storedMode
-          : (legacyTheme === 'dark' ? 'dark' : 'light');
+          : 'auto';
         const east8Hour = new Date(Date.now() + 8 * 60 * 60 * 1000).getUTCHours();
         const theme = mode === 'auto'
           ? (east8Hour >= 18 || east8Hour < 8 ? 'dark' : 'light')
@@ -90,8 +89,11 @@
         document.documentElement.dataset.theme = theme;
         updateFavicon(theme);
       } catch (error) {
-        document.documentElement.dataset.theme = 'light';
-        updateFavicon('light');
+        document.documentElement.dataset.themeMode = 'auto';
+        const east8Hour = new Date(Date.now() + 8 * 60 * 60 * 1000).getUTCHours();
+        const theme = east8Hour >= 18 || east8Hour < 8 ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        updateFavicon(theme);
       }
     }());
   </script>
@@ -100,6 +102,48 @@
   {{ $css := resources.Get "css/main.css" }}
   {{ $style := $css | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
+  {{- $imxInter := "static/fonts/imx/inter-variable.woff2" -}}
+  {{- $imxSerifRegular := "static/fonts/imx/noto-serif-sc-regular.ttf" -}}
+  {{- $imxSerifBold := "static/fonts/imx/noto-serif-sc-bold.ttf" -}}
+  {{- if or (fileExists $imxInter) (fileExists $imxSerifRegular) (fileExists $imxSerifBold) }}
+  <style>
+    {{- if fileExists $imxInter }}
+    @font-face {
+      font-family: 'IMX Inter';
+      src: url('{{ "fonts/imx/inter-variable.woff2" | relURL }}') format('woff2-variations');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    {{- end }}
+    {{- if fileExists $imxSerifRegular }}
+    @font-face {
+      font-family: 'IMX Noto Serif SC';
+      src: url('{{ "fonts/imx/noto-serif-sc-regular.ttf" | relURL }}') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    {{- end }}
+    {{- if fileExists $imxSerifBold }}
+    @font-face {
+      font-family: 'IMX Noto Serif SC';
+      src: url('{{ "fonts/imx/noto-serif-sc-bold.ttf" | relURL }}') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    {{- end }}
+    :root {
+      {{- if fileExists $imxInter }}
+      --imx-article-sans: 'IMX Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'PingFang SC', sans-serif;
+      {{- end }}
+      {{- if or (fileExists $imxSerifRegular) (fileExists $imxSerifBold) }}
+      --imx-article-serif: 'IMX Noto Serif SC', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
+      {{- end }}
+    }
+  </style>
+  {{- end }}
 
   <!-- RSS -->
   {{ with .OutputFormats.Get "rss" }}
