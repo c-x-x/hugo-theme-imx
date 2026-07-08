@@ -195,11 +195,9 @@ title = "我的博客"
   categoryId = "DIC_..."
   mapping = "pathname"
   lang = "zh-CN"
-  lightTheme = "light"
-  darkTheme = "dark"
 ```
 
-评论框在首次加载时读取站点当前主题，之后会跟随主题按钮实时切换。`lightTheme` 和 `darkTheme` 也可以填写 Giscus 支持的其他主题名称或自定义主题 URL。
+评论框在首次加载时读取站点当前主题，之后会跟随主题按钮实时切换。默认会使用主题内置的 IMX 浅色/深色评论样式。需要完全自定义时，可以额外填写 `lightTheme` 和 `darkTheme`，值可以是 Giscus 支持的主题名称或自定义主题 CSS URL。
 
 ## 文章 Front Matter
 

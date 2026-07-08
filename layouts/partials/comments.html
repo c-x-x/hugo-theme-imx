@@ -1,8 +1,21 @@
+{{- $defaultGiscusLightTheme := "giscus/imx-light.css" | absURL -}}
+{{- $defaultGiscusDarkTheme := "giscus/imx-dark.css" | absURL -}}
 {{ with .Site.Params.giscus }}
 {{ if .enabled }}
+{{- $lightTheme := .lightTheme | default $defaultGiscusLightTheme -}}
+{{- $darkTheme := .darkTheme | default $defaultGiscusDarkTheme -}}
+{{- if eq $lightTheme "light" -}}
+  {{- $lightTheme = $defaultGiscusLightTheme -}}
+{{- end -}}
+{{- if eq $darkTheme "dark" -}}
+  {{- $darkTheme = $defaultGiscusDarkTheme -}}
+{{- end -}}
 <section class="comments-section" id="comments" aria-labelledby="comments-title">
   <div class="comments-container">
-    <h2 class="section-title comments-title" id="comments-title">评论</h2>
+    <div class="comments-heading">
+      <p class="comments-kicker">GitHub Discussions</p>
+      <h2 class="comments-title" id="comments-title">评论区</h2>
+    </div>
     <div class="comments-wrapper">
       <div
         class="giscus-host"
@@ -12,8 +25,8 @@
         data-category-id="{{ .categoryId }}"
         data-mapping="{{ .mapping | default "pathname" }}"
         data-lang="{{ .lang | default "zh-CN" }}"
-        data-light-theme="{{ .lightTheme | default "light" }}"
-        data-dark-theme="{{ .darkTheme | default "dark" }}">
+        data-light-theme="{{ $lightTheme }}"
+        data-dark-theme="{{ $darkTheme }}">
       </div>
     </div>
   </div>

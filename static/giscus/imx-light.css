@@ -1,0 +1,114 @@
+@import url("https://giscus.app/themes/noborder_light.css");
+
+main {
+  --primary-default: 122, 90, 50;
+  --bg-default: 251, 250, 247;
+  --color-btn-primary-text: #fbfaf7;
+  --color-btn-primary-bg: #24211d;
+  --color-btn-primary-border: #24211d;
+  --color-btn-primary-hover-bg: #3a342d;
+  --color-btn-primary-hover-border: #3a342d;
+  --color-btn-primary-selected-bg: #24211d;
+  --color-accent-fg: #7a5a32;
+  --color-accent-emphasis: #7a5a32;
+  --color-accent-muted: rgba(122, 90, 50, 0.34);
+  --color-accent-subtle: rgba(122, 90, 50, 0.08);
+  --color-fg-default: #24211d;
+  --color-fg-muted: #5f5850;
+  --color-fg-subtle: rgba(95, 88, 80, 0.58);
+  --color-canvas-default: transparent;
+  --color-canvas-overlay: #fbfaf7;
+  --color-canvas-inset: rgba(242, 239, 232, 0.52);
+  --color-canvas-subtle: rgba(242, 239, 232, 0.54);
+  --color-border-default: rgba(75, 64, 52, 0.16);
+  --color-border-muted: rgba(75, 64, 52, 0.1);
+  --color-neutral-muted: rgba(75, 64, 52, 0.1);
+  --color-primer-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.48);
+}
+
+.gsc-main,
+.gsc-comment,
+.gsc-comment-box,
+.gsc-reactions,
+.gsc-timeline {
+  font-family: "IMX Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.gsc-comments-count {
+  color: #24211d;
+  font-size: 1.08rem;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+}
+
+.gsc-header {
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(75, 64, 52, 0.1);
+}
+
+.gsc-comment-box,
+.gsc-comment {
+  border: 1px solid rgba(75, 64, 52, 0.14) !important;
+  border-radius: 20px !important;
+  background: rgba(251, 250, 247, 0.42) !important;
+  box-shadow: none !important;
+}
+
+.gsc-comment-box {
+  overflow: hidden;
+}
+
+.gsc-comment-box-tabs {
+  background: rgba(242, 239, 232, 0.4) !important;
+  border-bottom-color: rgba(75, 64, 52, 0.12) !important;
+}
+
+.gsc-comment-box-tabs button {
+  border-radius: 14px 14px 0 0 !important;
+}
+
+.gsc-comment-box-textarea {
+  border-color: rgba(75, 64, 52, 0.14) !important;
+  border-radius: 16px !important;
+  background: rgba(251, 250, 247, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.gsc-comment-box-textarea:focus,
+.gsc-comment-box-textarea:focus-visible {
+  border-color: rgba(122, 90, 50, 0.34) !important;
+  box-shadow: 0 0 0 4px rgba(122, 90, 50, 0.09) !important;
+}
+
+.gsc-comment-content {
+  border-radius: 18px !important;
+  background: rgba(251, 250, 247, 0.52) !important;
+}
+
+.gsc-reactions {
+  border: 1px solid rgba(75, 64, 52, 0.12) !important;
+  border-radius: 18px !important;
+  background: rgba(251, 250, 247, 0.38) !important;
+}
+
+.btn,
+.gsc-comment-box-buttons button {
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: #24211d !important;
+  border-color: #24211d !important;
+  color: #fbfaf7 !important;
+}
+
+.btn-primary:hover {
+  background: #3a342d !important;
+  border-color: #3a342d !important;
+}
+
+.gsc-social-reaction-summary-item,
+.gsc-upvote-button {
+  border-radius: 999px !important;
+}
