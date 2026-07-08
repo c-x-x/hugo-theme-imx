@@ -1,0 +1,47 @@
+{{ define "main" }}
+<section class="not-found-page" data-not-found-page>
+  <div class="not-found-bg" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="not-found-shell">
+    <div class="not-found-copy">
+      <p class="not-found-kicker">404 / 页面没有抵达</p>
+      <h1>雪花偏离了航线</h1>
+      <p>
+        这个地址没有找到对应页面。你可以回到首页，也可以先玩一局接雪花，把迷路的碎片收回来。
+      </p>
+
+      <div class="not-found-actions">
+        <a class="not-found-action not-found-action-primary" href="{{ "/" | relLangURL }}">返回首页</a>
+        <a class="not-found-action not-found-action-secondary" href="{{ "posts/" | relLangURL }}">浏览文章</a>
+      </div>
+    </div>
+
+    <div class="not-found-game" data-404-game>
+      <div class="not-found-game-header">
+        <div>
+          <span class="not-found-game-eyebrow">Snow Catch</span>
+          <h2>接住雪花</h2>
+        </div>
+        <div class="not-found-game-stats" aria-live="polite">
+          <span>得分 <strong data-404-score>0</strong></span>
+          <span>生命 <strong data-404-lives>3</strong></span>
+        </div>
+      </div>
+
+      <canvas class="not-found-game-canvas" data-404-canvas width="720" height="420" tabindex="0" aria-label="404 接雪花小游戏"></canvas>
+
+      <div class="not-found-game-footer">
+        <p>移动鼠标、触摸拖动，或使用方向键。接住雪花加分，避开黑色断片。</p>
+        <div class="not-found-game-controls">
+          <button type="button" class="not-found-game-button" data-404-start>开始</button>
+          <button type="button" class="not-found-game-button not-found-game-button-ghost" data-404-reset>重来</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
