@@ -4880,6 +4880,8 @@ body:has(.article-page) .sidebar-toggle:hover {
 }
 
 .article-page .toc {
+  position: relative;
+  top: auto;
   width: 100%;
   padding: 0.2rem 0 0.2rem 0.12rem;
   border: 0;
@@ -4887,9 +4889,25 @@ body:has(.article-page) .sidebar-toggle:hover {
   background: transparent;
   box-shadow: none;
   font-size: 0.78rem;
-  max-height: none;
-  overflow: visible;
+  max-height: min(34rem, calc(100svh - 8.8rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.1rem,
+    #000 calc(100% - 1.1rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.1rem,
+    #000 calc(100% - 1.1rem),
+    transparent 100%
+  );
 }
 
 .article-page .toc::-webkit-scrollbar {
@@ -5031,6 +5049,7 @@ body:has(.article-page) .sidebar-toggle:hover {
 
   .article-page .toc {
     padding-top: 0.1rem;
+    max-height: min(31rem, calc(100svh - 8rem));
   }
 
   .article-page .toc > nav > ul > li > a {
@@ -5099,6 +5118,8 @@ body:has(.article-page) .sidebar-toggle:hover {
     max-height: calc(100dvh - 108px - env(safe-area-inset-top));
     overflow-y: auto;
     scrollbar-width: none;
+    -webkit-mask-image: none;
+    mask-image: none;
     padding: 0.9rem;
     border-radius: 18px;
     background: rgba(251, 250, 247, 0.92);

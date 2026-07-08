@@ -2165,35 +2165,137 @@
   const headings = document.querySelectorAll('.article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6');
 
   if (tocLinks.length > 0 && headings.length > 0) {
+    const tocContainer = document.querySelector('.article-page .toc') || document.querySelector('.toc');
     const tocLinkByHash = new Map();
     let activeTocLink = null;
+    let tocUpdateFrame = 0;
+    let tocScrollFrame = 0;
+    const tocReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const observerOptions = {
       rootMargin: '-100px 0px -66%',
       threshold: 0
     };
 
+    function addTocHashVariant(hash, link) {
+      if (!hash) {
+        return;
+      }
+
+      tocLinkByHash.set(hash, link);
+
+      try {
+        tocLinkByHash.set(decodeURIComponent(hash), link);
+      } catch (error) {
+        // Keep the original hash when it is already decoded or malformed.
+      }
+    }
+
+    function getTocLinkForHeading(heading) {
+      const id = heading ? heading.getAttribute('id') : '';
+
+      if (!id) {
+        return null;
+      }
+
+      return tocLinkByHash.get(`#${id}`) || tocLinkByHash.get(`#${encodeURIComponent(id)}`) || null;
+    }
+
+    function followActiveTocLink(link, instant = false) {
+      if (!tocContainer || !link || tocContainer.scrollHeight <= tocContainer.clientHeight + 2) {
+        return;
+      }
+
+      if (tocScrollFrame) {
+        window.cancelAnimationFrame(tocScrollFrame);
+      }
+
+      tocScrollFrame = window.requestAnimationFrame(() => {
+        tocScrollFrame = 0;
+
+        const tocRect = tocContainer.getBoundingClientRect();
+        const linkRect = link.getBoundingClientRect();
+        const linkCenter = linkRect.top - tocRect.top + tocContainer.scrollTop + linkRect.height / 2;
+        const targetTop = linkCenter - tocContainer.clientHeight * 0.42;
+        const maxTop = tocContainer.scrollHeight - tocContainer.clientHeight;
+        const nextTop = Math.min(Math.max(targetTop, 0), maxTop);
+        const currentDelta = Math.abs(tocContainer.scrollTop - nextTop);
+
+        if (currentDelta < 2) {
+          return;
+        }
+
+        tocContainer.scrollTo({
+          top: nextTop,
+          behavior: instant || tocReducedMotionQuery.matches ? 'auto' : 'smooth'
+        });
+      });
+    }
+
+    function setActiveTocLink(nextActiveLink, instant = false) {
+      if (!nextActiveLink || nextActiveLink === activeTocLink) {
+        if (nextActiveLink) {
+          followActiveTocLink(nextActiveLink, instant);
+        }
+
+        return;
+      }
+
+      if (activeTocLink) {
+        activeTocLink.classList.remove('active');
+      }
+
+      nextActiveLink.classList.add('active');
+      activeTocLink = nextActiveLink;
+      followActiveTocLink(nextActiveLink, instant);
+    }
+
+    function updateTocByScroll(instant = false) {
+      tocUpdateFrame = 0;
+
+      const probeY = Math.min(Math.max(window.innerHeight * 0.22, 112), 168);
+      let currentHeading = headings[0];
+
+      headings.forEach(heading => {
+        if (heading.getBoundingClientRect().top <= probeY) {
+          currentHeading = heading;
+        }
+      });
+
+      setActiveTocLink(getTocLinkForHeading(currentHeading), instant);
+    }
+
+    function requestTocUpdate(instant = false) {
+      if (tocUpdateFrame) {
+        return;
+      }
+
+      tocUpdateFrame = window.requestAnimationFrame(() => updateTocByScroll(instant));
+    }
+
     tocLinks.forEach(link => {
       const href = link.getAttribute('href');
 
-      if (href) {
-        tocLinkByHash.set(href, link);
+      if (!href) {
+        return;
+      }
+
+      addTocHashVariant(href, link);
+
+      try {
+        const url = new URL(href, window.location.href);
+
+        if (url.pathname === window.location.pathname) {
+          addTocHashVariant(url.hash, link);
+        }
+      } catch (error) {
+        // Hash-only links are already handled above.
       }
     });
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          const id = entry.target.getAttribute('id');
-          const nextActiveLink = id ? tocLinkByHash.get(`#${id}`) : null;
-
-          if (nextActiveLink && nextActiveLink !== activeTocLink) {
-            if (activeTocLink) {
-              activeTocLink.classList.remove('active');
-            }
-
-            nextActiveLink.classList.add('active');
-            activeTocLink = nextActiveLink;
-          }
+          setActiveTocLink(getTocLinkForHeading(entry.target));
         }
       });
     }, observerOptions);
@@ -2203,6 +2305,10 @@
         observer.observe(heading);
       }
     });
+
+    updateTocByScroll(true);
+    window.addEventListener('scroll', () => requestTocUpdate(false), { passive: true });
+    window.addEventListener('resize', () => requestTocUpdate(true));
   }
 
   // ============================================
