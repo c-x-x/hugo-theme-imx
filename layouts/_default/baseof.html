@@ -12,7 +12,7 @@
 {{- $faviconDark := $faviconDarkParam | default (cond (eq $favicon $defaultFaviconLight) $defaultFaviconDark $favicon) -}}
 {{- $faviconLightIsDefault := eq $faviconLight $defaultFaviconLight -}}
 {{- $faviconDarkIsDefault := eq $faviconDark $defaultFaviconDark -}}
-{{- $faviconAssetVersion := "20260704-snowflake-4" -}}
+{{- $faviconAssetVersion := "20260709-snowflake-refined-1" -}}
 {{- $faviconLightBaseURL := partial "resolve-url.html" (dict "url" $faviconLight) -}}
 {{- $faviconDarkBaseURL := partial "resolve-url.html" (dict "url" $faviconDark) -}}
 {{- $faviconLightURL := cond $faviconLightIsDefault (printf "%s?v=%s" $faviconLightBaseURL $faviconAssetVersion) $faviconLightBaseURL -}}

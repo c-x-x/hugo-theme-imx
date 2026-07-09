@@ -774,10 +774,11 @@
     const hero = document.querySelector('[data-home-entry]');
     const featured = document.querySelector('#featured-posts');
     const navbar = document.querySelector('.navbar');
+    const navbarContainer = navbar ? navbar.querySelector('.navbar-container') : null;
     const navbarMenu = navbar ? navbar.querySelector('.navbar-menu') : null;
     const navbarBrand = navbar ? navbar.querySelector('.navbar-brand') : null;
     const navbarActions = navbar ? navbar.querySelector('.navbar-actions') : null;
-    if (!hero || !featured || !navbar) {
+    if (!hero || !featured || !navbar || !navbarContainer) {
       return;
     }
 
@@ -793,9 +794,12 @@
     let lastDockAttraction = -1;
     let lastDockBrandShift = '0px';
     let lastDockActionsShift = '0px';
+    let lastDockShellLeft = '50%';
+    let lastDockShellRight = '50%';
+    let lastDockVisualKey = '';
     let dockAttracting = false;
-    const dockMergeEnter = 0.86;
-    const dockMergeExit = 0.74;
+    const dockMergeEnter = 0.88;
+    const dockMergeExit = 0.8;
     const edgeSnapRange = 0.2;
 
     function getPageTop(element) {
@@ -808,14 +812,17 @@
       const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : null;
       const brandRect = navbarBrand ? navbarBrand.getBoundingClientRect() : null;
       const actionsRect = navbarActions ? navbarActions.getBoundingClientRect() : null;
+      const containerRect = navbarContainer.getBoundingClientRect();
       const currentBrandShift = parseFloat(lastDockBrandShift) || 0;
       const currentActionsShift = parseFloat(lastDockActionsShift) || 0;
       const visualGap = Math.max(10, Math.min(18, window.innerWidth * 0.014));
       const fallbackDistance = menuRect
         ? Math.min(300, Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58))
         : 0;
+      const brandBaseLeft = brandRect ? brandRect.left - currentBrandShift : 0;
       const brandBaseRight = brandRect ? brandRect.right - currentBrandShift : 0;
       const actionsBaseLeft = actionsRect ? actionsRect.left - currentActionsShift : window.innerWidth;
+      const actionsBaseRight = actionsRect ? actionsRect.right - currentActionsShift : window.innerWidth;
       const menuLeft = menuRect ? menuRect.left : 0;
       const menuRight = menuRect ? menuRect.right : window.innerWidth;
       const brandDistance = brandRect && menuRect
@@ -832,9 +839,17 @@
       metrics = {
         actionsDistance,
         actionsLead,
+        actionsBaseLeft,
+        actionsBaseRight,
+        brandBaseLeft,
+        brandBaseRight,
+        containerLeft: containerRect.left,
+        containerRight: containerRect.right,
         brandDistance,
         featuredTop,
-        heroTop
+        heroTop,
+        menuLeft,
+        menuRight
       };
       metricsDirty = false;
 
@@ -855,12 +870,16 @@
       return point * point * (3 - 2 * point);
     }
 
+    function lerp(start, end, amount) {
+      return start + (end - start) * amount;
+    }
+
     function getDockAttraction(progress) {
       if (mobileQuery.matches || reduceMotionQuery.matches) {
         return 0;
       }
 
-      return smoothStep(0.08, 0.86, progress);
+      return smoothStep(0.06, 0.78, progress);
     }
 
     function resetDockAttraction() {
@@ -868,12 +887,30 @@
         lastDockAttraction === 0 &&
         lastDockBrandShift === '0px' &&
         lastDockActionsShift === '0px' &&
+        lastDockShellLeft === '50%' &&
+        lastDockShellRight === '50%' &&
+        lastDockVisualKey === '0.000|0.000|1.0000|0.8800|1.0000|0.800|0.140|0.110|0.280|1.000' &&
         !dockAttracting
       ) {
         return;
       }
 
       lastDockAttraction = 0;
+      lastDockVisualKey = '0.000|0.000|1.0000|0.8800|1.0000|0.800|0.140|0.110|0.280|1.000';
+      navbar.style.setProperty('--home-dock-attraction', '0.000');
+      navbar.style.setProperty('--home-dock-shell-opacity', '0.000');
+      navbar.style.setProperty('--home-dock-shell-scale-x', '1.0000');
+      navbar.style.setProperty('--home-dock-shell-scale-y', '0.8800');
+      navbar.style.setProperty('--home-dock-part-scale', '1.0000');
+      navbar.style.setProperty('--home-dock-part-bg-alpha', '0.800');
+      navbar.style.setProperty('--home-dock-part-border-alpha', '0.140');
+      navbar.style.setProperty('--home-dock-part-shadow-alpha', '0.110');
+      navbar.style.setProperty('--home-dock-part-dark-shadow-alpha', '0.280');
+      navbar.style.setProperty('--home-dock-part-overlay-alpha', '1.000');
+      lastDockShellLeft = '50%';
+      lastDockShellRight = '50%';
+      navbar.style.setProperty('--home-dock-shell-left', '50%');
+      navbar.style.setProperty('--home-dock-shell-right', '50%');
 
       if (lastDockBrandShift !== '0px') {
         lastDockBrandShift = '0px';
@@ -891,8 +928,50 @@
       }
     }
 
+    function writeDockVisualState(attraction) {
+      const partPresence = 1 - attraction;
+      const shellOpacity = attraction <= 0.002 ? 0 : Math.min(1, 0.08 + attraction * 0.92);
+      const shellScaleY = 0.88 + attraction * 0.12;
+      const partScale = 1;
+      const partBgAlpha = 0.8 * partPresence;
+      const partBorderAlpha = 0.14 * partPresence;
+      const partShadowAlpha = 0.11 * partPresence;
+      const partDarkShadowAlpha = 0.28 * partPresence;
+      const partOverlayAlpha = partPresence;
+      const key = [
+        attraction.toFixed(3),
+        shellOpacity.toFixed(3),
+        '1.0000',
+        shellScaleY.toFixed(4),
+        partScale.toFixed(4),
+        partBgAlpha.toFixed(3),
+        partBorderAlpha.toFixed(3),
+        partShadowAlpha.toFixed(3),
+        partDarkShadowAlpha.toFixed(3),
+        partOverlayAlpha.toFixed(3)
+      ].join('|');
+
+      if (key === lastDockVisualKey) {
+        return;
+      }
+
+      lastDockVisualKey = key;
+      navbar.style.setProperty('--home-dock-attraction', attraction.toFixed(3));
+      navbar.style.setProperty('--home-dock-shell-opacity', shellOpacity.toFixed(3));
+      navbar.style.setProperty('--home-dock-shell-scale-x', '1.0000');
+      navbar.style.setProperty('--home-dock-shell-scale-y', shellScaleY.toFixed(4));
+      navbar.style.setProperty('--home-dock-part-scale', partScale.toFixed(4));
+      navbar.style.setProperty('--home-dock-part-bg-alpha', partBgAlpha.toFixed(3));
+      navbar.style.setProperty('--home-dock-part-border-alpha', partBorderAlpha.toFixed(3));
+      navbar.style.setProperty('--home-dock-part-shadow-alpha', partShadowAlpha.toFixed(3));
+      navbar.style.setProperty('--home-dock-part-dark-shadow-alpha', partDarkShadowAlpha.toFixed(3));
+      navbar.style.setProperty('--home-dock-part-overlay-alpha', partOverlayAlpha.toFixed(3));
+    }
+
     function writeDockAttraction(attraction, currentMetrics) {
       const normalizedAttraction = Math.round(attraction * 1000) / 1000;
+
+      writeDockVisualState(normalizedAttraction);
 
       if (normalizedAttraction === lastDockAttraction) {
         return;
@@ -904,6 +983,18 @@
       const nextDockAttracting = !merged && normalizedAttraction > 0.002 && normalizedAttraction < 0.998;
       const brandShift = `${(currentMetrics.brandDistance * normalizedAttraction).toFixed(2)}px`;
       const actionsShift = `${(-currentMetrics.actionsDistance * actionsAttraction).toFixed(2)}px`;
+      const shellPad = 12;
+      const shellBlend = smoothStep(0.08, 0.82, normalizedAttraction);
+      const brandLeft = currentMetrics.brandBaseLeft + currentMetrics.brandDistance * normalizedAttraction;
+      const brandRight = currentMetrics.brandBaseRight + currentMetrics.brandDistance * normalizedAttraction;
+      const actionsLeft = currentMetrics.actionsBaseLeft - currentMetrics.actionsDistance * actionsAttraction;
+      const actionsRight = currentMetrics.actionsBaseRight - currentMetrics.actionsDistance * actionsAttraction;
+      const unionLeft = Math.min(brandLeft, currentMetrics.menuLeft, actionsLeft) - shellPad;
+      const unionRight = Math.max(brandRight, currentMetrics.menuRight, actionsRight) + shellPad;
+      const menuShellLeft = currentMetrics.menuLeft - shellPad;
+      const menuShellRight = currentMetrics.menuRight + shellPad;
+      const shellLeft = `${Math.max(0, lerp(menuShellLeft, unionLeft, shellBlend) - currentMetrics.containerLeft).toFixed(2)}px`;
+      const shellRight = `${Math.max(0, currentMetrics.containerRight - lerp(menuShellRight, unionRight, shellBlend)).toFixed(2)}px`;
 
       if (brandShift !== lastDockBrandShift) {
         lastDockBrandShift = brandShift;
@@ -913,6 +1004,16 @@
       if (actionsShift !== lastDockActionsShift) {
         lastDockActionsShift = actionsShift;
         navbar.style.setProperty('--home-dock-actions-shift', actionsShift);
+      }
+
+      if (shellLeft !== lastDockShellLeft) {
+        lastDockShellLeft = shellLeft;
+        navbar.style.setProperty('--home-dock-shell-left', shellLeft);
+      }
+
+      if (shellRight !== lastDockShellRight) {
+        lastDockShellRight = shellRight;
+        navbar.style.setProperty('--home-dock-shell-right', shellRight);
       }
 
       if (nextDockAttracting !== dockAttracting) {

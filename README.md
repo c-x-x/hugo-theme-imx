@@ -6,7 +6,9 @@
 
 IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它包含文章列表、分类与标签、站内搜索、文章目录、代码复制和 Giscus 评论，适合技术笔记和长期写作。
 
-![最新首页预览](images/preview-home.png)
+## 界面预览
+
+![首页预览](images/preview-home.png)
 
 ## 主要功能
 
@@ -24,9 +26,9 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 分类页和标签页：
 
-![最新分类页预览](images/preview-categories.png)
+![分类页预览](images/preview-categories.png)
 
-![最新标签页预览](images/preview-tags.png)
+![标签页预览](images/preview-tags.png)
 
 ## 环境要求
 
@@ -54,15 +56,15 @@ hugo mod init github.com/your-name/your-site
     path = "github.com/c-x-x/hugo-theme-imx"
 ```
 
-安装当前正式版并启动本地预览：
+安装最新正式版并启动本地预览：
 
 ```bash
-hugo mod get github.com/c-x-x/hugo-theme-imx@v1.0.1
+hugo mod get github.com/c-x-x/hugo-theme-imx@latest
 hugo mod tidy
 hugo server
 ```
 
-是不是发现和展示图不一样，别担心，这是我保留的最初始的经典版本，如果你喜欢可以使用这个，反之可以更新
+如果需要固定到某个版本，把 `@latest` 改成对应的 Release 版本号即可，例如 `@v1.0.0`。
 
 更新主题：
 
@@ -72,6 +74,27 @@ hugo mod tidy
 ```
 
 主题不使用 `theme = "..."` 配置，也不需要复制到站点的 `themes` 目录。
+
+## 体验示例站
+
+如果只是想先看看主题效果，不需要新建 Hugo 站点，可以直接下载 Release 源码包运行内置示例站。
+
+1. 打开 [Releases](https://github.com/c-x-x/hugo-theme-imx/releases)，下载最新版本的 `Source code (zip)` 或 `Source code (tar.gz)`。
+2. 解压后进入主题目录：
+
+```bash
+cd hugo-theme-imx-*
+```
+
+3. 启动示例站：
+
+```bash
+hugo server --source exampleSite
+```
+
+4. 浏览器打开终端中显示的本地地址，通常是 `http://localhost:1313/`。
+
+示例站的 `exampleSite/go.mod` 已经用本地 `replace` 指向当前主题源码，所以下载 Release 源码包后可以直接预览，不需要把主题复制到 `themes` 目录，也不需要先发布到自己的仓库。
 
 ## 最小配置
 

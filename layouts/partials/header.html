@@ -11,7 +11,7 @@
     {{- $logoLightIsDefault := eq $logoLight $defaultLogoLight -}}
     {{- $logoDarkIsDefault := eq $logoDark $defaultLogoDark -}}
     {{- $usesDefaultLogo := and $logoLightIsDefault $logoDarkIsDefault -}}
-    {{- $logoAssetVersion := "20260704-snowflake-4" -}}
+    {{- $logoAssetVersion := "20260709-snowflake-refined-1" -}}
     {{- $logoLightBaseURL := partial "resolve-url.html" (dict "url" $logoLight) -}}
     {{- $logoDarkBaseURL := partial "resolve-url.html" (dict "url" $logoDark) -}}
     {{- $logoLightURL := cond $logoLightIsDefault (printf "%s?v=%s" $logoLightBaseURL $logoAssetVersion) $logoLightBaseURL -}}
@@ -22,48 +22,48 @@
         <img src="{{ $logoLightURL }}" data-logo-light="{{ $logoLightURL }}" data-logo-dark="{{ $logoDarkURL }}" alt="" class="navbar-logo" width="40" height="40">
         {{ if $usesDefaultLogo }}
         <svg class="navbar-logo-ink" viewBox="0 0 64 64" focusable="false">
-          <g transform="translate(32 32)" fill="none" stroke="currentColor" stroke-width="3.05" stroke-linecap="round" stroke-linejoin="round">
+          <g transform="translate(32 32)" fill="none" stroke="currentColor" stroke-width="2.85" stroke-linecap="round" stroke-linejoin="round">
             <g>
-              <path pathLength="1" style="--i: 0" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 6" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 7" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 18" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 19" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 0" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 6" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 7" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 18" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 19" d="M0-18.8l6.7-5.1"/>
             </g>
             <g transform="rotate(60)">
-              <path pathLength="1" style="--i: 1" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 8" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 9" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 20" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 21" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 1" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 8" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 9" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 20" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 21" d="M0-18.8l6.7-5.1"/>
             </g>
             <g transform="rotate(120)">
-              <path pathLength="1" style="--i: 2" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 10" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 11" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 22" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 23" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 2" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 10" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 11" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 22" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 23" d="M0-18.8l6.7-5.1"/>
             </g>
             <g transform="rotate(180)">
-              <path pathLength="1" style="--i: 3" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 12" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 13" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 24" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 25" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 3" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 12" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 13" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 24" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 25" d="M0-18.8l6.7-5.1"/>
             </g>
             <g transform="rotate(240)">
-              <path pathLength="1" style="--i: 4" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 14" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 15" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 26" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 27" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 4" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 14" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 15" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 26" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 27" d="M0-18.8l6.7-5.1"/>
             </g>
             <g transform="rotate(300)">
-              <path pathLength="1" style="--i: 5" d="M0-5.9v-24.1"/>
-              <path pathLength="1" style="--i: 16" d="M0-13.2l-7.7-6.2"/>
-              <path pathLength="1" style="--i: 17" d="M0-13.2l7.7-6.2"/>
-              <path pathLength="1" style="--i: 28" d="M0-21.3l-9.3-7.1"/>
-              <path pathLength="1" style="--i: 29" d="M0-21.3l9.3-7.1"/>
+              <path pathLength="1" style="--i: 5" d="M0-5.5v-25"/>
+              <path pathLength="1" style="--i: 16" d="M0-11.2l-6.1-4.8"/>
+              <path pathLength="1" style="--i: 17" d="M0-11.2l6.1-4.8"/>
+              <path pathLength="1" style="--i: 28" d="M0-18.8l-6.7-5.1"/>
+              <path pathLength="1" style="--i: 29" d="M0-18.8l6.7-5.1"/>
             </g>
             <circle class="navbar-logo-ink-dot" cx="0" cy="0" r="5.1"/>
           </g>
