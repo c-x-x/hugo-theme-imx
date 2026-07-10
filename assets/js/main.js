@@ -770,7 +770,7 @@
     });
   }
 
-  function initHomeMagneticDock() {
+  function initSharedDock() {
     const hero = document.querySelector('[data-home-entry]');
     const featured = document.querySelector('#featured-posts');
     const navbar = document.querySelector('.navbar');
@@ -779,7 +779,15 @@
     const navbarBrand = navbar ? navbar.querySelector('.navbar-brand') : null;
     const navbarActions = navbar ? navbar.querySelector('.navbar-actions') : null;
     const navbarDockShell = navbar ? navbar.querySelector('.navbar-dock-shell') : null;
-    if (!hero || !featured || !navbar || !navbarContainer || !navbarDockShell) {
+    const hasHomeDockProgress = Boolean(hero && featured);
+    if (
+      !navbar ||
+      !navbarContainer ||
+      !navbarMenu ||
+      !navbarBrand ||
+      !navbarActions ||
+      !navbarDockShell
+    ) {
       return;
     }
 
@@ -809,8 +817,8 @@
     }
 
     function refreshMetrics() {
-      const heroTop = getPageTop(hero);
-      const featuredTop = getPageTop(featured);
+      const heroTop = hasHomeDockProgress ? getPageTop(hero) : 0;
+      const featuredTop = hasHomeDockProgress ? getPageTop(featured) : window.innerHeight;
       const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : null;
       const brandRect = navbarBrand ? navbarBrand.getBoundingClientRect() : null;
       const actionsRect = navbarActions ? navbarActions.getBoundingClientRect() : null;
@@ -1050,7 +1058,9 @@
 
       merged = nextMerged;
       navbar.classList.remove('is-dock-flipping', 'is-home-dock-fusing');
+      navbar.classList.toggle('is-dock-merged', merged);
       navbar.classList.toggle('is-home-dock-merged', merged);
+      document.body.classList.toggle('imx-dock-merged', merged);
       document.body.classList.toggle('imx-home-dock-merged', merged);
 
       if (merged && dockAttracting) {
@@ -1182,8 +1192,10 @@
       setDockAttraction(progress, currentMetrics);
       mergedChanged = setMergedState(nextMerged);
 
-      const snapMetrics = mergedChanged ? getMetrics() : currentMetrics;
-      scheduleEdgeSnap(scrollY, snapMetrics, progress);
+      if (hasHomeDockProgress) {
+        const snapMetrics = mergedChanged ? getMetrics() : currentMetrics;
+        scheduleEdgeSnap(scrollY, snapMetrics, progress);
+      }
     }
 
     function requestSync() {
@@ -2124,7 +2136,7 @@
   applyThemeMode(getThemeMode(), { persist: false });
   initNavbarClock();
   initHomeEntryHero();
-  initHomeMagneticDock();
+  initSharedDock();
   initArticleMarkdownLayout();
   initNotFoundGame();
 
