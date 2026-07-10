@@ -1,0 +1,23 @@
+{{- $url := .url | default "" -}}
+{{- $absolute := .absolute | default false -}}
+{{- $defaults := .defaults | default (slice) -}}
+{{- with .default -}}
+  {{- $defaults = $defaults | append . -}}
+{{- end -}}
+{{- $shouldVersion := false -}}
+{{- range $defaults -}}
+  {{- if eq $url . -}}
+    {{- $shouldVersion = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $resolved := partial "resolve-url.html" (dict "url" $url "absolute" $absolute) -}}
+{{- if $shouldVersion -}}
+  {{- $version := partial "theme-asset-version.html" . | strings.TrimSpace -}}
+  {{- if in $resolved "?" -}}
+    {{- printf "%s&v=%s" $resolved $version -}}
+  {{- else -}}
+    {{- printf "%s?v=%s" $resolved $version -}}
+  {{- end -}}
+{{- else -}}
+  {{- $resolved -}}
+{{- end -}}

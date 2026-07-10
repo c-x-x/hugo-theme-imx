@@ -1,7 +1,11 @@
 {{- $description := .Description | default .Site.Params.description | default "一个 Hugo 博客" -}}
 {{- $keywords := .Keywords | default .Site.Params.keywords -}}
-{{- $defaultOGImage := .Site.Params.defaultOGImage | default "/images/imx/default-og.jpg" -}}
+{{- $defaultCoverImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultOGImagePath := "/images/imx/default-og.jpg" -}}
+{{- $defaultOGImage := .Site.Params.defaultOGImage | default $defaultOGImagePath -}}
 {{- $pageImage := .Params.image | default $defaultOGImage -}}
+{{- $defaultPageImages := slice $defaultCoverImagePath $defaultOGImagePath -}}
+{{- $pageImageURL := partial "theme-asset-url.html" (dict "url" $pageImage "defaults" $defaultPageImages "absolute" true) -}}
 {{- $defaultFaviconLight := "/images/imx/favicon.svg" -}}
 {{- $defaultFaviconDark := "/images/imx/favicon-dark.svg" -}}
 {{- $faviconParam := .Site.Params.favicon -}}
@@ -10,13 +14,12 @@
 {{- $faviconDarkParam := or .Site.Params.faviconDark .Site.Params.favicondark -}}
 {{- $faviconLight := $faviconLightParam | default $favicon -}}
 {{- $faviconDark := $faviconDarkParam | default (cond (eq $favicon $defaultFaviconLight) $defaultFaviconDark $favicon) -}}
-{{- $faviconLightIsDefault := eq $faviconLight $defaultFaviconLight -}}
-{{- $faviconDarkIsDefault := eq $faviconDark $defaultFaviconDark -}}
-{{- $faviconAssetVersion := "20260709-snowflake-refined-1" -}}
-{{- $faviconLightBaseURL := partial "resolve-url.html" (dict "url" $faviconLight) -}}
-{{- $faviconDarkBaseURL := partial "resolve-url.html" (dict "url" $faviconDark) -}}
-{{- $faviconLightURL := cond $faviconLightIsDefault (printf "%s?v=%s" $faviconLightBaseURL $faviconAssetVersion) $faviconLightBaseURL -}}
-{{- $faviconDarkURL := cond $faviconDarkIsDefault (printf "%s?v=%s" $faviconDarkBaseURL $faviconAssetVersion) $faviconDarkBaseURL -}}
+{{- $faviconDefaults := slice $defaultFaviconLight $defaultFaviconDark -}}
+{{- $faviconLightURL := partial "theme-asset-url.html" (dict "url" $faviconLight "defaults" $faviconDefaults) -}}
+{{- $faviconDarkURL := partial "theme-asset-url.html" (dict "url" $faviconDark "defaults" $faviconDefaults) -}}
+{{- $defaultAvatarPath := "/images/imx/default-avatar.jpg" -}}
+{{- $appleTouchIcon := .Site.Params.avatar | default $defaultAvatarPath -}}
+{{- $appleTouchIconURL := partial "theme-asset-url.html" (dict "url" $appleTouchIcon "default" $defaultAvatarPath) -}}
 {{- $pageTitle := .Site.Title -}}
 {{- if not .IsHome -}}
   {{- $pageTitle = printf "%s | %s" .Title .Site.Title -}}
@@ -43,17 +46,17 @@
   <meta property="og:title" content="{{ $pageTitle }}">
   <meta property="og:description" content="{{ $description }}">
   <meta property="og:site_name" content="{{ .Site.Title }}">
-  <meta property="og:image" content="{{ partial "resolve-url.html" (dict "url" $pageImage "absolute" true) }}">
+  <meta property="og:image" content="{{ $pageImageURL }}">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ $pageTitle }}">
   <meta name="twitter:description" content="{{ $description }}">
-  <meta name="twitter:image" content="{{ partial "resolve-url.html" (dict "url" $pageImage "absolute" true) }}">
+  <meta name="twitter:image" content="{{ $pageImageURL }}">
 
   <!-- Favicon -->
   <link rel="icon" href="{{ $faviconLightURL }}" data-imx-favicon>
-  <link rel="apple-touch-icon" href="{{ partial "resolve-url.html" (dict "url" (.Site.Params.avatar | default "/images/imx/default-avatar.jpg")) }}">
+  <link rel="apple-touch-icon" href="{{ $appleTouchIconURL }}">
   <script>
     window.__IMX_FAVICONS__ = {
       light: {{ $faviconLightURL | jsonify | safeJS }},

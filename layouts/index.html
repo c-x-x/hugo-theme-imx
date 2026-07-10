@@ -1,6 +1,9 @@
 {{ define "main" }}
-{{- $avatar := .Site.Params.avatar | default "/images/imx/default-avatar.jpg" -}}
-{{- $defaultImage := .Site.Params.defaultImage | default "/images/imx/default-cover.jpg" -}}
+{{- $defaultAvatarPath := "/images/imx/default-avatar.jpg" -}}
+{{- $avatar := .Site.Params.avatar | default $defaultAvatarPath -}}
+{{- $avatarURL := partial "theme-asset-url.html" (dict "url" $avatar "default" $defaultAvatarPath) -}}
+{{- $defaultImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultImage := .Site.Params.defaultImage | default $defaultImagePath -}}
 {{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
 {{- $posts := where .Site.RegularPages "Type" "in" $mainSections -}}
 
@@ -27,7 +30,7 @@
 
     <div class="hero-brand-row">
       <h1 class="hero-title">{{ .Site.Title }}</h1>
-      <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="hero-avatar" width="96" height="96">
+      <img src="{{ $avatarURL }}" alt="{{ .Site.Title }}" class="hero-avatar" width="96" height="96">
     </div>
     <div class="hero-actions">
       <a href="#featured-posts" class="hero-action hero-action-primary">开始阅读</a>
@@ -51,7 +54,8 @@
       {{ range first 3 $posts }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
-        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+        {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}
+        <img src="{{ $imageURL }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
 
         <div class="post-card-content">
           <div class="post-card-meta">
@@ -111,7 +115,8 @@
       {{ range first 6 (after 3 $posts) }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
-        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+        {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}
+        <img src="{{ $imageURL }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
 
         <div class="post-card-content">
           <div class="post-card-meta">

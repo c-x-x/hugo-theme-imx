@@ -1,5 +1,6 @@
 <nav class="navbar">
   <div class="navbar-container">
+    <span class="navbar-dock-shell" aria-hidden="true"></span>
     {{- $defaultLogoLight := "/images/imx/logo.svg" -}}
     {{- $defaultLogoDark := "/images/imx/logo-dark.svg" -}}
     {{- $logoParam := .Site.Params.logo -}}
@@ -11,11 +12,9 @@
     {{- $logoLightIsDefault := eq $logoLight $defaultLogoLight -}}
     {{- $logoDarkIsDefault := eq $logoDark $defaultLogoDark -}}
     {{- $usesDefaultLogo := and $logoLightIsDefault $logoDarkIsDefault -}}
-    {{- $logoAssetVersion := "20260709-snowflake-refined-1" -}}
-    {{- $logoLightBaseURL := partial "resolve-url.html" (dict "url" $logoLight) -}}
-    {{- $logoDarkBaseURL := partial "resolve-url.html" (dict "url" $logoDark) -}}
-    {{- $logoLightURL := cond $logoLightIsDefault (printf "%s?v=%s" $logoLightBaseURL $logoAssetVersion) $logoLightBaseURL -}}
-    {{- $logoDarkURL := cond $logoDarkIsDefault (printf "%s?v=%s" $logoDarkBaseURL $logoAssetVersion) $logoDarkBaseURL -}}
+    {{- $logoDefaults := slice $defaultLogoLight $defaultLogoDark -}}
+    {{- $logoLightURL := partial "theme-asset-url.html" (dict "url" $logoLight "defaults" $logoDefaults) -}}
+    {{- $logoDarkURL := partial "theme-asset-url.html" (dict "url" $logoDark "defaults" $logoDefaults) -}}
     {{- $homeURL := .Site.Home.RelPermalink -}}
     <a href="{{ $homeURL }}" class="navbar-brand{{ if $usesDefaultLogo }} navbar-brand-default-logo{{ end }}" aria-label="{{ .Site.Title }} 首页">
       <span class="navbar-logo-wrap" aria-hidden="true">

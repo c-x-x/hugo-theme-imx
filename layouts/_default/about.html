@@ -6,8 +6,10 @@
 
     <div class="article-content about-content">
       <div class="about-profile">
-        {{- $avatar := .Site.Params.avatar | default "/images/imx/default-avatar.jpg" -}}
-        <img src="{{ partial "resolve-url.html" (dict "url" $avatar) }}" alt="{{ .Site.Title }}" class="about-avatar" width="150" height="150">
+        {{- $defaultAvatarPath := "/images/imx/default-avatar.jpg" -}}
+        {{- $avatar := .Site.Params.avatar | default $defaultAvatarPath -}}
+        {{- $avatarURL := partial "theme-asset-url.html" (dict "url" $avatar "default" $defaultAvatarPath) -}}
+        <img src="{{ $avatarURL }}" alt="{{ .Site.Title }}" class="about-avatar" width="150" height="150">
         <h2>{{ .Site.Title }}</h2>
         <p class="about-subtitle">{{ .Site.Params.subtitle }}</p>
       </div>

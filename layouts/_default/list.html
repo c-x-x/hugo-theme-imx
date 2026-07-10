@@ -1,5 +1,6 @@
 {{ define "main" }}
-{{- $defaultImage := .Site.Params.defaultImage | default "/images/imx/default-cover.jpg" -}}
+{{- $defaultImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultImage := .Site.Params.defaultImage | default $defaultImagePath -}}
 
 <section class="featured-section">
   <div class="container">
@@ -17,7 +18,8 @@
       {{ range .Pages }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
-        <img src="{{ partial "resolve-url.html" (dict "url" $image) }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
+        {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}
+        <img src="{{ $imageURL }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
 
         <div class="post-card-content">
           <div class="post-card-meta">
