@@ -778,6 +778,7 @@
     const navbarMenu = navbar ? navbar.querySelector('.navbar-menu') : null;
     const navbarBrand = navbar ? navbar.querySelector('.navbar-brand') : null;
     const navbarActions = navbar ? navbar.querySelector('.navbar-actions') : null;
+    const navbarThemeToggle = navbar ? navbar.querySelector('.theme-toggle') : null;
     const navbarDockShell = navbar ? navbar.querySelector('.navbar-dock-shell') : null;
     const hasHomeDockProgress = Boolean(hero && featured);
     if (
@@ -786,6 +787,7 @@
       !navbarMenu ||
       !navbarBrand ||
       !navbarActions ||
+      !navbarThemeToggle ||
       !navbarDockShell
     ) {
       return;
@@ -803,6 +805,7 @@
     let lastDockAttraction = -1;
     let lastDockBrandShift = '0px';
     let lastDockActionsShift = '0px';
+    let lastDockGroupShift = '0px';
     let lastDockShellScaleX = '1.0000';
     let lastDockShellWidth = '0px';
     let lastDockShellX = '0px';
@@ -821,28 +824,40 @@
       const featuredTop = hasHomeDockProgress ? getPageTop(featured) : window.innerHeight;
       const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : null;
       const brandRect = navbarBrand ? navbarBrand.getBoundingClientRect() : null;
-      const actionsRect = navbarActions ? navbarActions.getBoundingClientRect() : null;
+      const themeToggleRect = navbarThemeToggle ? navbarThemeToggle.getBoundingClientRect() : null;
       const containerRect = navbarContainer.getBoundingClientRect();
       const currentBrandShift = parseFloat(lastDockBrandShift) || 0;
       const currentActionsShift = parseFloat(lastDockActionsShift) || 0;
+      const currentGroupShift = parseFloat(lastDockGroupShift) || 0;
       const visualGap = Math.max(10, Math.min(18, window.innerWidth * 0.014));
+      const actionsGap = Math.max(4, Math.min(7, window.innerWidth * 0.0045));
       const fallbackDistance = menuRect
-        ? Math.min(300, Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58))
+        ? Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58)
         : 0;
-      const brandBaseLeft = brandRect ? brandRect.left - currentBrandShift : 0;
-      const brandBaseRight = brandRect ? brandRect.right - currentBrandShift : 0;
-      const actionsBaseLeft = actionsRect ? actionsRect.left - currentActionsShift : window.innerWidth;
-      const actionsBaseRight = actionsRect ? actionsRect.right - currentActionsShift : window.innerWidth;
-      const menuLeft = menuRect ? menuRect.left : 0;
-      const menuRight = menuRect ? menuRect.right : window.innerWidth;
+      const containerBaseLeft = containerRect.left - currentGroupShift;
+      const containerBaseRight = containerRect.right - currentGroupShift;
+      const brandBaseLeft = brandRect
+        ? brandRect.left - currentBrandShift - currentGroupShift
+        : 0;
+      const brandBaseRight = brandRect
+        ? brandRect.right - currentBrandShift - currentGroupShift
+        : 0;
+      const actionsBaseLeft = themeToggleRect
+        ? themeToggleRect.left - currentActionsShift - currentGroupShift
+        : window.innerWidth;
+      const actionsBaseRight = themeToggleRect
+        ? themeToggleRect.right - currentActionsShift - currentGroupShift
+        : window.innerWidth;
+      const menuLeft = menuRect ? menuRect.left - currentGroupShift : 0;
+      const menuRight = menuRect ? menuRect.right - currentGroupShift : window.innerWidth;
       const brandDistance = brandRect && menuRect
-        ? Math.min(360, Math.max(0, menuLeft - brandBaseRight - visualGap))
+        ? Math.max(0, menuLeft - brandBaseRight - visualGap)
         : fallbackDistance;
-      const actionsDistance = actionsRect && menuRect
-        ? Math.min(360, Math.max(0, actionsBaseLeft - menuRight - visualGap))
+      const actionsDistance = themeToggleRect && menuRect
+        ? Math.max(0, actionsBaseLeft - menuRight - actionsGap)
         : fallbackDistance;
-      const widthRatio = brandRect && actionsRect && actionsRect.width > 0
-        ? brandRect.width / actionsRect.width
+      const widthRatio = brandRect && themeToggleRect && themeToggleRect.width > 0
+        ? brandRect.width / themeToggleRect.width
         : 1;
       const actionsLead = Math.min(1.62, Math.max(1.12, 1 + (widthRatio - 1) * 0.18));
       const shellPad = 10;
@@ -851,15 +866,17 @@
       const finalActionsLeft = actionsBaseLeft - actionsDistance;
       const finalActionsRight = actionsBaseRight - actionsDistance;
       const shellFinalLeft = Math.max(
-        containerRect.left,
+        containerBaseLeft,
         Math.min(finalBrandLeft, menuLeft, finalActionsLeft) - shellPad
       );
       const shellFinalRight = Math.min(
-        containerRect.right,
+        containerBaseRight,
         Math.max(finalBrandRight, menuRight, finalActionsRight) + shellPad
       );
       const shellWidth = Math.max(1, shellFinalRight - shellFinalLeft);
       const shellStartWidth = Math.min(shellWidth, Math.max(1, menuRight - menuLeft + shellPad * 2));
+      const shellFinalAbsoluteCenter = (shellFinalLeft + shellFinalRight) / 2;
+      const containerAbsoluteCenter = (containerBaseLeft + containerBaseRight) / 2;
       const shellWidthValue = `${shellWidth.toFixed(2)}px`;
 
       if (shellWidthValue !== lastDockShellWidth) {
@@ -874,15 +891,16 @@
         actionsBaseRight,
         brandBaseLeft,
         brandBaseRight,
-        containerLeft: containerRect.left,
-        containerRight: containerRect.right,
+        containerLeft: containerBaseLeft,
+        containerRight: containerBaseRight,
         brandDistance,
         featuredTop,
+        groupFinalShift: containerAbsoluteCenter - shellFinalAbsoluteCenter,
         heroTop,
         menuLeft,
         menuRight,
-        shellFinalCenter: (shellFinalLeft + shellFinalRight) / 2 - containerRect.left,
-        shellStartCenter: (menuLeft + menuRight) / 2 - containerRect.left,
+        shellFinalCenter: shellFinalAbsoluteCenter - containerBaseLeft,
+        shellStartCenter: (menuLeft + menuRight) / 2 - containerBaseLeft,
         shellStartScaleX: shellStartWidth / shellWidth,
         shellWidth
       };
@@ -918,6 +936,7 @@
         lastDockAttraction === 0 &&
         lastDockBrandShift === '0px' &&
         lastDockActionsShift === '0px' &&
+        lastDockGroupShift === '0px' &&
         lastDockShellScaleX === '1.0000' &&
         lastDockShellX === '0px' &&
         lastDockVisualKey === '0.000|0.000|0.9000|1.0000|0.800|0.140|0.110|0.280|1.000' &&
@@ -950,6 +969,11 @@
       if (lastDockActionsShift !== '0px') {
         lastDockActionsShift = '0px';
         navbar.style.setProperty('--home-dock-actions-shift', '0px');
+      }
+
+      if (lastDockGroupShift !== '0px') {
+        lastDockGroupShift = '0px';
+        navbar.style.setProperty('--home-dock-group-shift', '0px');
       }
 
       if (dockAttracting) {
@@ -1013,6 +1037,7 @@
       const brandShift = `${(currentMetrics.brandDistance * normalizedAttraction).toFixed(2)}px`;
       const actionsShift = `${(-currentMetrics.actionsDistance * actionsAttraction).toFixed(2)}px`;
       const shellBlend = smoothStep(0.03, 0.9, normalizedAttraction);
+      const groupShift = `${(currentMetrics.groupFinalShift * shellBlend).toFixed(2)}px`;
       const shellCenter = lerp(currentMetrics.shellStartCenter, currentMetrics.shellFinalCenter, shellBlend);
       const shellScaleX = lerp(currentMetrics.shellStartScaleX, 1, shellBlend).toFixed(4);
       const shellX = `${(shellCenter - currentMetrics.shellWidth / 2).toFixed(2)}px`;
@@ -1025,6 +1050,11 @@
       if (actionsShift !== lastDockActionsShift) {
         lastDockActionsShift = actionsShift;
         navbar.style.setProperty('--home-dock-actions-shift', actionsShift);
+      }
+
+      if (groupShift !== lastDockGroupShift) {
+        lastDockGroupShift = groupShift;
+        navbar.style.setProperty('--home-dock-group-shift', groupShift);
       }
 
       if (shellScaleX !== lastDockShellScaleX) {
@@ -1372,8 +1402,10 @@
 
   function initNavbarClock() {
     const clockElements = document.querySelectorAll('[data-beijing-clock]');
+    const visitorIPElements = document.querySelectorAll('[data-visitor-ip]');
+    const visitorLocationElements = document.querySelectorAll('[data-visitor-location]');
 
-    if (!clockElements.length) {
+    if (!clockElements.length && !visitorIPElements.length && !visitorLocationElements.length) {
       return;
     }
 
@@ -1385,6 +1417,7 @@
       timeZone: 'Asia/Shanghai'
     });
     let clockTimer = 0;
+    let visitorIPText = '正在获取';
     let regionText = '定位中';
     let regionFullText = '定位中';
     const chinaRegionNames = {
@@ -1545,6 +1578,20 @@
       };
     }
 
+    function formatIPAddress(data) {
+      if (!data || data.success === false) {
+        return '';
+      }
+
+      return String(
+        data.ip ||
+        data.ipAddress ||
+        data.ip_address ||
+        data.query ||
+        ''
+      ).trim();
+    }
+
     async function fetchRegionJSON(url) {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
       const timeout = controller ? window.setTimeout(() => controller.abort(), 2800) : 0;
@@ -1581,6 +1628,16 @@
       });
     }
 
+    function updateVisitorInfo() {
+      visitorIPElements.forEach((element) => {
+        element.textContent = visitorIPText;
+      });
+
+      visitorLocationElements.forEach((element) => {
+        element.textContent = regionFullText === '定位中' ? '正在获取' : regionFullText;
+      });
+    }
+
     function startClockTimer() {
       window.clearInterval(clockTimer);
       updateNavbarClock();
@@ -1589,9 +1646,11 @@
 
     async function loadRegion() {
       if (!window.fetch) {
+        visitorIPText = '获取失败';
         regionText = '地区未知';
         regionFullText = '地区未知';
         updateNavbarClock();
+        updateVisitorInfo();
         return;
       }
 
@@ -1604,22 +1663,34 @@
 
       for (let index = 0; index < regionAPIs.length; index += 1) {
         const data = await fetchRegionJSON(regionAPIs[index]);
+        const nextIP = formatIPAddress(data);
         const nextRegion = formatRegion(data);
+
+        if (nextIP) {
+          visitorIPText = nextIP;
+          updateVisitorInfo();
+        }
 
         if (nextRegion && (nextRegion.full || nextRegion.short)) {
           regionText = nextRegion.full || nextRegion.short;
           regionFullText = nextRegion.full || nextRegion.short;
           updateNavbarClock();
+          updateVisitorInfo();
           return;
         }
       }
 
+      if (visitorIPText === '正在获取') {
+        visitorIPText = '获取失败';
+      }
       regionText = '地区未知';
       regionFullText = '地区未知';
       updateNavbarClock();
+      updateVisitorInfo();
     }
 
     startClockTimer();
+    updateVisitorInfo();
     loadRegion();
 
     document.addEventListener('visibilitychange', () => {

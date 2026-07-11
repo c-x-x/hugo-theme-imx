@@ -16,25 +16,21 @@
 
       {{ .Content }}
 
-      {{ with .Site.Params.social }}
-      {{ if or .github .email }}
-      <div class="about-contact">
-        <h3>联系方式</h3>
-        <div class="about-contact-links">
-          {{ if .github }}
-          <a href="{{ .github }}" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <svg width="24" height="24" fill="currentColor"><use href="#icon-github"></use></svg>
-          </a>
-          {{ end }}
-          {{ if .email }}
-          <a href="mailto:{{ .email }}" class="social-link" aria-label="电子邮箱">
-            <svg width="24" height="24" fill="currentColor"><use href="#icon-mail"></use></svg>
-          </a>
-          {{ end }}
+      <section class="about-visitor-info" aria-label="访客信息">
+        <div class="about-visitor-separator" role="separator">
+          <span>访客信息</span>
         </div>
-      </div>
-      {{ end }}
-      {{ end }}
+        <div class="about-visitor-grid" aria-live="polite">
+          <div class="about-visitor-item">
+            <span class="about-visitor-label">您的IP</span>
+            <strong class="about-visitor-value" data-visitor-ip>正在获取</strong>
+          </div>
+          <div class="about-visitor-item">
+            <span class="about-visitor-label">您的位置</span>
+            <strong class="about-visitor-value" data-visitor-location>正在获取</strong>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </section>
