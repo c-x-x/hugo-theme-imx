@@ -1,0 +1,32 @@
+{{- $paginator := . -}}
+{{- if gt $paginator.TotalPages 1 -}}
+<nav class="pagination" aria-label="文章分页">
+  <a class="pagination-control{{ if not $paginator.HasPrev }} is-disabled{{ end }}"
+     {{- if $paginator.HasPrev }} href="{{ $paginator.Prev.URL }}" rel="prev"{{ else }} aria-disabled="true" tabindex="-1"{{ end }}
+     aria-label="上一页">上一页</a>
+
+  <ol class="pagination-pages">
+    {{- $current := $paginator.PageNumber -}}
+    {{- $total := $paginator.TotalPages -}}
+    {{- $lastRendered := 0 -}}
+    {{- range $paginator.Pagers -}}
+      {{- $number := .PageNumber -}}
+      {{- $nearCurrent := and (ge $number (sub $current 2)) (le $number (add $current 2)) -}}
+      {{- if or (eq $number 1) (eq $number $total) $nearCurrent -}}
+        {{- if gt (sub $number $lastRendered) 1 }}
+        <li class="pagination-gap" aria-hidden="true">…</li>
+        {{- end }}
+        <li>
+          <a class="pagination-page{{ if eq $number $current }} is-current{{ end }}"
+             href="{{ .URL }}"{{ if eq $number $current }} aria-current="page"{{ end }}>{{ $number }}</a>
+        </li>
+        {{- $lastRendered = $number -}}
+      {{- end -}}
+    {{- end }}
+  </ol>
+
+  <a class="pagination-control{{ if not $paginator.HasNext }} is-disabled{{ end }}"
+     {{- if $paginator.HasNext }} href="{{ $paginator.Next.URL }}" rel="next"{{ else }} aria-disabled="true" tabindex="-1"{{ end }}
+     aria-label="下一页">下一页</a>
+</nav>
+{{- end -}}

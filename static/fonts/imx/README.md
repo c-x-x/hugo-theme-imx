@@ -7,10 +7,11 @@ The article page uses an open-source, self-hosted font pairing:
   - License: SIL Open Font License 1.1
   - Source: https://rsms.me/inter/
 
-- `noto-serif-sc-regular.ttf`
-- `noto-serif-sc-bold.ttf`
+- `noto-serif-sc-regular.woff2`
+- `noto-serif-sc-bold.woff2`
   - Noto Serif SC by Google / Adobe
   - License: SIL Open Font License 1.1
   - Source: https://fonts.google.com/noto/specimen/Noto+Serif+SC
+  - The original OpenType outlines and character map are preserved in lossless WOFF2 packaging.
 
 This keeps the theme close to the clean sans + readable serif style used by high-quality AI/docs sites without redistributing proprietary brand fonts.

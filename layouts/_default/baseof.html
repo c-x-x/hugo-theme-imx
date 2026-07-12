@@ -106,8 +106,8 @@
   {{ $style := $css | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
   {{- $imxInter := "static/fonts/imx/inter-variable.woff2" -}}
-  {{- $imxSerifRegular := "static/fonts/imx/noto-serif-sc-regular.ttf" -}}
-  {{- $imxSerifBold := "static/fonts/imx/noto-serif-sc-bold.ttf" -}}
+  {{- $imxSerifRegular := "static/fonts/imx/noto-serif-sc-regular.woff2" -}}
+  {{- $imxSerifBold := "static/fonts/imx/noto-serif-sc-bold.woff2" -}}
   {{- if or (fileExists $imxInter) (fileExists $imxSerifRegular) (fileExists $imxSerifBold) }}
   <style>
     {{- if fileExists $imxInter }}
@@ -122,7 +122,7 @@
     {{- if fileExists $imxSerifRegular }}
     @font-face {
       font-family: 'IMX Noto Serif SC';
-      src: url('{{ "fonts/imx/noto-serif-sc-regular.ttf" | relURL }}') format('truetype');
+      src: url('{{ "fonts/imx/noto-serif-sc-regular.woff2" | relURL }}') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
@@ -131,7 +131,7 @@
     {{- if fileExists $imxSerifBold }}
     @font-face {
       font-family: 'IMX Noto Serif SC';
-      src: url('{{ "fonts/imx/noto-serif-sc-bold.ttf" | relURL }}') format('truetype');
+      src: url('{{ "fonts/imx/noto-serif-sc-bold.woff2" | relURL }}') format('woff2');
       font-weight: 700;
       font-style: normal;
       font-display: swap;

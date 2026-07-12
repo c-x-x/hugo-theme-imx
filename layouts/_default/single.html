@@ -1,5 +1,6 @@
 {{ define "main" }}
-{{- $showToc := and .TableOfContents (ne .Params.toc false) -}}
+{{- $toc := .TableOfContents -}}
+{{- $showToc := and (in $toc "<li>") (ne .Params.toc false) -}}
 
 <article class="article-page{{ if not $showToc }} article-page-no-toc{{ end }}">
   <!-- Article Header -->
@@ -11,7 +12,7 @@
         <svg width="18" height="18" fill="currentColor"><use href="#icon-calendar"></use></svg>
         发布于 {{ .Date.Format "2006年01月02日" }}
       </span>
-      {{ if .Lastmod }}
+      {{ if gt .Lastmod.Unix .Date.Unix }}
       <span>
         <svg width="18" height="18" fill="currentColor"><use href="#icon-calendar"></use></svg>
         更新于 {{ .Lastmod.Format "2006年01月02日" }}
@@ -56,7 +57,7 @@
     <aside class="sidebar">
       <div class="toc">
         <h3 class="toc-title">目录</h3>
-        {{ .TableOfContents }}
+        {{ $toc }}
       </div>
     </aside>
     {{ end }}

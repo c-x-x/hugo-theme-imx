@@ -1,0 +1,28 @@
+{{- $destination := .Destination -}}
+{{- $resource := .Page.Resources.GetMatch $destination -}}
+{{- $alt := .Text | plainify -}}
+{{- if and $resource (eq $resource.ResourceType "image") -}}
+  {{- $subtype := lower $resource.MediaType.SubType -}}
+  {{- if in (slice "jpeg" "png") $subtype -}}
+    {{- $widths := slice 480 800 1200 1600 -}}
+    {{- $webpSources := slice -}}
+    {{- range $widths -}}
+      {{- if le . $resource.Width -}}
+        {{- $variant := $resource.Resize (printf "%dx webp q82" .) -}}
+        {{- $webpSources = $webpSources | append (printf "%s %dw" $variant.RelPermalink .) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if eq (len $webpSources) 0 -}}
+      {{- $variant := $resource.Resize (printf "%dx webp q82" $resource.Width) -}}
+      {{- $webpSources = $webpSources | append (printf "%s %dw" $variant.RelPermalink $resource.Width) -}}
+    {{- end -}}
+<picture>
+  <source type="image/webp" srcset="{{ delimit $webpSources ", " }}" sizes="(max-width: 768px) calc(100vw - 2rem), 760px">
+  <img src="{{ $resource.RelPermalink }}" alt="{{ $alt }}" width="{{ $resource.Width }}" height="{{ $resource.Height }}" loading="lazy" decoding="async"{{ with .Title }} title="{{ . }}"{{ end }}>
+</picture>
+  {{- else -}}
+<img src="{{ $resource.RelPermalink }}" alt="{{ $alt }}" width="{{ $resource.Width }}" height="{{ $resource.Height }}" loading="lazy" decoding="async"{{ with .Title }} title="{{ . }}"{{ end }}>
+  {{- end -}}
+{{- else -}}
+<img src="{{ $destination }}" alt="{{ $alt }}" loading="lazy" decoding="async"{{ with .Title }} title="{{ . }}"{{ end }}>
+{{- end -}}

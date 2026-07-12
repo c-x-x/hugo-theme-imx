@@ -249,7 +249,11 @@
     let glyphSpeed = 0.85;
     let glyphTargetSpeed = 0.85;
     let glyphPointer = { x: 1, y: 1 };
-    let glyphMaskGradient = null;
+    let glyphLastFrameTime = 0;
+    let glyphAccentColor = '37, 99, 235';
+    let glyphGlowCenterAlpha = 0.045;
+    let glyphGlowMiddleAlpha = 0.015;
+    let glyphGlowGradient = null;
     let heroVisible = true;
     let documentVisible = !document.hidden;
     let typedActive = false;
@@ -317,7 +321,40 @@
       return { context, width, height };
     }
 
-    function drawGlyphFrame() {
+    function refreshGlyphGlow() {
+      if (!glyphContext) {
+        return;
+      }
+
+      glyphGlowGradient = glyphContext.createRadialGradient(
+        glyphPointer.x,
+        glyphPointer.y,
+        0,
+        glyphPointer.x,
+        glyphPointer.y,
+        0.34 * Math.max(glyphWidth, glyphHeight)
+      );
+      glyphGlowGradient.addColorStop(0, `rgba(${glyphAccentColor}, ${glyphGlowCenterAlpha})`);
+      glyphGlowGradient.addColorStop(0.48, `rgba(${glyphAccentColor}, ${glyphGlowMiddleAlpha})`);
+      glyphGlowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    }
+
+    function refreshGlyphPaint() {
+      const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+      const rowColor = isDark ? '244, 244, 245' : '24, 32, 48';
+      glyphAccentColor = isDark ? '161, 161, 170' : '37, 99, 235';
+      glyphGlowCenterAlpha = isDark ? 0.09 : 0.045;
+      glyphGlowMiddleAlpha = isDark ? 0.03 : 0.015;
+
+      for (let index = 0; index < glyphRows.length; index += 1) {
+        const row = glyphRows[index];
+        row.fillStyle = `rgba(${rowColor}, ${row.alpha})`;
+      }
+
+      refreshGlyphGlow();
+    }
+
+    function drawGlyphFrame(timestamp = performance.now()) {
       glyphFrame = 0;
 
       if (!glyphCanvas) {
@@ -334,59 +371,32 @@
         glyphContext = context;
       }
 
-      const isDark = htmlElement.getAttribute('data-theme') === 'dark';
-      const rowColor = isDark ? '244, 244, 245' : '24, 32, 48';
-      const accentColor = isDark ? '161, 161, 170' : '37, 99, 235';
+      const elapsed = glyphLastFrameTime > 0 ? timestamp - glyphLastFrameTime : 1000 / 60;
+      const frameScale = Math.min(Math.max(elapsed / (1000 / 60), 0.25), 3);
+      const speedBlend = 1 - Math.pow(1 - 0.055, frameScale);
+      glyphLastFrameTime = timestamp;
 
       context.clearRect(0, 0, glyphWidth, glyphHeight);
-      context.font = '650 15px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
-      context.textBaseline = 'top';
-      context.textAlign = 'left';
-      glyphSpeed += (glyphTargetSpeed - glyphSpeed) * 0.055;
+      glyphSpeed += (glyphTargetSpeed - glyphSpeed) * speedBlend;
 
-      glyphRows.forEach((row) => {
-        row.x += row.speed * glyphSpeed;
+      for (let index = 0; index < glyphRows.length; index += 1) {
+        const row = glyphRows[index];
+        row.x += row.speed * glyphSpeed * frameScale;
 
-        if (row.x < -row.width / 2) {
+        while (row.x < -row.width / 2) {
           row.x += row.width / 2;
         }
 
-        context.fillStyle = `rgba(${rowColor}, ${row.alpha})`;
+        context.fillStyle = row.fillStyle;
         context.fillText(row.content, row.x, row.y);
-      });
-
-      context.save();
-      context.globalCompositeOperation = 'destination-in';
-
-      if (!glyphMaskGradient) {
-        glyphMaskGradient = context.createLinearGradient(0, 0, glyphWidth, 0);
-        glyphMaskGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        glyphMaskGradient.addColorStop(glyphWidth < 768 ? 0.08 : 0.16, 'rgba(0, 0, 0, 1)');
-        glyphMaskGradient.addColorStop(glyphWidth < 768 ? 0.92 : 0.84, 'rgba(0, 0, 0, 1)');
-        glyphMaskGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
       }
 
-      context.fillStyle = glyphMaskGradient;
-      context.fillRect(0, 0, glyphWidth, glyphHeight);
-      context.restore();
-
-      context.save();
-      context.globalCompositeOperation = 'lighter';
-
-      const glow = context.createRadialGradient(
-        glyphPointer.x,
-        glyphPointer.y,
-        0,
-        glyphPointer.x,
-        glyphPointer.y,
-        0.34 * Math.max(glyphWidth, glyphHeight)
-      );
-      glow.addColorStop(0, `rgba(${accentColor}, ${isDark ? 0.09 : 0.045})`);
-      glow.addColorStop(0.48, `rgba(${accentColor}, ${isDark ? 0.03 : 0.015})`);
-      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      context.fillStyle = glow;
-      context.fillRect(0, 0, glyphWidth, glyphHeight);
-      context.restore();
+      if (glyphGlowGradient) {
+        context.globalCompositeOperation = 'lighter';
+        context.fillStyle = glyphGlowGradient;
+        context.fillRect(0, 0, glyphWidth, glyphHeight);
+        context.globalCompositeOperation = 'source-over';
+      }
 
       if (canAnimateHomeEntry()) {
         glyphFrame = window.requestAnimationFrame(drawGlyphFrame);
@@ -400,6 +410,7 @@
     function stopGlyphAnimation() {
       window.cancelAnimationFrame(glyphFrame);
       glyphFrame = 0;
+      glyphLastFrameTime = 0;
     }
 
     function setupGlyphCanvas() {
@@ -409,6 +420,7 @@
 
       window.cancelAnimationFrame(glyphFrame);
       glyphFrame = 0;
+      glyphLastFrameTime = 0;
 
       const canvasState = prepareCanvas(glyphCanvas);
 
@@ -422,22 +434,25 @@
       glyphWidth = width;
       glyphHeight = height;
       glyphPointer = { x: 0.62 * width, y: 0.36 * height };
-      glyphMaskGradient = null;
       glyphSpeed = 0.85;
       glyphTargetSpeed = 0.85;
       context.font = '650 15px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
+      context.textBaseline = 'top';
+      context.textAlign = 'left';
       glyphRows = Array.from({ length: Math.ceil(height / 18) + 2 }, (_, rowIndex) => {
         const content = createGlyphRow(width);
 
         return {
-          alpha: (Math.random() * 0.24 + (isDark ? 0.22 : 0.2)).toFixed(3),
+          alpha: Number((Math.random() * 0.24 + (isDark ? 0.22 : 0.2)).toFixed(3)),
           content,
+          fillStyle: '',
           speed: -(Math.random() * 0.44 + 0.34),
           width: context.measureText(content).width,
           x: -(Math.random() * width),
           y: 18 * rowIndex
         };
       });
+      refreshGlyphPaint();
 
       if (canAnimateHomeEntry()) {
         drawGlyphFrame();
@@ -459,6 +474,7 @@
         x: clientX - glyphRect.left,
         y: clientY - glyphRect.top
       };
+      refreshGlyphGlow();
 
       const halfWidth = glyphWidth / 2;
       glyphTargetSpeed = halfWidth > 0
@@ -824,13 +840,13 @@
       const featuredTop = hasHomeDockProgress ? getPageTop(featured) : window.innerHeight;
       const menuRect = navbarMenu ? navbarMenu.getBoundingClientRect() : null;
       const brandRect = navbarBrand ? navbarBrand.getBoundingClientRect() : null;
+      const actionsRect = navbarActions ? navbarActions.getBoundingClientRect() : null;
       const themeToggleRect = navbarThemeToggle ? navbarThemeToggle.getBoundingClientRect() : null;
       const containerRect = navbarContainer.getBoundingClientRect();
       const currentBrandShift = parseFloat(lastDockBrandShift) || 0;
       const currentActionsShift = parseFloat(lastDockActionsShift) || 0;
       const currentGroupShift = parseFloat(lastDockGroupShift) || 0;
       const visualGap = Math.max(10, Math.min(18, window.innerWidth * 0.014));
-      const actionsGap = Math.max(4, Math.min(7, window.innerWidth * 0.0045));
       const fallbackDistance = menuRect
         ? Math.max(0, ((window.innerWidth - menuRect.width) / 2) * 0.58)
         : 0;
@@ -842,39 +858,43 @@
       const brandBaseRight = brandRect
         ? brandRect.right - currentBrandShift - currentGroupShift
         : 0;
-      const actionsBaseLeft = themeToggleRect
-        ? themeToggleRect.left - currentActionsShift - currentGroupShift
+      const actionsBaseLeft = actionsRect
+        ? actionsRect.left - currentActionsShift - currentGroupShift
         : window.innerWidth;
-      const actionsBaseRight = themeToggleRect
-        ? themeToggleRect.right - currentActionsShift - currentGroupShift
+      const actionsBaseRight = actionsRect
+        ? actionsRect.right - currentActionsShift - currentGroupShift
         : window.innerWidth;
       const menuLeft = menuRect ? menuRect.left - currentGroupShift : 0;
       const menuRight = menuRect ? menuRect.right - currentGroupShift : window.innerWidth;
       const brandDistance = brandRect && menuRect
         ? Math.max(0, menuLeft - brandBaseRight - visualGap)
         : fallbackDistance;
-      const actionsDistance = themeToggleRect && menuRect
-        ? Math.max(0, actionsBaseLeft - menuRight - actionsGap)
+      const actionsDistance = actionsRect && menuRect
+        ? Math.max(0, actionsBaseLeft - menuRight - visualGap)
         : fallbackDistance;
       const widthRatio = brandRect && themeToggleRect && themeToggleRect.width > 0
         ? brandRect.width / themeToggleRect.width
         : 1;
       const actionsLead = Math.min(1.62, Math.max(1.12, 1 + (widthRatio - 1) * 0.18));
-      const shellPad = 10;
+      const shellLeadingPad = 1;
+      const shellTrailingPad = 1;
       const finalBrandLeft = brandBaseLeft + brandDistance;
       const finalBrandRight = brandBaseRight + brandDistance;
       const finalActionsLeft = actionsBaseLeft - actionsDistance;
       const finalActionsRight = actionsBaseRight - actionsDistance;
       const shellFinalLeft = Math.max(
         containerBaseLeft,
-        Math.min(finalBrandLeft, menuLeft, finalActionsLeft) - shellPad
+        Math.min(finalBrandLeft, menuLeft, finalActionsLeft) - shellLeadingPad
       );
       const shellFinalRight = Math.min(
         containerBaseRight,
-        Math.max(finalBrandRight, menuRight, finalActionsRight) + shellPad
+        Math.max(finalBrandRight, menuRight, finalActionsRight) + shellTrailingPad
       );
       const shellWidth = Math.max(1, shellFinalRight - shellFinalLeft);
-      const shellStartWidth = Math.min(shellWidth, Math.max(1, menuRight - menuLeft + shellPad * 2));
+      const shellStartWidth = Math.min(
+        shellWidth,
+        Math.max(1, menuRight - menuLeft + shellLeadingPad + shellTrailingPad)
+      );
       const shellFinalAbsoluteCenter = (shellFinalLeft + shellFinalRight) / 2;
       const containerAbsoluteCenter = (containerBaseLeft + containerBaseRight) / 2;
       const shellWidthValue = `${shellWidth.toFixed(2)}px`;
@@ -923,9 +943,13 @@
       return start + (end - start) * amount;
     }
 
-    function getDockAttraction(progress) {
-      if (mobileQuery.matches || reduceMotionQuery.matches) {
+    function getDockAttraction(progress, nextMerged) {
+      if (mobileQuery.matches) {
         return 0;
+      }
+
+      if (reduceMotionQuery.matches) {
+        return nextMerged ? 1 : 0;
       }
 
       return smoothStep(0.06, 0.78, progress);
@@ -1077,8 +1101,8 @@
       writeDockAttraction(Math.min(Math.max(attraction, 0), 1), currentMetrics);
     }
 
-    function setDockAttraction(progress, currentMetrics) {
-      setDockAttractionValue(getDockAttraction(progress), currentMetrics);
+    function setDockAttraction(progress, currentMetrics, nextMerged) {
+      setDockAttractionValue(getDockAttraction(progress, nextMerged), currentMetrics);
     }
 
     function setMergedState(nextMerged) {
@@ -1087,7 +1111,6 @@
       }
 
       merged = nextMerged;
-      navbar.classList.remove('is-dock-flipping', 'is-home-dock-fusing');
       navbar.classList.toggle('is-dock-merged', merged);
       navbar.classList.toggle('is-home-dock-merged', merged);
       document.body.classList.toggle('imx-dock-merged', merged);
@@ -1219,7 +1242,7 @@
       const nextMerged = merged ? progress > dockMergeExit : progress >= dockMergeEnter;
       let mergedChanged = false;
 
-      setDockAttraction(progress, currentMetrics);
+      setDockAttraction(progress, currentMetrics, nextMerged);
       mergedChanged = setMergedState(nextMerged);
 
       if (hasHomeDockProgress) {
@@ -1400,26 +1423,18 @@
     scheduleAutoThemeSync(safeMode);
   }
 
-  function initNavbarClock() {
-    const clockElements = document.querySelectorAll('[data-beijing-clock]');
+  function initAboutVisitorInfo() {
     const visitorIPElements = document.querySelectorAll('[data-visitor-ip]');
     const visitorLocationElements = document.querySelectorAll('[data-visitor-location]');
 
-    if (!clockElements.length && !visitorIPElements.length && !visitorLocationElements.length) {
+    if (!visitorIPElements.length && !visitorLocationElements.length) {
       return;
     }
 
-    const clockFormatter = new Intl.DateTimeFormat('zh-CN', {
-      hour: '2-digit',
-      hour12: false,
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Asia/Shanghai'
-    });
-    let clockTimer = 0;
+    const visitorCacheKey = 'imx-about-visitor-info';
+    const visitorCacheDuration = 10 * 60 * 1000;
     let visitorIPText = '正在获取';
-    let regionText = '定位中';
-    let regionFullText = '定位中';
+    let regionFullText = '正在获取';
     const chinaRegionNames = {
       Anhui: '安徽',
       Beijing: '北京',
@@ -1519,11 +1534,16 @@
       return countryNames[cleanCountry] || countryCodeNames[cleanCode] || cleanCountry || cleanCode;
     }
 
+    function escapeRegularExpression(value) {
+      return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
     function withoutCountryPrefix(value, countryName) {
       const place = cleanPlaceName(value);
+      const countryPrefix = escapeRegularExpression(countryName);
 
       return place
-        .replace(new RegExp(`^${countryName}\\s*`, 'i'), '')
+        .replace(countryPrefix ? new RegExp(`^${countryPrefix}\\s*`, 'i') : /$^/, '')
         .replace(/^United States(?: of America)?\s*/i, '')
         .replace(/^USA\s*/i, '')
         .replace(/^US\s+/i, '')
@@ -1616,40 +1636,70 @@
       }
     }
 
-    function updateNavbarClock() {
-      const time = clockFormatter.format(new Date());
-      const text = regionText ? `${time} · ${regionText}` : time;
-      const label = regionFullText && regionFullText !== regionText ? `${time} · ${regionFullText}` : text;
-
-      clockElements.forEach((element) => {
-        element.textContent = text;
-        element.setAttribute('aria-label', label);
-        element.setAttribute('title', label);
-      });
-    }
-
     function updateVisitorInfo() {
       visitorIPElements.forEach((element) => {
         element.textContent = visitorIPText;
       });
 
       visitorLocationElements.forEach((element) => {
-        element.textContent = regionFullText === '定位中' ? '正在获取' : regionFullText;
+        element.textContent = regionFullText;
       });
     }
 
-    function startClockTimer() {
-      window.clearInterval(clockTimer);
-      updateNavbarClock();
-      clockTimer = window.setInterval(updateNavbarClock, 1000);
+    function isResolvedVisitorValue(value) {
+      return Boolean(value && value !== '正在获取' && value !== '获取失败' && value !== '地区未知');
+    }
+
+    function cacheVisitorInfo() {
+      if (!isResolvedVisitorValue(visitorIPText) && !isResolvedVisitorValue(regionFullText)) {
+        return;
+      }
+
+      try {
+        window.sessionStorage.setItem(visitorCacheKey, JSON.stringify({
+          ip: isResolvedVisitorValue(visitorIPText) ? visitorIPText : '',
+          location: isResolvedVisitorValue(regionFullText) ? regionFullText : '',
+          timestamp: Date.now()
+        }));
+      } catch (error) {
+        // Visitor information remains available even when session storage is blocked.
+      }
+    }
+
+    function restoreCachedVisitorInfo() {
+      try {
+        const cachedValue = window.sessionStorage.getItem(visitorCacheKey);
+
+        if (!cachedValue) {
+          return false;
+        }
+
+        const cached = JSON.parse(cachedValue);
+
+        if (!cached || Date.now() - Number(cached.timestamp || 0) > visitorCacheDuration) {
+          window.sessionStorage.removeItem(visitorCacheKey);
+          return false;
+        }
+
+        if (cached.ip) {
+          visitorIPText = String(cached.ip);
+        }
+
+        if (cached.location) {
+          regionFullText = String(cached.location);
+        }
+
+        updateVisitorInfo();
+        return isResolvedVisitorValue(visitorIPText) && isResolvedVisitorValue(regionFullText);
+      } catch (error) {
+        return false;
+      }
     }
 
     async function loadRegion() {
       if (!window.fetch) {
         visitorIPText = '获取失败';
-        regionText = '地区未知';
         regionFullText = '地区未知';
-        updateNavbarClock();
         updateVisitorInfo();
         return;
       }
@@ -1665,17 +1715,24 @@
         const data = await fetchRegionJSON(regionAPIs[index]);
         const nextIP = formatIPAddress(data);
         const nextRegion = formatRegion(data);
+        let visitorInfoChanged = false;
 
-        if (nextIP) {
+        if (nextIP && !isResolvedVisitorValue(visitorIPText)) {
           visitorIPText = nextIP;
-          updateVisitorInfo();
+          visitorInfoChanged = true;
         }
 
-        if (nextRegion && (nextRegion.full || nextRegion.short)) {
-          regionText = nextRegion.full || nextRegion.short;
+        if (nextRegion && (nextRegion.full || nextRegion.short) && !isResolvedVisitorValue(regionFullText)) {
           regionFullText = nextRegion.full || nextRegion.short;
-          updateNavbarClock();
+          visitorInfoChanged = true;
+        }
+
+        if (visitorInfoChanged) {
           updateVisitorInfo();
+          cacheVisitorInfo();
+        }
+
+        if (isResolvedVisitorValue(visitorIPText) && isResolvedVisitorValue(regionFullText)) {
           return;
         }
       }
@@ -1683,25 +1740,16 @@
       if (visitorIPText === '正在获取') {
         visitorIPText = '获取失败';
       }
-      regionText = '地区未知';
-      regionFullText = '地区未知';
-      updateNavbarClock();
+      if (!isResolvedVisitorValue(regionFullText)) {
+        regionFullText = '地区未知';
+      }
       updateVisitorInfo();
     }
 
-    startClockTimer();
     updateVisitorInfo();
-    loadRegion();
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        window.clearInterval(clockTimer);
-        clockTimer = 0;
-        return;
-      }
-
-      startClockTimer();
-    });
+    if (!restoreCachedVisitorInfo()) {
+      loadRegion();
+    }
   }
 
   function initArticleMarkdownLayout() {
@@ -2205,7 +2253,7 @@
 
   // 初始化主题
   applyThemeMode(getThemeMode(), { persist: false });
-  initNavbarClock();
+  initAboutVisitorInfo();
   initHomeEntryHero();
   initSharedDock();
   initArticleMarkdownLayout();
@@ -2292,61 +2340,6 @@
   }
 
   // ============================================
-  // Reading Progress Bar - 阅读进度条
-  // ============================================
-  const progressBar = document.querySelector('.reading-progress');
-
-  if (progressBar) {
-    let progressFrame = 0;
-    let progressDocumentHeight = 0;
-    let progressBoundsDirty = true;
-    let lastProgressScale = '';
-
-    function updateProgressBounds() {
-      const windowHeight = window.innerHeight;
-      progressDocumentHeight = document.documentElement.scrollHeight - windowHeight;
-      progressBoundsDirty = false;
-    }
-
-    function renderReadingProgress() {
-      progressFrame = 0;
-
-      if (progressBoundsDirty) {
-        updateProgressBounds();
-      }
-
-      const scrolled = window.scrollY;
-      const progress = progressDocumentHeight <= 0
-        ? 0
-        : Math.min(Math.max((scrolled / progressDocumentHeight) * 100, 0), 100);
-
-      const nextProgressScale = `scaleX(${(progress / 100).toFixed(4)})`;
-
-      if (nextProgressScale !== lastProgressScale) {
-        lastProgressScale = nextProgressScale;
-        progressBar.style.transform = nextProgressScale;
-      }
-    }
-
-    function requestReadingProgress() {
-      if (progressFrame) {
-        return;
-      }
-
-      progressFrame = window.requestAnimationFrame(renderReadingProgress);
-    }
-
-    updateProgressBounds();
-    requestReadingProgress();
-
-    window.addEventListener('scroll', requestReadingProgress, { passive: true });
-    window.addEventListener('resize', () => {
-      progressBoundsDirty = true;
-      requestReadingProgress();
-    });
-  }
-
-  // ============================================
   // Smooth Scroll - 平滑滚动
   // ============================================
   // CSS 中已经有 scroll-behavior: smooth 和 scroll-margin-top
@@ -2360,15 +2353,15 @@
 
   if (tocLinks.length > 0 && headings.length > 0) {
     const tocContainer = document.querySelector('.article-page .toc') || document.querySelector('.toc');
+    const articleContent = document.querySelector('.article-content');
     const tocLinkByHash = new Map();
     let activeTocLink = null;
+    let headingPositions = [];
+    let tocGeometryDirty = true;
+    let tocUpdateInstant = false;
     let tocUpdateFrame = 0;
     let tocScrollFrame = 0;
     const tocReducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const observerOptions = {
-      rootMargin: '-100px 0px -66%',
-      threshold: 0
-    };
 
     function addTocHashVariant(hash, link) {
       if (!hash) {
@@ -2443,27 +2436,58 @@
       followActiveTocLink(nextActiveLink, instant);
     }
 
+    function rebuildTocGeometry() {
+      const scrollTop = window.scrollY;
+      headingPositions = Array.from(headings, heading => ({
+        link: getTocLinkForHeading(heading),
+        top: scrollTop + heading.getBoundingClientRect().top
+      })).filter(item => item.link);
+      tocGeometryDirty = false;
+    }
+
     function updateTocByScroll(instant = false) {
       tocUpdateFrame = 0;
 
-      const probeY = Math.min(Math.max(window.innerHeight * 0.22, 112), 168);
-      let currentHeading = headings[0];
+      if (tocGeometryDirty) {
+        rebuildTocGeometry();
+      }
 
-      headings.forEach(heading => {
-        if (heading.getBoundingClientRect().top <= probeY) {
-          currentHeading = heading;
+      if (headingPositions.length === 0) {
+        return;
+      }
+
+      const probeTop = window.scrollY + Math.min(Math.max(window.innerHeight * 0.22, 112), 168);
+      let low = 0;
+      let high = headingPositions.length - 1;
+      let activeIndex = 0;
+
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+
+        if (headingPositions[middle].top <= probeTop) {
+          activeIndex = middle;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
         }
-      });
+      }
 
-      setActiveTocLink(getTocLinkForHeading(currentHeading), instant);
+      setActiveTocLink(headingPositions[activeIndex].link, instant);
     }
 
-    function requestTocUpdate(instant = false) {
+    function requestTocUpdate(instant = false, refreshGeometry = false) {
+      tocUpdateInstant = tocUpdateInstant || instant;
+      tocGeometryDirty = tocGeometryDirty || refreshGeometry;
+
       if (tocUpdateFrame) {
         return;
       }
 
-      tocUpdateFrame = window.requestAnimationFrame(() => updateTocByScroll(instant));
+      tocUpdateFrame = window.requestAnimationFrame(() => {
+        const nextInstant = tocUpdateInstant;
+        tocUpdateInstant = false;
+        updateTocByScroll(nextInstant);
+      });
     }
 
     tocLinks.forEach(link => {
@@ -2486,23 +2510,27 @@
       }
     });
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setActiveTocLink(getTocLinkForHeading(entry.target));
-        }
-      });
-    }, observerOptions);
-
-    headings.forEach(heading => {
-      if (heading.getAttribute('id')) {
-        observer.observe(heading);
-      }
-    });
-
     updateTocByScroll(true);
     window.addEventListener('scroll', () => requestTocUpdate(false), { passive: true });
-    window.addEventListener('resize', () => requestTocUpdate(true));
+    window.addEventListener('resize', () => requestTocUpdate(true, true));
+    window.addEventListener('load', () => requestTocUpdate(true, true), { once: true });
+
+    if (articleContent && 'ResizeObserver' in window) {
+      const articleResizeObserver = new ResizeObserver(() => requestTocUpdate(true, true));
+      articleResizeObserver.observe(articleContent);
+    }
+
+    if (articleContent) {
+      articleContent.querySelectorAll('img').forEach(image => {
+        if (!image.complete) {
+          image.addEventListener('load', () => requestTocUpdate(true, true), { once: true });
+        }
+      });
+    }
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => requestTocUpdate(true, true));
+    }
   }
 
   // ============================================
@@ -2836,26 +2864,6 @@
         setMobileMenu(false);
       }
     });
-  }
-
-  // ============================================
-  // Lazy Load Images - 图片懒加载
-  // ============================================
-  const images = document.querySelectorAll('img[data-src]');
-
-  if ('IntersectionObserver' in window && images.length > 0) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-          observer.unobserve(img);
-        }
-      });
-    });
-
-    images.forEach(img => imageObserver.observe(img));
   }
 
   // ============================================
@@ -3381,8 +3389,6 @@
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(scheduleNavbarMetricsRefresh, 80);
     });
-    window.addEventListener('imx:navigation-layout-change', scheduleNavbarMetricsRefresh);
-
     if ('ResizeObserver' in window) {
       const navbarResizeObserver = new ResizeObserver(scheduleNavbarMetricsRefresh);
 
