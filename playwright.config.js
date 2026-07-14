@@ -23,7 +23,7 @@ module.exports = defineConfig({
     trace: 'retain-on-failure'
   },
   webServer: externalServer ? undefined : {
-    command: 'hugo server --source exampleSite --bind 127.0.0.1 --port 1417 --disableFastRender --renderToMemory --cacheDir /tmp/hugo-theme-imx-playwright-cache --noBuildLock',
+    command: 'hugo server --source exampleSite --destination /tmp/hugo-theme-imx-playwright-public --bind 127.0.0.1 --port 1417 --disableFastRender --cacheDir /tmp/hugo-theme-imx-playwright-cache --noBuildLock',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000

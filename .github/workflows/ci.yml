@@ -31,8 +31,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
+
+      - name: Show tool versions
+        run: |
+          go version
+          hugo version
+          node --version
+          npm --version
 
       - name: Install test dependencies
         run: npm ci
@@ -44,7 +51,7 @@ jobs:
         run: npm run check:js
 
       - name: Build example site
-        run: hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
+        run: npm run build:example
 
       - name: Verify generated pages
         run: |
@@ -58,6 +65,12 @@ jobs:
 
       - name: Run browser regression tests
         run: npm run test:e2e
+
+      - name: Verify test artifacts and repository output
+        run: |
+          test "$(find test-results -type f -name '*.png' | wc -l)" -eq 6
+          test ! -d public
+          test ! -d exampleSite/public
 
       - name: Upload regression screenshots
         if: ${{ always() && hashFiles('test-results/**/*.png') != '' }}
