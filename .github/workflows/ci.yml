@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.20"
+          cache: false
+
+      - name: Set up Hugo Extended
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.112.0"
+          extended: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Check JavaScript syntax
+        run: npm run check:js
+
+      - name: Build example site
+        run: hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
+
+      - name: Verify generated pages
+        run: |
+          test -f /tmp/hugo-theme-imx-public/index.html
+          test -f /tmp/hugo-theme-imx-public/posts/index.html
+          test -f /tmp/hugo-theme-imx-public/posts/regression-long-article/index.html
+          test -f /tmp/hugo-theme-imx-public/categories/index.html
+          test -f /tmp/hugo-theme-imx-public/tags/index.html
+          test -f /tmp/hugo-theme-imx-public/about/index.html
+          test -f /tmp/hugo-theme-imx-public/404.html
+
+      - name: Run browser regression tests
+        run: npm run test:e2e
+
+      - name: Upload regression screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-screenshots
+          path: test-results/**/*.png
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

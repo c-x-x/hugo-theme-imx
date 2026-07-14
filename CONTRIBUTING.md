@@ -36,14 +36,19 @@ hugo server --source exampleSite
 提交前至少运行：
 
 ```bash
-hugo --source exampleSite --minify
+hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
 ```
 
-涉及 JavaScript 时再运行：
+安装测试依赖后，运行全部 JavaScript 语法检查和浏览器回归：
 
 ```bash
-node --check assets/js/main.js
+npm ci
+npx playwright install chromium
+npm run check:js
+npm run test:e2e
 ```
+
+普通主题使用者不需要安装 Node.js；这些依赖只服务于仓库维护和 CI。Playwright 覆盖五种视口，并生成首页、文章页和 About 页的浅色/深色截图。
 
 ## Pull Request
 

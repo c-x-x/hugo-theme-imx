@@ -1,0 +1,84 @@
+/* ============================================
+   IMX Theme - Main Stylesheet
+   Core layout and component styles
+   ============================================ */
+
+/* 通用界面使用本地系统字体栈；文章页字体由 baseof.html 自托管加载。 */
+
+/* CSS Variables for Light/Dark Mode */
+:root {
+  /* Light Mode - 阅读友好的暖白纸感 */
+  --color-primary: #7A5A32;
+  --color-primary-light: #9B7442;
+  --color-primary-dark: #563D21;
+  --color-primary-rgb: 122, 90, 50;
+  --color-primary-hover: #6A4B28;
+
+  --color-bg: #FBFAF7;
+  --color-bg-secondary: #F2EFE8;
+  --color-bg-glass: rgba(251, 250, 247, 0.8);
+  --color-bg-card: rgba(251, 250, 247, 0.72);
+
+  --color-text: #24211D;
+  --color-text-secondary: #5F5850;
+  --color-text-muted: #8D8479;
+
+  --color-border: rgba(75, 64, 52, 0.14);
+  --color-shadow: rgba(75, 64, 52, 0.11);
+
+  /* Claude-style code blocks */
+  --color-code-bg: #F5F5F7;
+  --color-code-border: #D2D2D7;
+  --color-code-text: #1D1D1F;
+  --color-code-comment: #6E6E73;
+  --color-code-keyword: var(--color-primary);
+  --color-code-string: #1A8D5B;
+  --color-code-function: #D14343;
+  --color-code-number: #F5821F;
+
+  /* Gradient Effects */
+  --gradient-primary: linear-gradient(135deg, #8B6740 0%, #563D21 100%);
+  --gradient-accent: radial-gradient(circle at 20% 50%, rgba(122, 90, 50, 0.08) 0%, transparent 50%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px var(--color-shadow);
+  --shadow-md: 0 4px 16px var(--color-shadow);
+  --shadow-lg: 0 8px 32px var(--color-shadow);
+
+  /* Blur */
+  --blur-glass: blur(20px);
+
+}
+
+[data-theme="dark"] {
+  /* Dark Mode - 统一文章页灰黑阅读配色 */
+  --color-primary: #D4C6B2;
+  --color-primary-light: #EEEAE3;
+  --color-primary-dark: #8F8982;
+  --color-primary-rgb: 212, 198, 178;
+  --color-primary-hover: #EEEAE3;
+
+  --color-bg: #171716;
+  --color-bg-secondary: #1F1F1D;
+  --color-bg-glass: rgba(23, 23, 22, 0.84);
+  --color-bg-card: rgba(23, 23, 22, 0.76);
+
+  --color-text: #EEEAE3;
+  --color-text-secondary: #C7C0B7;
+  --color-text-muted: #8F8982;
+
+  --color-border: rgba(238, 234, 227, 0.13);
+  --color-shadow: rgba(0, 0, 0, 0.46);
+
+  /* Claude-style dark code blocks */
+  --color-code-bg: #18181B;
+  --color-code-border: #3F3F46;
+  --color-code-text: #E4E4E7;
+  --color-code-comment: #A1A1AA;
+  --color-code-keyword: #E4E4E7;
+  --color-code-string: #34D399;
+  --color-code-function: #F87171;
+  --color-code-number: #FB923C;
+
+  --gradient-accent: radial-gradient(circle at 20% 50%, rgba(212, 198, 178, 0.11) 0%, transparent 50%);
+}

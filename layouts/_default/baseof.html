@@ -102,8 +102,28 @@
   </script>
 
   <!-- CSS -->
-  {{ $css := resources.Get "css/main.css" }}
-  {{ $style := $css | minify | fingerprint }}
+  {{- $cssSources := slice
+    (resources.Get "css/tokens.css")
+    (resources.Get "css/base.css")
+    (resources.Get "css/layout.css")
+    (resources.Get "css/not-found.css")
+    (resources.Get "css/navigation.css")
+    (resources.Get "css/home.css")
+    (resources.Get "css/cards.css")
+    (resources.Get "css/taxonomy.css")
+    (resources.Get "css/article.css")
+    (resources.Get "css/search.css")
+    (resources.Get "css/footer.css")
+    (resources.Get "css/responsive.css")
+    (resources.Get "css/utilities.css")
+    (resources.Get "css/article-reading.css")
+    (resources.Get "css/code.css")
+    (resources.Get "css/loading.css")
+    (resources.Get "css/print.css")
+    (resources.Get "css/code-toolbar.css")
+  -}}
+  {{- $css := $cssSources | resources.Concat "css/main.css" -}}
+  {{- $style := $css | minify | fingerprint -}}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
   {{- $imxInter := "static/fonts/imx/inter-variable.woff2" -}}
   {{- $imxSerifRegular := "static/fonts/imx/noto-serif-sc-regular.woff2" -}}
@@ -219,7 +239,7 @@
 
   <!-- JavaScript -->
   {{ $js := resources.Get "js/main.js" }}
-  {{ $script := $js | minify | fingerprint }}
+  {{ $script := $js | js.Build (dict "target" "es2018" "minify" true) | fingerprint }}
   <script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
 </body>
 </html>

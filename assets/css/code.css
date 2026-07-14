@@ -1,0 +1,395 @@
+/* ============================================
+   Code Blocks - macOS Window Style
+   支持深色/浅色主题切换
+   ============================================ */
+
+/* Light Theme */
+:root {
+  --code-bg: #f8fafc;
+  --code-border: rgba(15, 23, 42, 0.12);
+  --code-text: #24292f;
+  --code-comment: #6e7781;
+  --code-keyword: #cf222e;
+  --code-string: #0a3069;
+  --code-function: #8250df;
+  --code-number: #0550ae;
+  --code-operator: #cf222e;
+  --code-variable: #953800;
+  --code-constant: #0550ae;
+  --code-class: #953800;
+  --code-tag: #116329;
+  --code-attr: #0550ae;
+  --code-builtin: #8250df;
+  --code-accent: #0969da;
+  --code-muted: #57606a;
+  --code-toolbar-bg: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  --code-toolbar-border: rgba(15, 23, 42, 0.09);
+  --code-button-bg: rgba(255, 255, 255, 0.72);
+  --code-button-hover-bg: rgba(var(--color-primary-rgb), 0.1);
+  --code-button-border: rgba(15, 23, 42, 0.12);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --code-bg: #0d1117;
+  --code-border: rgba(255, 255, 255, 0.1);
+  --code-text: #e6edf3;
+  --code-comment: #8b949e;
+  --code-keyword: #ff7b72;
+  --code-string: #a5d6ff;
+  --code-function: #d2a8ff;
+  --code-number: #79c0ff;
+  --code-operator: #ff7b72;
+  --code-variable: #ffa657;
+  --code-constant: #79c0ff;
+  --code-class: #ffa657;
+  --code-tag: #7ee787;
+  --code-attr: #79c0ff;
+  --code-builtin: #d2a8ff;
+  --code-accent: #2f81f7;
+  --code-muted: #8b949e;
+  --code-toolbar-bg: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  --code-toolbar-border: rgba(255, 255, 255, 0.08);
+  --code-button-bg: rgba(255, 255, 255, 0.07);
+  --code-button-hover-bg: rgba(255, 255, 255, 0.12);
+  --code-button-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Code Block Container */
+.highlight {
+  --code-tab-size: 2;
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--code-border);
+  background: var(--code-bg);
+  box-shadow:
+    0 18px 42px rgba(15, 23, 42, 0.12),
+    0 2px 8px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="dark"] .highlight {
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.highlight::before {
+  display: none;
+}
+
+.code-block-header {
+  position: relative;
+  z-index: 2;
+  min-height: 44px;
+  padding: 0.5rem 0.62rem;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.72rem;
+  background: var(--code-toolbar-bg);
+  border-bottom: 1px solid var(--code-toolbar-border);
+}
+
+.code-window-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  min-width: 56px;
+}
+
+.code-window-controls span {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.code-window-controls span:nth-child(1) {
+  background: #ff5f57;
+  border-color: #e0443e;
+}
+
+.code-window-controls span:nth-child(2) {
+  background: #ffbd2e;
+  border-color: #dea123;
+}
+
+.code-window-controls span:nth-child(3) {
+  background: #28c840;
+  border-color: #1cad34;
+}
+
+.highlight pre {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 1.05rem 1.1rem 1.18rem;
+  background: var(--code-bg);
+  border: none;
+  border-radius: 0;
+  overflow-x: auto;
+  tab-size: var(--code-tab-size);
+}
+
+.highlight pre code {
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--code-text);
+  background: transparent;
+  tab-size: var(--code-tab-size);
+  min-width: max-content;
+}
+
+.highlight[data-code-lang="bash"],
+.highlight[data-code-lang="shell"],
+.highlight[data-code-lang="zsh"] {
+  --code-keyword: #16a34a;
+  --code-string: #0e7490;
+  --code-function: #15803d;
+  --code-variable: #0369a1;
+}
+
+.highlight[data-code-lang="javascript"],
+.highlight[data-code-lang="typescript"] {
+  --code-keyword: #7c3aed;
+  --code-string: #15803d;
+  --code-function: #c2410c;
+  --code-variable: #b45309;
+}
+
+.highlight[data-code-lang="python"] {
+  --code-keyword: #1d4ed8;
+  --code-string: #15803d;
+  --code-function: #7c3aed;
+  --code-variable: #0369a1;
+}
+
+.highlight[data-code-lang="html"],
+.highlight[data-code-lang="css"] {
+  --code-keyword: #c2410c;
+  --code-string: #047857;
+  --code-function: #db2777;
+  --code-tag: #ea580c;
+  --code-attr: #2563eb;
+}
+
+.highlight[data-code-lang="json"],
+.highlight[data-code-lang="yaml"],
+.highlight[data-code-lang="markdown"] {
+  --code-keyword: #0f766e;
+  --code-string: #2563eb;
+  --code-function: #7c3aed;
+  --code-variable: #0e7490;
+}
+
+.highlight[data-code-lang="go"],
+.highlight[data-code-lang="rust"],
+.highlight[data-code-lang="java"],
+.highlight[data-code-lang="c"],
+.highlight[data-code-lang="cpp"] {
+  --code-keyword: #4f46e5;
+  --code-string: #0f766e;
+  --code-function: #c2410c;
+  --code-class: #b45309;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="bash"],
+[data-theme="dark"] .highlight[data-code-lang="shell"],
+[data-theme="dark"] .highlight[data-code-lang="zsh"] {
+  --code-keyword: #86efac;
+  --code-string: #67e8f9;
+  --code-function: #4ade80;
+  --code-variable: #7dd3fc;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="javascript"],
+[data-theme="dark"] .highlight[data-code-lang="typescript"] {
+  --code-keyword: #c4b5fd;
+  --code-string: #86efac;
+  --code-function: #fdba74;
+  --code-variable: #fde68a;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="python"] {
+  --code-keyword: #93c5fd;
+  --code-string: #86efac;
+  --code-function: #c4b5fd;
+  --code-variable: #7dd3fc;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="html"],
+[data-theme="dark"] .highlight[data-code-lang="css"] {
+  --code-keyword: #fdba74;
+  --code-string: #86efac;
+  --code-function: #f9a8d4;
+  --code-tag: #fb923c;
+  --code-attr: #93c5fd;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="json"],
+[data-theme="dark"] .highlight[data-code-lang="yaml"],
+[data-theme="dark"] .highlight[data-code-lang="markdown"] {
+  --code-keyword: #5eead4;
+  --code-string: #93c5fd;
+  --code-function: #c4b5fd;
+  --code-variable: #67e8f9;
+}
+
+[data-theme="dark"] .highlight[data-code-lang="go"],
+[data-theme="dark"] .highlight[data-code-lang="rust"],
+[data-theme="dark"] .highlight[data-code-lang="java"],
+[data-theme="dark"] .highlight[data-code-lang="c"],
+[data-theme="dark"] .highlight[data-code-lang="cpp"] {
+  --code-keyword: #a5b4fc;
+  --code-string: #5eead4;
+  --code-function: #fdba74;
+  --code-class: #fde68a;
+}
+
+/* Inline Code */
+code {
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  border: 1px solid var(--code-border);
+  font-weight: 400;
+}
+
+/* ============================================
+   Syntax Highlighting - GitHub Style
+   ============================================ */
+
+/* Comments */
+.highlight .c,
+.highlight .cm,
+.highlight .c1,
+.highlight .cs {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+/* Keywords */
+.highlight .k,
+.highlight .kd,
+.highlight .kn,
+.highlight .kr,
+.highlight .kt,
+.highlight .kp {
+  color: var(--code-keyword);
+  font-weight: 600;
+}
+
+/* Strings */
+.highlight .s,
+.highlight .s1,
+.highlight .s2,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sr,
+.highlight .sx {
+  color: var(--code-string);
+}
+
+/* Functions */
+.highlight .nf,
+.highlight .fm {
+  color: var(--code-function);
+  font-weight: 600;
+}
+
+/* Numbers */
+.highlight .m,
+.highlight .mf,
+.highlight .mh,
+.highlight .mi,
+.highlight .mo,
+.highlight .il {
+  color: var(--code-number);
+}
+
+/* Operators */
+.highlight .o,
+.highlight .ow {
+  color: var(--code-operator);
+  font-weight: 600;
+}
+
+/* Variables */
+.highlight .n,
+.highlight .nv,
+.highlight .nb,
+.highlight .bp {
+  color: var(--code-variable);
+}
+
+/* Constants */
+.highlight .kc,
+.highlight .no {
+  color: var(--code-constant);
+  font-weight: 600;
+}
+
+/* Classes */
+.highlight .nc,
+.highlight .nn {
+  color: var(--code-class);
+  font-weight: 600;
+}
+
+/* Tags (HTML/XML) */
+.highlight .nt {
+  color: var(--code-tag);
+  font-weight: 600;
+}
+
+/* Attributes */
+.highlight .na {
+  color: var(--code-attr);
+}
+
+/* Built-in */
+.highlight .nb,
+.highlight .bp {
+  color: var(--code-builtin);
+}
+
+/* Punctuation */
+.highlight .p {
+  color: var(--code-text);
+}
+
+/* Whitespace */
+.highlight .w {
+  color: transparent;
+}
+
+/* Error */
+.highlight .err {
+  color: var(--code-keyword);
+}
+
+/* Generic */
+.highlight .ge {
+  font-style: italic;
+}
+
+.highlight .gs {
+  font-weight: 600;
+}
+

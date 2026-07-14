@@ -22,7 +22,7 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 - 可选的 Giscus 评论
 - SEO、Open Graph、Twitter Card 和 RSS
 - 内置雪花 Logo、头像、文章封面、分享图和 favicon
-- 不加载远程字体
+- 通用界面使用系统字体栈，文章页自托管 Inter 与 Noto Serif SC WOFF2 字体，不请求远程字体服务
 
 分类页和标签页：
 
@@ -34,6 +34,8 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 - Hugo Extended `0.112.0` 或更高版本
 - Go `1.20` 或更高版本
+
+主题使用 Hugo Module，并在根目录 `hugo.toml` 的 `[module.hugoVersion]` 中声明最低 Hugo 版本和 Extended 要求；`go.mod` 声明 Go 版本。Node.js 只用于维护者运行自动化测试，普通站点构建不需要 Node.js。
 
 ```bash
 hugo version
@@ -160,11 +162,13 @@ title = "我的博客"
   author = "作者"
   keywords = ["Hugo", "博客"]
   logo = "/images/logo.svg"
+  logoLight = "/images/logo-light.svg"
   logoDark = "/images/logo-dark.svg"
   avatar = "/images/avatar.jpg"
   defaultImage = "/images/default-cover.jpg"
   defaultOGImage = "/images/default-og.jpg"
   favicon = "/images/favicon.svg"
+  faviconLight = "/images/favicon-light.svg"
   faviconDark = "/images/favicon-dark.svg"
   mainSections = ["posts"]
   footerText = "页脚文字"
@@ -174,21 +178,31 @@ title = "我的博客"
     email = "hello@example.com"
 ```
 
-`logo` 用于顶部导航，`avatar` 用于首页和关于页面。`logoDark` 和 `faviconDark` 可为深色模式提供单独素材；未配置时，自定义的 `logo` 和 `favicon` 会在深浅色中复用同一份文件。
+`logo` 用于顶部导航，`avatar` 用于首页和关于页面。`logoLight`、`logoDark`、`faviconLight` 和 `faviconDark` 可分别覆盖浅色与深色素材；未配置模式专用素材时，自定义的 `logo` 和 `favicon` 会在深浅色中复用同一份文件。
+
+`[params.social]` 当前只用于页脚社交链接：`github` 显示 GitHub 图标链接，`email` 显示邮件链接。它不会自动生成 About 页联系方式。
 
 未配置图片时，主题使用以下内置资源：
 
 | 参数 | 默认值 |
 | --- | --- |
 | `logo` | `/images/imx/logo.svg` |
+| `logoLight` | `logo` 的值；未配置 `logo` 时为 `/images/imx/logo.svg` |
 | `logoDark` | `/images/imx/logo-dark.svg` |
 | `avatar` | `/images/imx/default-avatar.jpg` |
 | `defaultImage` | `/images/imx/default-cover.jpg` |
 | `defaultOGImage` | `/images/imx/default-og.jpg` |
 | `favicon` | `/images/imx/favicon.svg` |
+| `faviconLight` | `favicon` 的值；未配置 `favicon` 时为 `/images/imx/favicon.svg` |
 | `faviconDark` | `/images/imx/favicon-dark.svg` |
 
 文章没有设置 `image` 时，列表卡片使用 `defaultImage`。页面没有独立图片时，分享元数据使用 `defaultOGImage`。
+
+## About 页访客信息
+
+使用 `layout = "about"` 的 About 页默认显示访客 IP 和地区。页面进入后依次请求 `ipwho.is`、`ipapi.co`、`freeipapi.com` 和 `api.ip.sb`，单次请求超时为 2.8 秒；成功结果在当前浏览器会话中缓存 10 分钟。此功能当前没有关闭参数，显示内容为“您的IP”和“您的位置”。
+
+访客请求只在页面存在对应访客信息元素时发起。部署站点前应根据适用的隐私政策和法律要求说明这些第三方请求。
 
 ## 主题模式
 
@@ -249,10 +263,21 @@ hugo server --source exampleSite
 构建检查：
 
 ```bash
-hugo --source exampleSite --minify
+hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
 ```
 
 `exampleSite/go.mod` 使用本地 `replace` 指向仓库根目录，仅用于开发。
+
+浏览器回归测试只用于主题维护，不影响普通用户构建。首次运行需要 Node.js 18 或更高版本：
+
+```bash
+npm ci
+npx playwright install chromium
+npm run check:js
+npm run test:e2e
+```
+
+Playwright 会在内存中启动示例站，覆盖五种视口、主要页面、主题模式、导航、Dock、目录和横向溢出，并在 `test-results` 中保存首页、长文章和 About 页的浅色/深色截图。
 
 ## 目录结构
 
@@ -260,14 +285,26 @@ hugo --source exampleSite --minify
 hugo-theme-imx/
 ├── archetypes/
 ├── assets/
+│   ├── css/             # 按 tokens、页面组件、响应式和覆盖顺序拆分
+│   └── js/
+│       ├── core/        # 存储、媒体查询、URL、DOM 与动画通用方法
+│       ├── main.js      # Hugo js.Build 入口
+│       └── *.js         # 主题、导航、Dock、首页、搜索、目录等功能模块
+├── .github/workflows/   # 构建与 Playwright 回归检查
 ├── exampleSite/
 ├── images/
 ├── layouts/
 ├── static/
+│   └── fonts/imx/       # 自托管字体及对应 OFL 许可证
+├── tests/
+├── hugo.toml            # Hugo Module 兼容要求
 ├── go.mod
+├── package.json         # 仅用于维护者测试
 ├── theme.toml
 └── README.md
 ```
+
+模板通过 Hugo Pipes 按固定顺序拼接 CSS，随后压缩并生成指纹；JavaScript 由 Hugo `js.Build` 解析模块、合并、压缩并生成指纹。浏览器最终各加载一个主题 CSS 和一个主题 JavaScript 文件，不要求额外执行 npm 构建。
 
 ## 参与维护
 
@@ -275,4 +312,4 @@ hugo-theme-imx/
 
 ## 许可证
 
-代码和仓库内置素材按 [MIT License](LICENSE) 分发。第三方内容的授权范围见 [CREDITS.md](CREDITS.md)。
+主题代码和项目自有素材按 [MIT License](LICENSE) 分发。Inter 与 Noto Serif SC 字体分别按 SIL Open Font License 1.1 分发，完整文本位于 `static/fonts/imx/`；其他第三方内容见 [CREDITS.md](CREDITS.md)。

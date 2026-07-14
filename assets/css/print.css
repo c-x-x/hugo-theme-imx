@@ -1,0 +1,23 @@
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .navbar,
+  .sidebar,
+  .footer,
+  .sidebar-toggle,
+  .theme-toggle {
+    display: none;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .article-content {
+    box-shadow: none;
+    border: none;
+  }
+}

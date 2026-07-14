@@ -1,0 +1,31 @@
+const { defineConfig } = require('@playwright/test');
+
+const externalServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER === '1';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:1417';
+
+module.exports = defineConfig({
+  testDir: './tests',
+  outputDir: 'test-results',
+  timeout: 30_000,
+  expect: { timeout: 5_000 },
+  fullyParallel: false,
+  forbidOnly: Boolean(process.env.CI),
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: process.env.CI
+    ? [['line'], ['html', { outputFolder: 'playwright-report', open: 'never' }]]
+    : 'line',
+  use: {
+    baseURL,
+    browserName: 'chromium',
+    colorScheme: 'light',
+    reducedMotion: 'reduce',
+    trace: 'retain-on-failure'
+  },
+  webServer: externalServer ? undefined : {
+    command: 'hugo server --source exampleSite --bind 127.0.0.1 --port 1417 --disableFastRender --renderToMemory --cacheDir /tmp/hugo-theme-imx-playwright-cache --noBuildLock',
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000
+  }
+});
