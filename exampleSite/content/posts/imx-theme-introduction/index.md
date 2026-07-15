@@ -2,7 +2,7 @@
 title = "留一方安静的屏幕：认识 IMX"
 date = 2026-07-15T12:00:00+08:00
 description = "IMX 是一款面向中文写作者的 Hugo 主题。它把设计藏进细节，让阅读、归档与长久写作重新成为博客的中心。"
-image = "/images/posts/imx-theme-introduction.png"
+image = "/posts/imx-theme-introduction/images/cover.webp"
 categories = ["主题随笔"]
 tags = ["IMX Theme", "Hugo", "写作"]
 toc = true
@@ -10,7 +10,7 @@ toc = true
 
 有些博客急于展示自己：色彩先于文字抵达，动画比段落更早开口。IMX 选择了另一条路。它愿意向后退半步，把屏幕还给文章，把注意力留给那些需要慢慢读完的句子。
 
-![摊开的书页与 IMX 雪花意象](../../images/posts/imx-theme-introduction.png)
+![摊开的书页与 IMX 雪花意象](images/cover.webp)
 
 这是一款为中文博客而写的 Hugo 主题。它有清楚的内容结构，也有搜索、目录、代码高亮和评论这些现代站点需要的能力；但它并不想把功能一项项摆在读者面前。多数时候，它只是安静地托住内容。
 
@@ -74,6 +74,6 @@ IMX 通过 Hugo Module 安装。站点不需要复制整套主题源码，也不
 
 不妨先写下一段确实想保存的文字，再替换站点名称、头像与封面。等内容站稳以后，再整理分类、开启搜索，或者决定是否需要评论。IMX 的许多配置都允许稍后完成，因为它更关心写作能否顺利开始。
 
-需要动手搭建时，可以继续阅读 [《从空目录到上线：hugo-theme-imx 全量配置手册》]({{% ref "posts/imx-configuration-deployment-guide.md" %}})；若准备开放讨论，再参考 [《把评论留在 GitHub：IMX 主题接入 Giscus》]({{% ref "posts/imx-giscus-comments.md" %}})。
+需要动手搭建时，可以继续阅读 [《从空目录到上线：hugo-theme-imx 全量配置手册》]({{% ref "/posts/imx-configuration-deployment-guide" %}})；若准备开放讨论，再参考 [《把评论留在 GitHub：IMX 主题接入 Giscus》]({{% ref "/posts/imx-giscus-comments" %}})。
 
 其余的，就交给文章本身。

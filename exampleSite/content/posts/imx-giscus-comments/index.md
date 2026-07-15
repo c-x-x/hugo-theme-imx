@@ -2,7 +2,7 @@
 title = "把评论留在 GitHub：IMX 主题接入 Giscus"
 date = 2026-07-15T10:00:00+08:00
 description = "从启用 Discussions、安装 Giscus App，到填写 IMX 主题参数和检查深浅色联动，一次把评论系统配妥。"
-image = "/images/posts/imx-giscus-comments.png"
+image = "/posts/imx-giscus-comments/images/cover.webp"
 categories = ["主题指南"]
 tags = ["Giscus", "GitHub Discussions", "Hugo"]
 toc = true
@@ -10,7 +10,7 @@ toc = true
 
 Giscus 不替你另建一套评论数据库。每篇文章的评论最终都是 GitHub Discussions 里的一个讨论，访客用 GitHub 账号登录后发言，站长仍在熟悉的仓库里管理内容。对静态博客来说，这套办法省心，也方便迁移。
 
-![IMX 主题与 Giscus 评论连接示意](../../images/posts/imx-giscus-comments.png)
+![IMX 主题与 Giscus 评论连接示意](images/cover.webp)
 
 IMX 已经把 Giscus 的加载、懒加载和深浅色同步写进主题。真正需要做的事只有两部分：先把 GitHub 仓库准备好，再把 giscus.app 生成的参数原样填进 `hugo.toml`。
 

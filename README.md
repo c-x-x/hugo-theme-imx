@@ -8,7 +8,7 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 ## 界面预览
 
-![首页预览](images/preview-home.png)
+![首页预览](images/preview-home.webp)
 
 ## 主要功能
 
@@ -26,9 +26,9 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 分类页和标签页：
 
-![分类页预览](images/preview-categories.png)
+![分类页预览](images/preview-categories.webp)
 
-![标签页预览](images/preview-tags.png)
+![标签页预览](images/preview-tags.webp)
 
 ## 环境要求
 
@@ -165,7 +165,7 @@ title = "我的博客"
   logoLight = "/images/logo-light.svg"
   logoDark = "/images/logo-dark.svg"
   avatar = "/images/avatar.jpg"
-  defaultImage = "/images/default-cover.jpg"
+  defaultImage = "/images/default-cover.webp"
   defaultOGImage = "/images/default-og.jpg"
   favicon = "/images/favicon.svg"
   faviconLight = "/images/favicon-light.svg"
@@ -190,7 +190,7 @@ title = "我的博客"
 | `logoLight` | `logo` 的值；未配置 `logo` 时为 `/images/imx/logo.svg` |
 | `logoDark` | `/images/imx/logo-dark.svg` |
 | `avatar` | `/images/imx/default-avatar.jpg` |
-| `defaultImage` | `/images/imx/default-cover.jpg` |
+| `defaultImage` | `/images/imx/default-cover.webp` |
 | `defaultOGImage` | `/images/imx/default-og.jpg` |
 | `favicon` | `/images/imx/favicon.svg` |
 | `faviconLight` | `favicon` 的值；未配置 `favicon` 时为 `/images/imx/favicon.svg` |

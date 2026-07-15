@@ -2,7 +2,7 @@
 title = "从空目录到上线：hugo-theme-imx 全量配置手册"
 date = 2026-07-15T11:00:00+08:00
 description = "完整梳理 IMX 的安装、站点参数、图片、菜单、搜索、文章 Front Matter、样式覆盖、GitHub Pages 部署与日常更新。"
-image = "/images/posts/imx-configuration-deployment.png"
+image = "/posts/imx-configuration-deployment-guide/images/cover.webp"
 categories = ["主题指南"]
 tags = ["Hugo", "IMX Theme", "部署", "配置"]
 toc = true
@@ -10,7 +10,7 @@ toc = true
 
 这篇手册按一个真实站点的顺序来写：先把环境和模块装好，再整理 `hugo.toml`、内容与图片，最后部署。文中的配置以 IMX 当前模板实际读取的参数为准，不把 Hugo 的数百项通用设置全部塞进来凑数。
 
-![IMX 从配置到部署的流程示意](../../images/posts/imx-configuration-deployment.png)
+![IMX 从配置到部署的流程示意](images/cover.webp)
 
 如果只想先看效果，下载主题 Release 源码后，在主题目录运行：
 
@@ -414,7 +414,7 @@ description = "关于我和这个站点"
 
 ## 13. 评论系统
 
-Giscus 默认关闭。它涉及 GitHub Discussions、App 授权、仓库与分类 ID、URL 映射和深浅色主题，不适合在总配置里压缩成几行。请按  [《把评论留在 GitHub：IMX 主题接入 Giscus》]({{% ref "posts/imx-giscus-comments.md" %}})完成配置与排错。
+Giscus 默认关闭。它涉及 GitHub Discussions、App 授权、仓库与分类 ID、URL 映射和深浅色主题，不适合在总配置里压缩成几行。请按 [《把评论留在 GitHub：IMX 主题接入 Giscus》]({{% ref "/posts/imx-giscus-comments" %}}) 完成配置与排错。
 
 在准备好仓库前保持 `enabled = false`，不要用空的 `repoId` 和 `categoryId` 强行开启。
 

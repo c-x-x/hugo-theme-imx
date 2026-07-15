@@ -2,7 +2,7 @@
 {{- $defaultAvatarPath := "/images/imx/default-avatar.jpg" -}}
 {{- $avatar := .Site.Params.avatar | default $defaultAvatarPath -}}
 {{- $avatarURL := partial "theme-asset-url.html" (dict "url" $avatar "default" $defaultAvatarPath) -}}
-{{- $defaultImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultImagePath := "/images/imx/default-cover.webp" -}}
 {{- $defaultImage := .Site.Params.defaultImage | default $defaultImagePath -}}
 {{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
 {{- $posts := where .Site.RegularPages "Type" "in" $mainSections -}}

@@ -1,5 +1,5 @@
 {{ define "main" }}
-{{- $defaultImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultImagePath := "/images/imx/default-cover.webp" -}}
 {{- $defaultImage := .Site.Params.defaultImage | default $defaultImagePath -}}
 {{- $pages := .RegularPagesRecursive.ByDate.Reverse -}}
 {{- $paginator := .Paginate $pages -}}

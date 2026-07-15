@@ -1,6 +1,6 @@
 {{- $description := .Description | default .Site.Params.description | default "一个 Hugo 博客" -}}
 {{- $keywords := .Keywords | default .Site.Params.keywords -}}
-{{- $defaultCoverImagePath := "/images/imx/default-cover.jpg" -}}
+{{- $defaultCoverImagePath := "/images/imx/default-cover.webp" -}}
 {{- $defaultOGImagePath := "/images/imx/default-og.jpg" -}}
 {{- $defaultOGImage := .Site.Params.defaultOGImage | default $defaultOGImagePath -}}
 {{- $pageImage := .Params.image | default $defaultOGImage -}}
