@@ -2,13 +2,10 @@
 {{- $resource := .Page.Resources.GetMatch $destination -}}
 {{- $alt := .Text | plainify -}}
 
-{{- if and $resource (reflect.IsImageResource $resource) -}}
+{{- if and $resource (eq $resource.ResourceType "image") -}}
   {{- $subtype := lower $resource.MediaType.SubType -}}
 
-  {{- if and
-    (in (slice "jpeg" "png") $subtype)
-    (reflect.IsImageResourceProcessable $resource)
-  -}}
+  {{- if in (slice "jpeg" "png") $subtype -}}
     {{- $widths := slice 480 800 1200 1600 -}}
     {{- $webpSources := slice -}}
 
@@ -45,7 +42,7 @@
     {{- with .Title }} title="{{ . }}"{{ end }}>
 </picture>
 
-  {{- else if reflect.IsImageResourceWithMeta $resource -}}
+  {{- else if in (slice "gif" "webp") $subtype -}}
 
 <img
   src="{{ $resource.RelPermalink }}"
