@@ -489,6 +489,32 @@ body:has(.article-page) .sidebar-toggle:hover {
   font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
 }
 
+.article-page .article-content code:not(pre code) {
+  padding: 0.14em 0.42em;
+  color: var(--article-ink);
+  background: rgba(var(--article-accent-rgb), 0.08);
+  border-color: rgba(var(--article-accent-rgb), 0.22);
+  border-radius: 0.34em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.article-page .article-content > pre {
+  margin: 2rem 0;
+  padding: clamp(0.9rem, 2vw, 1.1rem);
+  color: var(--article-ink);
+  background: rgba(var(--article-accent-rgb), 0.065);
+  border-color: rgba(var(--article-accent-rgb), 0.22);
+  border-radius: 14px;
+  box-shadow: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.article-page .article-content > pre > code {
+  color: var(--article-ink);
+  line-height: 1.65;
+}
+
 .article-page .article-content .highlight {
   margin: 2rem 0;
 }
@@ -883,4 +909,3 @@ body:has(.article-page) .sidebar-toggle:hover {
     padding: 0;
   }
 }
-
