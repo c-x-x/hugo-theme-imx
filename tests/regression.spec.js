@@ -125,6 +125,23 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await expect(page.locator('.navbar-menu')).toHaveClass(/active/);
   await expectNoHorizontalOverflow(page);
 
+  await openStablePage(page, '/posts/imx-theme-introduction/');
+  await page.locator('.sidebar-toggle').click();
+  await expect(page.locator('.sidebar')).toHaveClass(/active/);
+  const mobileTocLayout = await page.evaluate(() => {
+    const sidebar = document.querySelector('.article-page .sidebar');
+    const toc = document.querySelector('.article-page .toc');
+    return {
+      sidebarHeight: sidebar.getBoundingClientRect().height,
+      tocHeight: toc.getBoundingClientRect().height,
+      sidebarBottom: sidebar.getBoundingClientRect().bottom,
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(Math.abs(mobileTocLayout.sidebarHeight - mobileTocLayout.tocHeight)).toBeLessThanOrEqual(1);
+  expect(mobileTocLayout.sidebarBottom).toBeLessThanOrEqual(mobileTocLayout.viewportHeight);
+  await expectNoHorizontalOverflow(page);
+
   await page.setViewportSize({ width: 1024, height: 768 });
   await openStablePage(page, '/posts/regression-long-article/');
   await expect(page.locator('.article-content')).toBeVisible();
@@ -158,6 +175,16 @@ for (const mode of ['light', 'dark']) {
       if (name === 'about') {
         await expect(page.locator('[data-visitor-ip]')).toHaveText('203.0.113.10');
         await expect(page.locator('[data-visitor-location]')).toHaveText('上海');
+        const inlineCodeStyle = await page.locator('.about-content code').evaluate(element => {
+          const style = getComputedStyle(element);
+          return {
+            backgroundColor: style.backgroundColor,
+            borderColor: style.borderColor
+          };
+        });
+        const accent = mode === 'light' ? '122, 90, 50' : '212, 198, 178';
+        expect(inlineCodeStyle.backgroundColor).toBe(`rgba(${accent}, 0.08)`);
+        expect(inlineCodeStyle.borderColor).toBe(`rgba(${accent}, 0.22)`);
       }
       await page.screenshot({
         path: testInfo.outputPath(`${name}-${mode}.png`),

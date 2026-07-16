@@ -485,15 +485,17 @@ body:has(.article-page) .sidebar-toggle:hover {
   background: var(--article-soft-line);
 }
 
-.article-page .article-content code {
+.article-page .article-content code,
+.about-content code {
   font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
 }
 
-.article-page .article-content code:not(pre code) {
+.article-page .article-content code:not(pre code),
+.about-content code:not(pre code) {
   padding: 0.14em 0.42em;
-  color: var(--article-ink);
-  background: rgba(var(--article-accent-rgb), 0.08);
-  border-color: rgba(var(--article-accent-rgb), 0.22);
+  color: var(--article-ink, var(--color-text));
+  background: rgba(var(--article-accent-rgb, var(--color-primary-rgb)), 0.08);
+  border-color: rgba(var(--article-accent-rgb, var(--color-primary-rgb)), 0.22);
   border-radius: 0.34em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
@@ -795,8 +797,16 @@ body:has(.article-page) .sidebar-toggle:hover {
     right: 0.85rem;
     width: min(292px, calc(100vw - 1.7rem));
     max-width: min(292px, calc(100vw - 1.7rem));
+    height: auto;
     max-height: calc(100dvh - 108px - env(safe-area-inset-top));
     padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     transform: translateX(calc(100% + 1.1rem));
     opacity: 0;
     pointer-events: none;
