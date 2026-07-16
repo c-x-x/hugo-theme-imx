@@ -3,7 +3,7 @@
    Core layout and component styles
    ============================================ */
 
-/* 通用界面使用本地系统字体栈；文章页字体由 baseof.html 自托管加载。 */
+/* 通用界面优先使用自托管 IMX Inter；文章正文使用自托管 IMX Noto Serif SC。 */
 
 /* CSS Variables for Light/Dark Mode */
 :root {

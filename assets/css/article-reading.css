@@ -331,7 +331,7 @@ body:has(.article-page) .sidebar-toggle:hover {
 .article-page .article-content a {
   font-family: inherit;
   color: var(--article-accent);
-  font-weight: 560;
+  font-weight: 700;
   text-decoration: underline;
   text-decoration-color: rgba(var(--article-accent-rgb), 0.34);
   text-decoration-thickness: 0.06em;
@@ -345,7 +345,7 @@ body:has(.article-page) .sidebar-toggle:hover {
 
 .article-page .article-content strong {
   color: var(--article-ink);
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .article-page .article-content em {
@@ -793,12 +793,12 @@ body:has(.article-page) .sidebar-toggle:hover {
 
   .article-page .sidebar {
     position: fixed;
-    top: calc(88px + env(safe-area-inset-top));
+    top: 50%;
     right: 0.85rem;
     width: min(292px, calc(100vw - 1.7rem));
     max-width: min(292px, calc(100vw - 1.7rem));
     height: auto;
-    max-height: calc(100dvh - 108px - env(safe-area-inset-top));
+    max-height: calc(100dvh - 176px - env(safe-area-inset-top) - env(safe-area-inset-top));
     padding: 0;
     overflow: visible;
     border: 0;
@@ -807,14 +807,14 @@ body:has(.article-page) .sidebar-toggle:hover {
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    transform: translateX(calc(100% + 1.1rem));
+    transform: translate(calc(100% + 1.1rem), -50%);
     opacity: 0;
     pointer-events: none;
     z-index: 998;
   }
 
   .article-page .sidebar.active {
-    transform: translateX(0);
+    transform: translate(0, -50%);
     opacity: 1;
     pointer-events: auto;
   }
@@ -823,13 +823,13 @@ body:has(.article-page) .sidebar-toggle:hover {
     width: min(292px, calc(100vw - 1.7rem));
     opacity: 0;
     overflow-y: visible;
-    transform: translateX(calc(100% + 1.1rem));
+    transform: translate(calc(100% + 1.1rem), -50%);
   }
 
   .article-page .toc {
     position: static;
     height: auto;
-    max-height: calc(100dvh - 108px - env(safe-area-inset-top));
+    max-height: calc(100dvh - 176px - env(safe-area-inset-top) - env(safe-area-inset-top));
     overflow-y: auto;
     scrollbar-width: none;
     -webkit-mask-image: none;

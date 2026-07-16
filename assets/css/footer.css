@@ -3,7 +3,7 @@
    ============================================ */
 
 .footer {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--color-bg-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
@@ -32,7 +32,7 @@
 }
 
 .footer-text {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--color-text-muted);
   font-size: 0.9rem;
   font-weight: 400;

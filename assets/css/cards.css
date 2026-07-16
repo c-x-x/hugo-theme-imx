@@ -164,7 +164,7 @@
 }
 
 .post-card-meta {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: flex;
   gap: 0.34rem 0.62rem;
   flex-wrap: nowrap;
@@ -193,7 +193,7 @@
 }
 
 .post-card-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: -webkit-box;
   overflow: hidden;
   font-size: clamp(1rem, 1.32vw, 1.12rem);
@@ -215,7 +215,7 @@
 }
 
 .post-card-excerpt {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: -webkit-box;
   overflow: hidden;
   min-height: 0;
@@ -299,7 +299,7 @@
 }
 
 .tag {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -370,7 +370,7 @@
   justify-content: center;
   gap: 0.7rem;
   margin: 3rem auto 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .pagination-pages {

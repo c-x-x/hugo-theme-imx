@@ -103,7 +103,7 @@
 
 /* TOC - Table of Contents */
 .toc {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--color-bg-card);
   border-radius: 12px;
   border: 1px solid var(--color-border);
@@ -178,7 +178,7 @@
 }
 
 .toc-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -231,7 +231,7 @@
 
 /* 一级标题链接 - H2 */
 .toc > nav > ul > li > a {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--color-text);
   font-size: 0.95rem;
   font-weight: 600;
@@ -242,7 +242,7 @@
 
 /* 二级标题链接 - H3 */
 .toc > nav > ul > li > ul > li > a {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
@@ -253,7 +253,7 @@
 
 /* 三级标题链接 - H4 */
 .toc > nav > ul > li > ul > li > ul > li > a {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--color-text-muted);
   font-size: 0.85rem;
   font-weight: 400;
@@ -264,7 +264,7 @@
 
 /* 四级标题链接 - H5 */
 .toc > nav > ul > li > ul > li > ul > li > ul > li > a {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--color-text-muted);
   font-size: 0.8rem;
   font-weight: 400;
@@ -293,7 +293,7 @@
    ============================================ */
 
 .article-header {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   text-align: center;
   padding: 8rem 2rem 3rem;
   max-width: 900px;
@@ -301,7 +301,7 @@
 }
 
 .article-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 1.5rem;
@@ -310,7 +310,7 @@
 }
 
 .article-meta {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: flex;
   gap: 2rem;
   justify-content: center;
@@ -328,7 +328,7 @@
 }
 
 .article-content {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;

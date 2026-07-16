@@ -22,7 +22,7 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 - 可选的 Giscus 评论
 - SEO、Open Graph、Twitter Card 和 RSS
 - 内置雪花 Logo、头像、文章封面、分享图和 favicon
-- 通用界面使用系统字体栈，文章页自托管 Inter 与 Noto Serif SC WOFF2 字体，不请求远程字体服务
+- 通用界面优先使用自托管 Inter，文章正文优先使用自托管 Noto Serif SC；均保留系统字体回退，不请求远程字体服务
 
 分类页和标签页：
 

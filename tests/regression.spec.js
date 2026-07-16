@@ -93,6 +93,12 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await page.setViewportSize({ width: 1440, height: 900 });
   await openStablePage(page, '/');
 
+  const uiFontFamilies = await page.evaluate(() => ['body', '.navbar-brand', '.post-card-title'].map(selector => {
+    const element = document.querySelector(selector);
+    return getComputedStyle(element).fontFamily;
+  }));
+  uiFontFamilies.forEach(fontFamily => expect(fontFamily.toLowerCase()).toContain('imx inter'));
+
   await page.evaluate(() => {
     localStorage.setItem('themeMode', 'light');
     location.reload();
@@ -125,21 +131,41 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await expect(page.locator('.navbar-menu')).toHaveClass(/active/);
   await expectNoHorizontalOverflow(page);
 
+  await page.setViewportSize({ width: 375, height: 541 });
   await openStablePage(page, '/posts/imx-theme-introduction/');
   await page.locator('.sidebar-toggle').click();
   await expect(page.locator('.sidebar')).toHaveClass(/active/);
   const mobileTocLayout = await page.evaluate(() => {
     const sidebar = document.querySelector('.article-page .sidebar');
     const toc = document.querySelector('.article-page .toc');
+    const sidebarRect = sidebar.getBoundingClientRect();
     return {
-      sidebarHeight: sidebar.getBoundingClientRect().height,
+      sidebarHeight: sidebarRect.height,
       tocHeight: toc.getBoundingClientRect().height,
-      sidebarBottom: sidebar.getBoundingClientRect().bottom,
+      sidebarCenter: sidebarRect.top + sidebarRect.height / 2,
+      sidebarBottom: sidebarRect.bottom,
       viewportHeight: window.innerHeight
     };
   });
   expect(Math.abs(mobileTocLayout.sidebarHeight - mobileTocLayout.tocHeight)).toBeLessThanOrEqual(1);
+  expect(Math.abs(mobileTocLayout.sidebarCenter - mobileTocLayout.viewportHeight / 2)).toBeLessThanOrEqual(1);
   expect(mobileTocLayout.sidebarBottom).toBeLessThanOrEqual(mobileTocLayout.viewportHeight);
+  await expectNoHorizontalOverflow(page);
+
+  await openStablePage(page, '/posts/imx-configuration-deployment-guide/');
+  await page.locator('.sidebar-toggle').click();
+  const longMobileTocLayout = await page.evaluate(() => {
+    const toc = document.querySelector('.article-page .toc');
+    const rect = toc.getBoundingClientRect();
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      scrollable: toc.scrollHeight > toc.clientHeight
+    };
+  });
+  expect(longMobileTocLayout.top).toBeGreaterThanOrEqual(87);
+  expect(longMobileTocLayout.bottom).toBeLessThanOrEqual(541);
+  expect(longMobileTocLayout.scrollable).toBe(true);
   await expectNoHorizontalOverflow(page);
 
   await page.setViewportSize({ width: 1024, height: 768 });
@@ -147,6 +173,11 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await expect(page.locator('.article-content')).toBeVisible();
   await expect(page.locator('.toc')).toBeVisible();
   await expect(page.locator('.toc a')).toHaveCount(8);
+  const articleSerifWeights = await page.evaluate(() => ({
+    link: getComputedStyle(document.querySelector('.article-content a')).fontWeight,
+    strong: getComputedStyle(document.querySelector('.article-content strong')).fontWeight
+  }));
+  expect(articleSerifWeights).toEqual({ link: '700', strong: '700' });
   const articleIsLong = await page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight * 2);
   expect(articleIsLong).toBe(true);
   await page.evaluate(() => {
