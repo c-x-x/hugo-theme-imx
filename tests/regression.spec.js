@@ -152,6 +152,7 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
     const toggle = document.querySelector('.sidebar-toggle');
     const commentButton = document.querySelector('.comment-jump-btn');
     const lastTopLevelItem = toc.querySelector(':scope > nav > ul > li:last-child');
+    const penultimateTopLevelItem = toc.querySelector(':scope > nav > ul > li:nth-last-child(2)');
     const sidebarRect = sidebar.getBoundingClientRect();
     const toolsRect = tools.getBoundingClientRect();
     const actionsRect = actions.getBoundingClientRect();
@@ -167,6 +168,7 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
       tocPaddingTop: parseFloat(getComputedStyle(toc).paddingTop),
       tocPaddingBottom: parseFloat(getComputedStyle(toc).paddingBottom),
       lastItemPaddingRight: parseFloat(getComputedStyle(lastTopLevelItem).paddingRight),
+      penultimateItemPaddingRight: parseFloat(getComputedStyle(penultimateTopLevelItem).paddingRight),
       sidebarCenter: sidebarRect.top + sidebarRect.height / 2,
       sidebarBottom: sidebarRect.bottom,
       toolsRight: toolsRect.right,
@@ -180,6 +182,11 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
       actionsBottom: actionsRect.bottom,
       actionsFlexDirection: getComputedStyle(actions).flexDirection,
       actionsBorderLeftWidth: getComputedStyle(actions).borderLeftWidth,
+      actionsBorderTopWidth: getComputedStyle(actions).borderTopWidth,
+      actionsBorderRightWidth: getComputedStyle(actions).borderRightWidth,
+      actionsBorderBottomWidth: getComputedStyle(actions).borderBottomWidth,
+      actionsBackground: getComputedStyle(actions).backgroundColor,
+      actionsBoxShadow: getComputedStyle(actions).boxShadow,
       toggleBottom: toggleRect.bottom,
       sidebarRight: sidebarRect.right,
       commentRight: commentRect.right,
@@ -199,10 +206,17 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(mobileTocLayout.actionsLeft).toBeGreaterThan(mobileTocLayout.sidebarLeft);
   expect(Math.abs(mobileTocLayout.actionsRight - (mobileTocLayout.toolsRight - 1))).toBeLessThanOrEqual(1);
   expect(Math.abs(mobileTocLayout.actionsBottom - (mobileTocLayout.toolsBottom - 1))).toBeLessThanOrEqual(1);
-  expect(mobileTocLayout.actionsFlexDirection).toBe('row');
+  expect(mobileTocLayout.actionsFlexDirection).toBe('column');
   expect(Math.abs(mobileTocLayout.tocPaddingBottom - mobileTocLayout.tocPaddingTop)).toBeLessThanOrEqual(1);
-  expect(mobileTocLayout.lastItemPaddingRight).toBeGreaterThanOrEqual(100);
+  expect(mobileTocLayout.lastItemPaddingRight).toBeGreaterThanOrEqual(55);
+  expect(mobileTocLayout.lastItemPaddingRight).toBeLessThanOrEqual(70);
+  expect(mobileTocLayout.penultimateItemPaddingRight).toBeGreaterThanOrEqual(55);
   expect(mobileTocLayout.actionsBorderLeftWidth).toBe('0px');
+  expect(mobileTocLayout.actionsBorderTopWidth).toBe('0px');
+  expect(mobileTocLayout.actionsBorderRightWidth).toBe('0px');
+  expect(mobileTocLayout.actionsBorderBottomWidth).toBe('0px');
+  expect(mobileTocLayout.actionsBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(mobileTocLayout.actionsBoxShadow).toBe('none');
   expect(mobileTocLayout.commentRight).toBeLessThanOrEqual(398);
   expect(mobileTocLayout.commentRadius).toBe('12px');
   expect(mobileTocLayout.toggleRadius).toBe('12px');

@@ -844,13 +844,13 @@ body:has(.article-page) .sidebar-toggle:hover {
     right: 0;
     bottom: 0;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.2rem;
-    overflow: hidden;
-    border: 1px solid var(--article-soft-line);
-    border-radius: 16px;
-    background: rgba(251, 250, 247, 0.92);
-    box-shadow: 0 12px 30px rgba(75, 64, 52, 0.12);
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     pointer-events: auto;
     transition:
       background-color 0.24s ease,
@@ -860,8 +860,8 @@ body:has(.article-page) .sidebar-toggle:hover {
   }
 
   [data-theme="dark"] .article-page .article-tools-actions {
-    background: rgba(23, 23, 22, 0.94);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    background: transparent;
+    box-shadow: none;
   }
 
   .article-page .article-tools:has(.sidebar.active) .article-tools-actions {
@@ -953,12 +953,8 @@ body:has(.article-page) .sidebar-toggle:hover {
     padding-right: calc(var(--floating-action-toggle-size) + 0.7rem);
   }
 
-  .article-page .article-tools:has(.comment-jump-btn) .toc > nav > ul > li:last-child {
-    padding-right: calc(
-      var(--floating-action-toggle-size) +
-      var(--floating-action-toggle-size) +
-      0.9rem
-    );
+  .article-page .article-tools:has(.comment-jump-btn) .toc > nav > ul > li:nth-last-child(-n + 2) {
+    padding-right: calc(var(--floating-action-toggle-size) + 0.7rem);
   }
 
 }
