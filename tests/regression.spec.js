@@ -131,41 +131,136 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await expect(page.locator('.navbar-menu')).toHaveClass(/active/);
   await expectNoHorizontalOverflow(page);
 
-  await page.setViewportSize({ width: 375, height: 541 });
+  await page.setViewportSize({ width: 398, height: 541 });
   await openStablePage(page, '/posts/imx-theme-introduction/');
+  await expect(page.locator('.article-tools')).toHaveCount(1);
+  await expect(page.locator('.article-tools-actions')).toHaveCount(1);
+  await page.evaluate(() => {
+    const commentButton = document.createElement('a');
+    commentButton.className = 'comment-jump-btn';
+    commentButton.href = '#comments';
+    commentButton.setAttribute('aria-label', '回归测试评论按钮');
+    document.querySelector('.article-tools-actions').prepend(commentButton);
+  });
   await page.locator('.sidebar-toggle').click();
   await expect(page.locator('.sidebar')).toHaveClass(/active/);
   const mobileTocLayout = await page.evaluate(() => {
     const sidebar = document.querySelector('.article-page .sidebar');
     const toc = document.querySelector('.article-page .toc');
+    const tools = document.querySelector('.article-tools');
+    const actions = document.querySelector('.article-tools-actions');
+    const toggle = document.querySelector('.sidebar-toggle');
+    const commentButton = document.querySelector('.comment-jump-btn');
+    const lastTopLevelItem = toc.querySelector(':scope > nav > ul > li:last-child');
     const sidebarRect = sidebar.getBoundingClientRect();
+    const toolsRect = tools.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const toggleRect = toggle.getBoundingClientRect();
+    const commentRect = commentButton.getBoundingClientRect();
     return {
+      toolsContainsSidebar: tools.contains(sidebar),
+      toolsContainsActions: tools.contains(actions),
       sidebarHeight: sidebarRect.height,
+      sidebarLeft: sidebarRect.left,
+      sidebarWidth: sidebarRect.width,
       tocHeight: toc.getBoundingClientRect().height,
+      tocPaddingTop: parseFloat(getComputedStyle(toc).paddingTop),
+      tocPaddingBottom: parseFloat(getComputedStyle(toc).paddingBottom),
+      lastItemPaddingRight: parseFloat(getComputedStyle(lastTopLevelItem).paddingRight),
       sidebarCenter: sidebarRect.top + sidebarRect.height / 2,
       sidebarBottom: sidebarRect.bottom,
+      toolsRight: toolsRect.right,
+      toolsWidth: toolsRect.width,
+      toolsBottom: toolsRect.bottom,
+      toolsTop: toolsRect.top,
+      toolsBackground: getComputedStyle(tools).backgroundColor,
+      sidebarBackground: getComputedStyle(sidebar).backgroundColor,
+      actionsLeft: actionsRect.left,
+      actionsRight: actionsRect.right,
+      actionsBottom: actionsRect.bottom,
+      actionsFlexDirection: getComputedStyle(actions).flexDirection,
+      actionsBorderLeftWidth: getComputedStyle(actions).borderLeftWidth,
+      toggleBottom: toggleRect.bottom,
+      sidebarRight: sidebarRect.right,
+      commentRight: commentRect.right,
+      commentRadius: getComputedStyle(commentButton).borderRadius,
+      toggleRadius: getComputedStyle(toggle).borderRadius,
       viewportHeight: window.innerHeight
     };
   });
+  expect(mobileTocLayout.toolsContainsSidebar).toBe(true);
+  expect(mobileTocLayout.toolsContainsActions).toBe(true);
   expect(Math.abs(mobileTocLayout.sidebarHeight - mobileTocLayout.tocHeight)).toBeLessThanOrEqual(1);
-  expect(Math.abs(mobileTocLayout.sidebarCenter - mobileTocLayout.viewportHeight / 2)).toBeLessThanOrEqual(1);
-  expect(mobileTocLayout.sidebarBottom).toBeLessThanOrEqual(mobileTocLayout.viewportHeight);
+  expect(Math.abs(mobileTocLayout.toolsBottom - mobileTocLayout.toggleBottom)).toBeLessThanOrEqual(1);
+  expect(Math.abs(mobileTocLayout.sidebarBottom - mobileTocLayout.toolsBottom)).toBeLessThanOrEqual(1);
+  expect(Math.abs(mobileTocLayout.sidebarWidth - (mobileTocLayout.toolsWidth - 2))).toBeLessThanOrEqual(1);
+  expect(mobileTocLayout.toolsWidth).toBeGreaterThanOrEqual(278);
+  expect(mobileTocLayout.toolsWidth).toBeLessThanOrEqual(310);
+  expect(mobileTocLayout.actionsLeft).toBeGreaterThan(mobileTocLayout.sidebarLeft);
+  expect(Math.abs(mobileTocLayout.actionsRight - (mobileTocLayout.toolsRight - 1))).toBeLessThanOrEqual(1);
+  expect(Math.abs(mobileTocLayout.actionsBottom - (mobileTocLayout.toolsBottom - 1))).toBeLessThanOrEqual(1);
+  expect(mobileTocLayout.actionsFlexDirection).toBe('row');
+  expect(Math.abs(mobileTocLayout.tocPaddingBottom - mobileTocLayout.tocPaddingTop)).toBeLessThanOrEqual(1);
+  expect(mobileTocLayout.lastItemPaddingRight).toBeGreaterThanOrEqual(100);
+  expect(mobileTocLayout.actionsBorderLeftWidth).toBe('0px');
+  expect(mobileTocLayout.commentRight).toBeLessThanOrEqual(398);
+  expect(mobileTocLayout.commentRadius).toBe('12px');
+  expect(mobileTocLayout.toggleRadius).toBe('12px');
+  expect(mobileTocLayout.toolsBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(mobileTocLayout.sidebarBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(mobileTocLayout.sidebarCenter).toBeGreaterThan(mobileTocLayout.viewportHeight / 2);
+  expect(mobileTocLayout.toolsTop).toBeGreaterThanOrEqual(87);
+  expect(mobileTocLayout.toolsBottom).toBeLessThanOrEqual(mobileTocLayout.viewportHeight);
   await expectNoHorizontalOverflow(page);
 
   await openStablePage(page, '/posts/imx-configuration-deployment-guide/');
   await page.locator('.sidebar-toggle').click();
   const longMobileTocLayout = await page.evaluate(() => {
     const toc = document.querySelector('.article-page .toc');
+    const tools = document.querySelector('.article-tools');
+    const actions = document.querySelector('.article-tools-actions');
+    const toggle = document.querySelector('.sidebar-toggle');
     const rect = toc.getBoundingClientRect();
+    const toolsRect = tools.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const toggleRect = toggle.getBoundingClientRect();
     return {
       top: rect.top,
       bottom: rect.bottom,
+      toolsTop: toolsRect.top,
+      toolsBottom: toolsRect.bottom,
+      toggleBottom: toggleRect.bottom,
+      actionsRight: actionsRect.right,
+      toolsRight: toolsRect.right,
       scrollable: toc.scrollHeight > toc.clientHeight
     };
   });
   expect(longMobileTocLayout.top).toBeGreaterThanOrEqual(87);
   expect(longMobileTocLayout.bottom).toBeLessThanOrEqual(541);
+  expect(Math.abs(longMobileTocLayout.top - longMobileTocLayout.toolsTop)).toBeLessThanOrEqual(1);
+  expect(Math.abs(longMobileTocLayout.bottom - longMobileTocLayout.toolsBottom)).toBeLessThanOrEqual(1);
+  expect(Math.abs(longMobileTocLayout.bottom - longMobileTocLayout.toggleBottom)).toBeLessThanOrEqual(2);
+  expect(Math.abs(longMobileTocLayout.actionsRight - (longMobileTocLayout.toolsRight - 1))).toBeLessThanOrEqual(1);
   expect(longMobileTocLayout.scrollable).toBe(true);
+  await expectNoHorizontalOverflow(page);
+
+  await page.setViewportSize({ width: 320, height: 568 });
+  await openStablePage(page, '/posts/imx-theme-introduction/');
+  await page.locator('.sidebar-toggle').click();
+  const narrowMobileTocLayout = await page.evaluate(() => {
+    const toolsRect = document.querySelector('.article-tools').getBoundingClientRect();
+    const sidebarRect = document.querySelector('.article-page .sidebar').getBoundingClientRect();
+    return {
+      toolsLeft: toolsRect.left,
+      toolsRight: toolsRect.right,
+      left: sidebarRect.left,
+      width: toolsRect.width
+    };
+  });
+  expect(narrowMobileTocLayout.toolsLeft).toBeGreaterThanOrEqual(8);
+  expect(narrowMobileTocLayout.toolsRight).toBeLessThanOrEqual(320);
+  expect(narrowMobileTocLayout.left).toBeGreaterThanOrEqual(8);
+  expect(narrowMobileTocLayout.width).toBeLessThanOrEqual(304);
   await expectNoHorizontalOverflow(page);
 
   await page.setViewportSize({ width: 1024, height: 768 });

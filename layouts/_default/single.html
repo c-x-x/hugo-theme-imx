@@ -52,31 +52,40 @@
       </div>
     </div>
 
-    <!-- Table of Contents Sidebar -->
+    <!-- Article tools: table of contents and related actions -->
     {{ if $showToc }}
-    <aside class="sidebar">
-      <div class="toc">
-        <h3 class="toc-title">目录</h3>
-        {{ $toc }}
+    <div class="article-tools">
+      <aside class="sidebar">
+        <div class="toc">
+          <h3 class="toc-title">目录</h3>
+          {{ $toc }}
+        </div>
+      </aside>
+
+      <div class="article-tools-actions">
+        {{ if .Site.Params.giscus.enabled }}
+        <a href="#comments" class="comment-jump-btn" aria-label="跳转到评论" title="跳转到评论">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        {{ end }}
+
+        <button class="sidebar-toggle" aria-label="切换侧边栏">
+          <svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>
+        </button>
       </div>
-    </aside>
+    </div>
     {{ end }}
   </div>
 
-  <!-- Comment Jump Button (Above Sidebar Toggle) -->
-  {{ if .Site.Params.giscus.enabled }}
+  <!-- Keep the comment action available on article pages without a TOC. -->
+  {{ if and .Site.Params.giscus.enabled (not $showToc) }}
   <a href="#comments" class="comment-jump-btn" aria-label="跳转到评论" title="跳转到评论">
     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </a>
-  {{ end }}
-
-  <!-- Sidebar Toggle Button -->
-  {{ if $showToc }}
-  <button class="sidebar-toggle" aria-label="切换侧边栏">
-    <svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>
-  </button>
   {{ end }}
 
   <!-- Comments Section -->
