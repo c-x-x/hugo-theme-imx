@@ -36,7 +36,7 @@ hugo server --source exampleSite
 提交前至少运行：
 
 ```bash
-hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
+npm run build:example:strict
 ```
 
 安装测试依赖后，运行全部 JavaScript 语法检查和浏览器回归：
@@ -45,10 +45,11 @@ hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /t
 npm ci
 npx playwright install chromium
 npm run check:js
+npm run test:build-validation
 npm run test:e2e
 ```
 
-普通主题使用者不需要安装 Node.js；这些依赖只服务于仓库维护和 CI。Playwright 覆盖五种视口，并生成首页、文章页和 About 页的浅色/深色截图。
+普通主题使用者不需要安装 Node.js；这些依赖只服务于仓库维护和 CI。严格构建会拒绝 Hugo 警告并验证搜索索引、关键页面和默认资源内容哈希。Playwright 使用 Chromium 覆盖五种视口、评论主题同步、搜索、Dock、目录、404 游戏和 About 访客行为，并比较首页、文章页和 About 页的浅色/深色视觉基线。涉及兼容性的改动还应人工抽查 Firefox 与 Safari/WebKit。
 
 ## Pull Request
 

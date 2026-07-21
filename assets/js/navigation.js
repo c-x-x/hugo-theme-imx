@@ -15,7 +15,6 @@ export function initNavigation() {
       mobileMenuToggle.classList.toggle('active', open);
       mobileMenuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       mobileMenuToggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
-      document.body.classList.toggle('mobile-menu-open', open);
     }
 
     mobileMenuToggle.addEventListener('click', () => {

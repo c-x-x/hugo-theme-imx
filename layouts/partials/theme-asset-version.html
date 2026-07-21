@@ -1,1 +1,8 @@
-20260715-theme-assets-4
+{{- $assetURL := . | default "" -}}
+{{- $assetPath := replaceRE "^/" "" $assetURL -}}
+{{- $staticPath := printf "static/%s" $assetPath -}}
+{{- if fileExists $staticPath -}}
+  {{- md5 (readFile $staticPath) -}}
+{{- else -}}
+  {{- md5 $assetURL -}}
+{{- end -}}

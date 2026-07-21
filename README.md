@@ -34,8 +34,9 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 
 - Hugo Extended `0.112.0` 或更高版本
 - Go `1.20` 或更高版本
+- Chrome / Edge 108、Firefox 101、Safari 15.4 或更高版本（功能基线）
 
-主题使用 Hugo Module，并在根目录 `hugo.toml` 的 `[module.hugoVersion]` 中声明最低 Hugo 版本和 Extended 要求；`go.mod` 声明 Go 版本。Node.js 只用于维护者运行自动化测试，普通站点构建不需要 Node.js。
+主题使用 Hugo Module，并在根目录 `hugo.toml` 的 `[module.hugoVersion]` 中声明最低 Hugo 版本和 Extended 要求；`go.mod` 声明 Go 版本。浏览器版本是主题所用现代 CSS 能力的功能基线；CI 自动回归使用 Chromium，Firefox 和 Safari/WebKit 由发布前人工抽查。更早版本可能可以访问内容，但不属于支持范围。Node.js 只用于维护者运行自动化测试，普通站点构建不需要 Node.js。
 
 ```bash
 hugo version
@@ -226,6 +227,7 @@ title = "我的博客"
 ```toml
 [params.giscus]
   enabled = true
+  demo = false
   repo = "your-name/comments"
   repoId = "R_..."
   category = "Announcements"
@@ -235,6 +237,8 @@ title = "我的博客"
 ```
 
 评论框在首次加载时读取站点当前主题，之后会跟随主题按钮实时切换。默认会使用主题内置的 IMX 浅色/深色评论样式。需要完全自定义时，可以额外填写 `lightTheme` 和 `darkTheme`，值可以是 Giscus 支持的主题名称或自定义主题 CSS URL。
+
+`demo = true` 仅用于主题预览：当 `enabled = false` 时，它会显示明确标注为“模拟展示”的静态评论区，不加载 Giscus，也不能发布或保存评论。该参数默认关闭，不影响未配置它的站点；正式站点应保持 `demo = false`，并使用有效的 `repoId` 和 `categoryId` 启用真实 Giscus。若 `enabled` 与 `demo` 同时为 `true`，真实 Giscus 优先。
 
 ## 文章 Front Matter
 
@@ -263,8 +267,10 @@ hugo server --source exampleSite
 构建检查：
 
 ```bash
-hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock
+npm run build:example:strict
 ```
+
+严格构建会将结果写入 `/tmp`，遇到 Hugo 警告时失败，并检查搜索索引、分类和标签详情页及其他关键页面。只运行普通 Hugo 构建时仍可使用 `npm run build:example`。
 
 `exampleSite/go.mod` 使用本地 `replace` 指向仓库根目录，仅用于开发。
 
@@ -274,10 +280,11 @@ hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /t
 npm ci
 npx playwright install chromium
 npm run check:js
+npm run test:build-validation
 npm run test:e2e
 ```
 
-Playwright 会在内存中启动示例站，覆盖五种视口、主要页面、主题模式、导航、Dock、目录和横向溢出，并在 `test-results` 中保存首页、长文章和 About 页的浅色/深色截图。
+Playwright 会在 `/tmp` 中启动两份独立示例站服务，其中一份启用测试用 Giscus 配置。测试覆盖五种视口、主要页面、搜索、主题模式、导航、Dock 的合并与恢复、Giscus 主题同步、目录、404 游戏、About 访客完整请求顺序、超时、失败显示与缓存，以及横向溢出。首页、长文章和 About 页分别保留浅色、深色视觉基线；每次测试都会比较差异，并把本次截图保存到 `test-results` 供 CI 下载。
 
 ## 目录结构
 
@@ -294,9 +301,10 @@ hugo-theme-imx/
 ├── exampleSite/
 ├── images/
 ├── layouts/
+├── scripts/                 # 严格构建和生成产物验证
 ├── static/
 │   └── fonts/imx/       # 自托管字体及对应 OFL 许可证
-├── tests/
+├── tests/                   # Playwright 与构建门禁回归
 ├── hugo.toml            # Hugo Module 兼容要求
 ├── go.mod
 ├── package.json         # 仅用于维护者测试
@@ -304,7 +312,7 @@ hugo-theme-imx/
 └── README.md
 ```
 
-模板通过 Hugo Pipes 按固定顺序拼接 CSS，随后压缩并生成指纹；JavaScript 由 Hugo `js.Build` 解析模块、合并、压缩并生成指纹。浏览器最终各加载一个主题 CSS 和一个主题 JavaScript 文件，不要求额外执行 npm 构建。
+模板通过 Hugo Pipes 按固定顺序拼接 CSS，随后压缩并生成指纹；JavaScript 由 Hugo `js.Build` 解析模块、合并、压缩并生成指纹。浏览器最终各加载一个主题 CSS 和一个主题 JavaScript 文件，不要求额外执行 npm 构建。主题自带图片的缓存版本根据文件内容自动生成，替换素材时无需手动维护版本字符串。
 
 ## 参与维护
 

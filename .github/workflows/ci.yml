@@ -11,25 +11,33 @@ jobs:
   build-and-regression:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - hugo-version: "0.112.0"
+            playwright: false
+          - hugo-version: "0.164.0"
+            playwright: true
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.20"
           cache: false
 
       - name: Set up Hugo Extended
-        uses: peaceiris/actions-hugo@v3
+        uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78 # v3
         with:
-          hugo-version: "0.112.0"
+          hugo-version: ${{ matrix.hugo-version }}
           extended: true
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
           cache: npm
@@ -45,36 +53,34 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
+        if: matrix.playwright
         run: npx playwright install --with-deps chromium
 
       - name: Check JavaScript syntax
         run: npm run check:js
 
-      - name: Build example site
-        run: npm run build:example
+      - name: Verify strict build rejects missing artifacts
+        run: npm run test:build-validation
 
-      - name: Verify generated pages
-        run: |
-          test -f /tmp/hugo-theme-imx-public/index.html
-          test -f /tmp/hugo-theme-imx-public/posts/index.html
-          test -f /tmp/hugo-theme-imx-public/posts/regression-long-article/index.html
-          test -f /tmp/hugo-theme-imx-public/categories/index.html
-          test -f /tmp/hugo-theme-imx-public/tags/index.html
-          test -f /tmp/hugo-theme-imx-public/about/index.html
-          test -f /tmp/hugo-theme-imx-public/404.html
+      - name: Build and verify example site
+        run: npm run build:example:strict
 
       - name: Run browser regression tests
+        if: matrix.playwright
         run: npm run test:e2e
 
-      - name: Verify test artifacts and repository output
+      - name: Verify repository output
         run: |
-          test "$(find test-results -type f -name '*.png' | wc -l)" -eq 6
           test ! -d public
           test ! -d exampleSite/public
 
+      - name: Verify browser regression screenshots
+        if: matrix.playwright
+        run: test "$(find test-results -type f -name '*.png' | wc -l)" -eq 6
+
       - name: Upload regression screenshots
         if: ${{ always() && hashFiles('test-results/**/*.png') != '' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: regression-screenshots
           path: test-results/**/*.png
@@ -82,7 +88,7 @@ jobs:
 
       - name: Upload Playwright report on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: playwright-report
           path: playwright-report/

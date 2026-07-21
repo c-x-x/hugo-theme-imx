@@ -98,5 +98,21 @@
     });
   }());
 </script>
+{{ else if .demo }}
+<section class="comments-section" id="comments" aria-labelledby="comments-title">
+  <div class="comments-container">
+    <div class="comments-heading">
+      <p class="comments-kicker">GitHub Discussions</p>
+      <h2 class="comments-title" id="comments-title">评论区</h2>
+    </div>
+    <div class="comments-wrapper">
+      <div class="comments-demo" role="note" aria-label="评论区模拟展示">
+        <span class="comments-demo-label">模拟展示</span>
+        <p class="comments-demo-title">评论功能尚未启用</p>
+        <p class="comments-demo-description">此区域仅用于展示主题的评论区样式，无法发布或保存评论。</p>
+      </div>
+    </div>
+  </div>
+</section>
 {{ end }}
 {{ end }}

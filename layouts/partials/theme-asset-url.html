@@ -12,7 +12,7 @@
 {{- end -}}
 {{- $resolved := partial "resolve-url.html" (dict "url" $url "absolute" $absolute) -}}
 {{- if $shouldVersion -}}
-  {{- $version := trim (partial "theme-asset-version.html" .) " \t\r\n" -}}
+  {{- $version := trim (partial "theme-asset-version.html" $url) " \t\r\n" -}}
   {{- if in $resolved "?" -}}
     {{- printf "%s&v=%s" $resolved $version -}}
   {{- else -}}

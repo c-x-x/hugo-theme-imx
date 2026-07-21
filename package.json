@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "build:example": "hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock",
+    "build:example:strict": "bash scripts/build-example-strict.sh",
     "check:js": "find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "verify:example": "bash scripts/verify-example-output.sh",
+    "test:build-validation": "bash tests/strict-build-validation.test.sh",
     "test:e2e": "playwright test",
-    "test": "npm run check:js && npm run test:e2e"
+    "test": "npm run check:js && npm run test:build-validation && npm run test:e2e"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"

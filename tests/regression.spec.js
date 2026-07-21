@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+const giscusBaseURL = process.env.PLAYWRIGHT_GISCUS_BASE_URL || 'http://127.0.0.1:1418';
+
 const viewports = [
   { width: 2048, height: 1024 },
   { width: 1440, height: 900 },
@@ -90,6 +92,11 @@ for (const viewport of viewports) {
 test('theme modes, desktop dock, mobile menu and article toc remain operational', async ({ page }) => {
   const errors = watchConsole(page);
   await stubVisitorAPIs(page);
+  await page.route('https://giscus.app/client.js', route => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: ''
+  }));
   await page.setViewportSize({ width: 1440, height: 900 });
   await openStablePage(page, '/');
 
@@ -132,16 +139,10 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   await expectNoHorizontalOverflow(page);
 
   await page.setViewportSize({ width: 398, height: 541 });
-  await openStablePage(page, '/posts/imx-theme-introduction/');
+  await openStablePage(page, `${giscusBaseURL}/posts/imx-theme-introduction/`);
   await expect(page.locator('.article-tools')).toHaveCount(1);
   await expect(page.locator('.article-tools-actions')).toHaveCount(1);
-  await page.evaluate(() => {
-    const commentButton = document.createElement('a');
-    commentButton.className = 'comment-jump-btn';
-    commentButton.href = '#comments';
-    commentButton.setAttribute('aria-label', '回归测试评论按钮');
-    document.querySelector('.article-tools-actions').prepend(commentButton);
-  });
+  await expect(page.locator('.article-tools')).toHaveClass(/has-comments/);
   await page.locator('.sidebar-toggle').click();
   await expect(page.locator('.sidebar')).toHaveClass(/active/);
   const mobileTocLayout = await page.evaluate(() => {
@@ -303,6 +304,130 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(errors).toEqual([]);
 });
 
+test('desktop dock merges and restores with normal motion enabled', async ({ page }) => {
+  const errors = watchConsole(page);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => document.fonts && document.fonts.ready);
+
+  await page.evaluate(() => scrollTo(0, document.querySelector('#featured-posts').offsetTop + 24));
+  await expect(page.locator('body')).toHaveClass(/imx-dock-merged/);
+  await expect(page.locator('.navbar')).toHaveClass(/is-dock-merged/);
+
+  await page.evaluate(() => scrollTo(0, 0));
+  await expect(page.locator('body')).not.toHaveClass(/imx-dock-merged/);
+  await expect(page.locator('.navbar')).not.toHaveClass(/is-dock-merged/);
+  expect(errors).toEqual([]);
+});
+
+test('404 game starts from keyboard and resets its visible state', async ({ page }) => {
+  const errors = watchConsole(page);
+  await page.goto('/missing-regression-page/', { waitUntil: 'domcontentloaded' });
+  const canvas = page.locator('[data-404-canvas]');
+  const start = page.locator('[data-404-start]');
+  const reset = page.locator('[data-404-reset]');
+
+  await expect(start).toHaveText('开始');
+  await expect(page.locator('[data-404-score]')).toHaveText('0');
+  await expect(page.locator('[data-404-lives]')).toHaveText('3');
+  await canvas.focus();
+  await page.keyboard.press('Space');
+  await expect(start).toHaveText('进行中');
+  await reset.click();
+  await expect(start).toHaveText('进行中');
+  await expect(page.locator('[data-404-score]')).toHaveText('0');
+  await expect(page.locator('[data-404-lives]')).toHaveText('3');
+  expect(errors).toEqual([]);
+});
+
+test('mobile dock, comment and TOC buttons use translucent surfaces in both themes', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('themeMode')) localStorage.setItem('themeMode', 'light');
+  });
+  await page.route('https://giscus.app/client.js', route => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: ''
+  }));
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.navbar-container')).toHaveCSS('background-color', 'rgba(251, 250, 247, 0.68)');
+
+  await page.evaluate(() => {
+    localStorage.setItem('themeMode', 'dark');
+    location.reload();
+  });
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.locator('.navbar-container')).toHaveCSS('background-color', 'rgba(23, 23, 22, 0.72)');
+
+  await page.goto(`${giscusBaseURL}/posts/imx-theme-introduction/`, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => {
+    localStorage.setItem('themeMode', 'dark');
+    location.reload();
+  });
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.locator('.navbar-container')).toHaveCSS('background-color', 'rgba(23, 23, 22, 0.72)');
+  await expect(page.locator('.comment-jump-btn')).toHaveCSS('background-color', 'rgba(23, 23, 22, 0.76)');
+  await expect(page.locator('.sidebar-toggle')).toHaveCSS('background-color', 'rgba(23, 23, 22, 0.76)');
+  await page.locator('.mobile-menu-toggle').click();
+  await expect(page.locator('.navbar-menu')).toHaveCSS('background-color', 'rgba(23, 23, 22, 0.72)');
+  await expect(page.locator('.navbar-menu')).toHaveCSS('backdrop-filter', 'blur(22px) saturate(1.65)');
+
+  await page.evaluate(() => {
+    localStorage.setItem('themeMode', 'light');
+    location.reload();
+  });
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.locator('.navbar-container')).toHaveCSS('background-color', 'rgba(251, 250, 247, 0.68)');
+  await expect(page.locator('.comment-jump-btn')).toHaveCSS('background-color', 'rgba(251, 250, 247, 0.72)');
+  await expect(page.locator('.sidebar-toggle')).toHaveCSS('background-color', 'rgba(251, 250, 247, 0.72)');
+  await page.locator('.mobile-menu-toggle').click();
+  await expect(page.locator('.navbar-menu')).toHaveCSS('background-color', 'rgba(251, 250, 247, 0.68)');
+  await expect(page.locator('.navbar-menu')).toHaveCSS('backdrop-filter', 'blur(22px) saturate(1.65)');
+});
+
+test('mobile menu leaves a long article scrollable while open', async ({ page }) => {
+  const errors = watchConsole(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/posts/regression-long-article/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.locator('.mobile-menu-toggle').click();
+  await expect(page.locator('.mobile-menu-toggle')).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('body')).not.toHaveClass(/mobile-menu-open/);
+  await page.mouse.wheel(0, 500);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});
+
+test('static comment demo remains readable without overflow in both themes', async ({ page }) => {
+  const errors = watchConsole(page);
+  const expectedBackgrounds = {
+    light: 'rgba(251, 250, 247, 0.72)',
+    dark: 'rgba(23, 23, 22, 0.76)'
+  };
+
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
+    await page.setViewportSize(viewport);
+    for (const mode of ['light', 'dark']) {
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await page.evaluate(themeMode => localStorage.setItem('themeMode', themeMode), mode);
+      await openStablePage(page, '/posts/imx-theme-introduction/');
+
+      const demo = page.locator('#comments .comments-demo');
+      await expect(page.locator('html')).toHaveAttribute('data-theme', mode);
+      await expect(demo).toBeVisible();
+      await expect(demo).toHaveCSS('background-color', expectedBackgrounds[mode]);
+      await expect(demo).toHaveCSS('border-radius', '20px');
+      await expect(page.locator('.comments-demo-label')).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    }
+  }
+
+  expect(errors).toEqual([]);
+});
+
 for (const mode of ['light', 'dark']) {
   for (const [name, route] of routes.filter(([name]) => ['home', 'article', 'about'].includes(name))) {
     test(`capture ${name} in ${mode} mode`, async ({ page }, testInfo) => {
@@ -310,6 +435,7 @@ for (const mode of ['light', 'dark']) {
       await stubVisitorAPIs(page);
       await page.addInitScript(themeMode => localStorage.setItem('themeMode', themeMode), mode);
       await openStablePage(page, route);
+      await page.waitForLoadState('networkidle');
       await expect(page.locator('html')).toHaveAttribute('data-theme', mode);
       await expect(page.locator(routes.find(([routeName]) => routeName === name)[2]).first()).toBeVisible();
       if (name === 'about') {
@@ -326,6 +452,13 @@ for (const mode of ['light', 'dark']) {
         expect(inlineCodeStyle.backgroundColor).toBe(`rgba(${accent}, 0.08)`);
         expect(inlineCodeStyle.borderColor).toBe(`rgba(${accent}, 0.22)`);
       }
+      await expect(page).toHaveScreenshot(`${name}-${mode}.png`, {
+        fullPage: true,
+        animations: 'disabled',
+        caret: 'hide',
+        maxDiffPixelRatio: 0.02,
+        threshold: 0.3
+      });
       await page.screenshot({
         path: testInfo.outputPath(`${name}-${mode}.png`),
         fullPage: true,

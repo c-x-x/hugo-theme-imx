@@ -1,0 +1,7 @@
+{{ define "main" }}
+{{- $defaultCoverPath := "/images/imx/default-cover.webp" -}}
+{{- $defaultCoverURL := partial "theme-asset-url.html" (dict "url" $defaultCoverPath "default" $defaultCoverPath) -}}
+<main data-asset-version-regression>
+  <img src="{{ $defaultCoverURL }}" alt="" width="1600" height="900">
+</main>
+{{ end }}

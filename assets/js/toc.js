@@ -10,12 +10,22 @@ export function initToc() {
   const sidebarToggle = document.querySelector('.sidebar-toggle');
   const sidebar = document.querySelector('.sidebar');
   const articlePage = document.querySelector('.article-page');
+  const articleTools = document.querySelector('.article-tools');
 
   if (sidebarToggle && sidebar) {
     function updateSidebarIcon(isOpen) {
       sidebarToggle.innerHTML = isOpen
         ? '<svg width="24" height="24" fill="currentColor"><use href="#icon-close"></use></svg>'
         : '<svg width="24" height="24" fill="currentColor"><use href="#icon-menu"></use></svg>';
+    }
+
+    function updateSidebarState(isOpen) {
+      updateSidebarIcon(isOpen);
+      sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+      sidebarToggle.setAttribute('aria-label', isOpen ? '关闭目录' : '打开目录');
+      if (articleTools) {
+        articleTools.classList.toggle('is-toc-open', isOpen);
+      }
     }
 
     function setArticleTocCollapsed(isCollapsed) {
@@ -32,7 +42,7 @@ export function initToc() {
         sidebar.classList.remove('active');
         sidebarToggle.classList.remove('active');
         setArticleTocCollapsed(false);
-        updateSidebarIcon(false);
+        updateSidebarState(false);
         return;
       }
 
@@ -41,7 +51,7 @@ export function initToc() {
       const isCollapsed = getStorageItem('sidebarCollapsed') === 'true';
       sidebar.classList.toggle('collapsed', isCollapsed);
       setArticleTocCollapsed(isCollapsed);
-      updateSidebarIcon(!isCollapsed);
+      updateSidebarState(!isCollapsed);
     }
 
     syncSidebarMode();
@@ -51,7 +61,7 @@ export function initToc() {
         const isOpen = !sidebar.classList.contains('active');
         sidebar.classList.toggle('active', isOpen);
         sidebarToggle.classList.toggle('active', isOpen);
-        updateSidebarIcon(isOpen);
+        updateSidebarState(isOpen);
         return;
       }
 
@@ -61,7 +71,7 @@ export function initToc() {
       sidebar.classList.toggle('collapsed', nextCollapsed);
       setArticleTocCollapsed(nextCollapsed);
       setStorageItem('sidebarCollapsed', nextCollapsed);
-      updateSidebarIcon(isCollapsed);
+      updateSidebarState(isCollapsed);
     });
 
     onMediaQueryChange(mobileQuery, () => {

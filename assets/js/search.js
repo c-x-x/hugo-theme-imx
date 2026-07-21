@@ -23,6 +23,7 @@ export function initSearch() {
       })
       .then(data => {
         searchIndex = Array.isArray(data) ? data : [];
+        performSearch(searchInput.value);
       })
       .catch(() => console.warn('IMX Theme: 未找到搜索索引，请确认首页启用了 JSON 输出。'));
 
@@ -93,12 +94,15 @@ export function initSearch() {
 
     // 高亮搜索词
     function highlightText(text, query) {
+      const characterEntities = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
       const escapedText = String(text || '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+        .replace(/[&<>"']/g, character => characterEntities[character]);
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(${escapedQuery})`, 'gi');
 

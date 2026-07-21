@@ -24,6 +24,7 @@ enableRobotsTXT = true
 
   [params.giscus]
     enabled = false
+    demo = true
     repo = ""
     repoId = ""
     category = "Announcements"

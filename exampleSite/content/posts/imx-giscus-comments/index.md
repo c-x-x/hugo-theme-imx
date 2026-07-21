@@ -95,6 +95,7 @@ data-category-id="DIC_kwDO..."
 ```toml
 [params.giscus]
   enabled = true
+  demo = false
   repo = "your-name/blog-comments"
   repoId = "R_kgDOxxxxxxxx"
   category = "Announcements"
@@ -109,7 +110,8 @@ data-category-id="DIC_kwDO..."
 
 | IMX 参数 | 来自哪里 | 说明 |
 | --- | --- | --- |
-| `enabled` | 手动填写 | `true` 才会加载评论区 |
+| `enabled` | 手动填写 | `true` 时加载真实评论区，并优先于模拟模式 |
+| `demo` | 手动填写 | 仅供主题预览；`enabled = false` 时显示不可评论的静态模拟区 |
 | `repo` | `data-repo` | 必须是 `owner/repository` |
 | `repoId` | `data-repo-id` | 仓库的 GraphQL ID |
 | `category` | `data-category` | Discussion 分类名称，区分大小写 |
@@ -139,6 +141,8 @@ hugo server --disableFastRender
 ```
 
 打开任意一篇文章，滚到正文末尾。正常情况下会看到“GitHub Discussions / 评论区”，以及一个“使用 GitHub 登录”的评论框。列表页、分类页和 About 页不会加载 Giscus。
+
+主题仓库的示例站使用 `enabled = false`、`demo = true` 展示静态评论区，并明确标注无法发布或保存评论。正式站点不要把它当作 Giscus 配置；应保持 `demo = false`，填入有效 ID 后启用真实评论。
 
 接着至少做四项检查：
 

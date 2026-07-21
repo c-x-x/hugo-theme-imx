@@ -108,6 +108,7 @@
     (resources.Get "css/layout.css")
     (resources.Get "css/not-found.css")
     (resources.Get "css/navigation.css")
+    (resources.Get "css/navigation-liquid.css")
     (resources.Get "css/home.css")
     (resources.Get "css/cards.css")
     (resources.Get "css/taxonomy.css")
@@ -115,8 +116,10 @@
     (resources.Get "css/search.css")
     (resources.Get "css/footer.css")
     (resources.Get "css/responsive.css")
+    (resources.Get "css/responsive-content.css")
     (resources.Get "css/utilities.css")
     (resources.Get "css/article-reading.css")
+    (resources.Get "css/article-reading-responsive.css")
     (resources.Get "css/code.css")
     (resources.Get "css/loading.css")
     (resources.Get "css/print.css")
@@ -228,7 +231,7 @@
     </symbol>
   </svg>
 </head>
-<body class="{{ if .IsHome }}is-home{{ end }}" data-search-index="{{ "index.json" | relLangURL }}">
+<body class="{{ if .IsHome }}is-home{{ end }}{{ block "body-class" . }}{{ end }}" data-search-index="{{ "index.json" | relLangURL }}">
   {{ partial "header.html" . }}
 
   <main class="main-wrapper{{ if .IsHome }} main-wrapper-home{{ end }}">
