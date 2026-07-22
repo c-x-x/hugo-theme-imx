@@ -341,6 +341,53 @@ test('404 game starts from keyboard and resets its visible state', async ({ page
   expect(errors).toEqual([]);
 });
 
+test('desktop dock uses one translucent surface on every page', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  const surfaceSelectors = ['.navbar-brand', '.navbar-menu', '.navbar-actions'];
+  const routes = [
+    '/',
+    '/posts/',
+    '/categories/',
+    '/tags/',
+    '/about/',
+    '/missing-regression-page/',
+    '/posts/imx-theme-introduction/'
+  ];
+  const expectedSurfaces = {
+    light: 'rgba(251, 250, 247, 0.68)',
+    dark: 'rgba(23, 23, 22, 0.72)'
+  };
+  const transparentSurfaces = {
+    light: 'rgba(251, 250, 247, 0)',
+    dark: 'rgba(23, 23, 22, 0)'
+  };
+
+  for (const mode of ['light', 'dark']) {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(themeMode => localStorage.setItem('themeMode', themeMode), mode);
+
+    for (const route of routes) {
+      await openStablePage(page, route);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', mode);
+
+      for (const selector of surfaceSelectors) {
+        await expect(page.locator(selector)).toHaveCSS('background-color', expectedSurfaces[mode]);
+      }
+    }
+
+    await openStablePage(page, '/');
+    await page.evaluate(() => scrollTo(0, document.querySelector('#featured-posts').offsetTop + 24));
+    await expect(page.locator('.navbar')).toHaveClass(/is-dock-merged/);
+    await expect(page.locator('.navbar-dock-shell')).toHaveCSS('background-color', expectedSurfaces[mode]);
+    await expect(page.locator('.navbar-dock-shell')).toHaveCSS('opacity', '1');
+    for (const selector of surfaceSelectors) {
+      await expect(page.locator(selector)).toHaveCSS('background-color', transparentSurfaces[mode]);
+    }
+
+  }
+});
+
 test('mobile dock, comment and TOC buttons use translucent surfaces in both themes', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.addInitScript(() => {

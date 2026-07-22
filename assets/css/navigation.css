@@ -98,7 +98,7 @@
   overflow: hidden;
   border: 1px solid rgba(60, 55, 48, 0.14);
   border-radius: 999px;
-  background: rgba(250, 249, 246, 0.8);
+  background: rgba(var(--desktop-dock-surface-rgb), var(--desktop-dock-surface-alpha));
   box-shadow:
     0 14px 34px rgba(44, 40, 34, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.58);
@@ -115,7 +115,7 @@
 
 [data-theme="dark"] .navbar-dock-shell {
   border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(24, 24, 23, 0.88);
+  background: rgba(var(--desktop-dock-surface-rgb), var(--desktop-dock-surface-alpha));
   box-shadow:
     0 14px 34px rgba(0, 0, 0, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.09);
@@ -404,7 +404,10 @@
   .navbar.has-shared-dock .navbar-brand,
   .navbar.has-shared-dock .navbar-actions,
   .navbar.has-shared-dock .navbar-brand:hover {
-    background: rgba(251, 250, 247, var(--home-dock-part-bg-alpha, 0.8));
+    background: rgba(
+      var(--desktop-dock-surface-rgb),
+      calc(var(--desktop-dock-surface-alpha) * var(--home-dock-part-overlay-alpha, 1))
+    );
     border-color: rgba(75, 64, 52, var(--home-dock-part-border-alpha, 0.14));
     box-shadow:
       0 7px 26px rgba(75, 64, 52, var(--home-dock-part-shadow-alpha, 0.11));
@@ -414,7 +417,10 @@
   [data-theme="dark"] .navbar.has-shared-dock .navbar-brand,
   [data-theme="dark"] .navbar.has-shared-dock .navbar-actions,
   [data-theme="dark"] .navbar.has-shared-dock .navbar-brand:hover {
-    background: rgba(23, 23, 22, var(--home-dock-part-bg-alpha, 0.8));
+    background: rgba(
+      var(--desktop-dock-surface-rgb),
+      calc(var(--desktop-dock-surface-alpha) * var(--home-dock-part-overlay-alpha, 1))
+    );
     border-color: rgba(238, 234, 227, var(--home-dock-part-border-alpha, 0.14));
     box-shadow:
       0 7px 26px rgba(0, 0, 0, var(--home-dock-part-dark-shadow-alpha, 0.28));
@@ -429,7 +435,10 @@
   }
 
   .navbar.has-shared-dock .navbar-menu {
-    background: rgba(251, 250, 247, calc(var(--home-dock-part-bg-alpha, 0.8) * 0.625));
+    background: rgba(
+      var(--desktop-dock-surface-rgb),
+      calc(var(--desktop-dock-surface-alpha) * var(--home-dock-part-overlay-alpha, 1))
+    );
     border-color: rgba(15, 23, 42, var(--home-dock-part-border-alpha, 0.14));
     box-shadow:
       0 7px 26px rgba(75, 64, 52, var(--home-dock-part-shadow-alpha, 0.11)),
@@ -439,7 +448,10 @@
   }
 
   [data-theme="dark"] .navbar.has-shared-dock .navbar-menu {
-    background: rgba(23, 23, 22, calc(var(--home-dock-part-bg-alpha, 0.8) * 0.675));
+    background: rgba(
+      var(--desktop-dock-surface-rgb),
+      calc(var(--desktop-dock-surface-alpha) * var(--home-dock-part-overlay-alpha, 1))
+    );
     border-color: rgba(255, 255, 255, var(--home-dock-part-border-alpha, 0.14));
     box-shadow:
       0 7px 28px rgba(0, 0, 0, var(--home-dock-part-dark-shadow-alpha, 0.28)),
@@ -483,4 +495,3 @@
     transition-delay: 0s;
   }
 }
-
