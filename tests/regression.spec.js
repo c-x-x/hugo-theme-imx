@@ -401,6 +401,31 @@ test('mobile menu leaves a long article scrollable while open', async ({ page })
   expect(errors).toEqual([]);
 });
 
+test('mobile navigation visibly highlights the current section on every primary route', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.addInitScript(() => localStorage.setItem('themeMode', 'light'));
+
+  const routeExpectations = [
+    ['/', '/'],
+    ['/posts/', '/posts/'],
+    ['/posts/imx-theme-introduction/', '/posts/'],
+    ['/categories/', '/categories/'],
+    ['/tags/', '/tags/'],
+    ['/about/', '/about/']
+  ];
+
+  for (const [route, expectedHref] of routeExpectations) {
+    await openStablePage(page, route);
+    await page.locator('.mobile-menu-toggle').click();
+
+    const activeLink = page.locator(`.navbar-menu a[href="${expectedHref}"]`);
+    await expect(activeLink).toHaveClass(/active/);
+    await expect(activeLink).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('.navbar-menu a.active')).toHaveCount(1);
+    await expect(activeLink).toHaveCSS('background-color', 'rgba(122, 90, 50, 0.12)');
+  }
+});
+
 test('static comment demo remains readable without overflow in both themes', async ({ page }) => {
   const errors = watchConsole(page);
   const expectedBackgrounds = {

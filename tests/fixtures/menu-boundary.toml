@@ -1,0 +1,24 @@
+[[menus.main]]
+  name = "首页"
+  pageRef = "/"
+  weight = 10
+
+[[menus.main]]
+  name = "短路径"
+  url = "post"
+  weight = 20
+
+[[menus.main]]
+  name = "文章"
+  url = "posts"
+  weight = 30
+
+[[menus.main]]
+  name = "主题介绍"
+  url = "posts/imx-theme-introduction"
+  weight = 40
+
+[[menus.main]]
+  name = "关于"
+  pageRef = "/about"
+  weight = 50

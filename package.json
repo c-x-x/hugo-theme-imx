@@ -4,7 +4,7 @@
   "scripts": {
     "build:example": "hugo --source exampleSite --destination /tmp/hugo-theme-imx-public --cacheDir /tmp/hugo-theme-imx-cache --gc --minify --noBuildLock",
     "build:example:strict": "bash scripts/build-example-strict.sh",
-    "check:js": "find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "check:js": "find assets/js scripts tests playwright.config.js -type f -name '*.js' -print0 | xargs -0 -n1 node --check",
     "verify:example": "bash scripts/verify-example-output.sh",
     "test:build-validation": "bash tests/strict-build-validation.test.sh",
     "test:e2e": "playwright test",

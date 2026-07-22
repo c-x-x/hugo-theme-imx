@@ -41,6 +41,13 @@ require_content "categories/主题指南/index.html" "主题指南"
 require_content "categories/主题指南/index.html" "/posts/imx-configuration-deployment-guide/"
 require_content "tags/hugo/index.html" "Hugo"
 require_content "tags/hugo/index.html" "/posts/imx-theme-introduction/"
+node scripts/verify-navigation-output.js "$output_dir" \
+  "index.html=/" \
+  "posts/index.html=/posts/" \
+  "posts/imx-theme-introduction/index.html=/posts/" \
+  "categories/index.html=/categories/" \
+  "tags/index.html=/tags/" \
+  "about/index.html=/about/"
 
 node - "$output_dir/index.json" <<'NODE'
 const fs = require('fs');

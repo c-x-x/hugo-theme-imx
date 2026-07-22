@@ -18,6 +18,8 @@
   --color-bg-secondary: #F2EFE8;
   --color-bg-glass: rgba(251, 250, 247, 0.8);
   --color-bg-card: rgba(251, 250, 247, 0.72);
+  --color-bg-mobile-dock: rgba(251, 250, 247, 0.68);
+  --filter-mobile-dock: blur(22px) saturate(165%);
 
   --color-text: #24211D;
   --color-text-secondary: #5F5850;
@@ -62,6 +64,7 @@
   --color-bg-secondary: #1F1F1D;
   --color-bg-glass: rgba(23, 23, 22, 0.84);
   --color-bg-card: rgba(23, 23, 22, 0.76);
+  --color-bg-mobile-dock: rgba(23, 23, 22, 0.72);
 
   --color-text: #EEEAE3;
   --color-text-secondary: #C7C0B7;

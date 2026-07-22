@@ -36,9 +36,9 @@
     column-gap: 6px;
     border: 1px solid rgba(75, 64, 52, 0.12);
     border-radius: 24px;
-    background: rgba(251, 250, 247, 0.68);
-    backdrop-filter: blur(22px) saturate(165%);
-    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    background: var(--color-bg-mobile-dock);
+    backdrop-filter: var(--filter-mobile-dock);
+    -webkit-backdrop-filter: var(--filter-mobile-dock);
     box-shadow:
       0 12px 30px rgba(44, 40, 34, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.72);
@@ -49,7 +49,7 @@
   }
 
   [data-theme="dark"] .navbar-container {
-    background: rgba(23, 23, 22, 0.72);
+    background: var(--color-bg-mobile-dock);
     border-color: rgba(238, 234, 227, 0.13);
     box-shadow:
       0 14px 34px rgba(0, 0, 0, 0.3),
@@ -202,8 +202,8 @@
     border: 1px solid rgba(75, 64, 52, 0.12);
     border-radius: 18px;
     background: rgba(251, 250, 247, 0.88);
-    backdrop-filter: blur(22px) saturate(165%);
-    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    backdrop-filter: var(--filter-mobile-dock);
+    -webkit-backdrop-filter: var(--filter-mobile-dock);
     box-shadow:
       0 14px 34px rgba(44, 40, 34, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.64);

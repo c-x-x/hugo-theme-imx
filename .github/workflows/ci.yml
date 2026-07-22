@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 permissions:
@@ -50,6 +52,7 @@ jobs:
           npm --version
 
       - name: Install test dependencies
+        if: matrix.playwright
         run: npm ci
 
       - name: Install Chromium
@@ -61,9 +64,6 @@ jobs:
 
       - name: Verify strict build rejects missing artifacts
         run: npm run test:build-validation
-
-      - name: Build and verify example site
-        run: npm run build:example:strict
 
       - name: Run browser regression tests
         if: matrix.playwright

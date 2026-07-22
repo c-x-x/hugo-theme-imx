@@ -126,14 +126,14 @@
     flex: 0 0 var(--floating-action-toggle-size);
     border: 0;
     border-radius: 12px;
-    background: rgba(251, 250, 247, 0.72);
+    background: var(--color-bg-card);
     box-shadow: none;
     transform: none;
   }
 
   [data-theme="dark"] .article-page .article-tools-actions .comment-jump-btn,
   [data-theme="dark"] .article-page .article-tools-actions .sidebar-toggle {
-    background: rgba(23, 23, 22, 0.76);
+    background: var(--color-bg-card);
   }
 
   .article-page .article-tools-actions .comment-jump-btn + .sidebar-toggle {

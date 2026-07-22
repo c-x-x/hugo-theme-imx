@@ -138,12 +138,12 @@ title = "我的博客"
 
 [[menus.main]]
   name = "分类"
-  url = "/categories/"
+  pageRef = "/categories"
   weight = 30
 
 [[menus.main]]
   name = "标签"
-  url = "/tags/"
+  pageRef = "/tags"
   weight = 40
 
 [[menus.main]]

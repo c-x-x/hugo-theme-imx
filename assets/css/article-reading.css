@@ -67,25 +67,25 @@ body.is-article-page .navbar-container {
 @media (max-width: 768px) {
   body.is-article-page .navbar-container {
     border-color: var(--article-soft-line);
-    background: rgba(251, 250, 247, 0.68);
-    backdrop-filter: blur(22px) saturate(165%);
-    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    background: var(--color-bg-mobile-dock);
+    backdrop-filter: var(--filter-mobile-dock);
+    -webkit-backdrop-filter: var(--filter-mobile-dock);
   }
 
   body.is-article-page .navbar-menu {
     border-color: var(--article-soft-line);
-    background: rgba(251, 250, 247, 0.68);
-    backdrop-filter: blur(22px) saturate(165%);
-    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    background: var(--color-bg-mobile-dock);
+    backdrop-filter: var(--filter-mobile-dock);
+    -webkit-backdrop-filter: var(--filter-mobile-dock);
     box-shadow: none;
   }
 
   [data-theme="dark"] body.is-article-page .navbar-container {
-    background: rgba(23, 23, 22, 0.72);
+    background: var(--color-bg-mobile-dock);
   }
 
   [data-theme="dark"] body.is-article-page .navbar-menu {
-    background: rgba(23, 23, 22, 0.72);
+    background: var(--color-bg-mobile-dock);
   }
 }
 
@@ -119,7 +119,6 @@ body.is-article-page .navbar-container {
   }
 }
 
-body.is-article-page .navbar-menu a.active,
 body.is-article-page .navbar-menu a:hover,
 body.is-article-page .theme-toggle:hover,
 body.is-article-page .mobile-menu-toggle:hover {
@@ -772,13 +771,13 @@ body.is-article-page .sidebar-toggle:hover {
 
 .article-page .comments-demo {
   border-color: var(--article-soft-line);
-  background: rgba(251, 250, 247, 0.72);
+  background: var(--color-bg-card);
   color: var(--article-ink);
   font-family: var(--article-ui-font);
 }
 
 [data-theme="dark"] .article-page .comments-demo {
-  background: rgba(23, 23, 22, 0.76);
+  background: var(--color-bg-card);
 }
 
 .article-page .comments-demo-label {

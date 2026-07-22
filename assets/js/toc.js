@@ -1,4 +1,4 @@
-import { mobileQuery, sidebarOverlayQuery } from "./core/dom.js";
+import { mobileQuery } from "./core/dom.js";
 import { getStorageItem, setStorageItem } from "./core/storage.js";
 import { onMediaQueryChange } from "./core/media-query.js";
 export function initToc() {
@@ -33,11 +33,11 @@ export function initToc() {
         return;
       }
 
-      articlePage.classList.toggle('article-page-toc-collapsed', !sidebarOverlayQuery.matches && isCollapsed);
+      articlePage.classList.toggle('article-page-toc-collapsed', !mobileQuery.matches && isCollapsed);
     }
 
     function syncSidebarMode() {
-      if (sidebarOverlayQuery.matches) {
+      if (mobileQuery.matches) {
         sidebar.classList.remove('collapsed');
         sidebar.classList.remove('active');
         sidebarToggle.classList.remove('active');
@@ -57,7 +57,7 @@ export function initToc() {
     syncSidebarMode();
 
     sidebarToggle.addEventListener('click', () => {
-      if (sidebarOverlayQuery.matches) {
+      if (mobileQuery.matches) {
         const isOpen = !sidebar.classList.contains('active');
         sidebar.classList.toggle('active', isOpen);
         sidebarToggle.classList.toggle('active', isOpen);
@@ -78,9 +78,6 @@ export function initToc() {
       syncSidebarMode();
     });
 
-    onMediaQueryChange(sidebarOverlayQuery, () => {
-      syncSidebarMode();
-    });
   }
 
   // ============================================

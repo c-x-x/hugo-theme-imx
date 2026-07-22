@@ -5,11 +5,22 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 empty_output_dir="$(mktemp -d /tmp/hugo-theme-imx-empty-output.XXXXXX)"
 built_output_dir="$(mktemp -d /tmp/hugo-theme-imx-built-output.XXXXXX)"
+subdir_output_dir="$(mktemp -d /tmp/hugo-theme-imx-subdir-output.XXXXXX)"
+navigation_parser_output_dir="$(mktemp -d /tmp/hugo-theme-imx-navigation-parser-output.XXXXXX)"
 warning_output_dir="$(mktemp -d /tmp/hugo-theme-imx-warning-output.XXXXXX)"
 fake_bin="$(mktemp -d /tmp/hugo-theme-imx-fake-bin.XXXXXX)"
-trap 'rm -rf "$empty_output_dir" "$built_output_dir" "$warning_output_dir" "$fake_bin"' EXIT
+trap 'rm -rf "$empty_output_dir" "$built_output_dir" "$subdir_output_dir" "$navigation_parser_output_dir" "$warning_output_dir" "$fake_bin"' EXIT
 
 cd "$root_dir"
+
+cat > "$navigation_parser_output_dir/index.html" <<'HTML'
+<ul data-layout="primary" class="menu navbar-menu enhanced">
+  <li><a aria-current="page" data-class="inactive" class="active selected" href="/quoted/">Quoted attributes</a></li>
+  <li aria-hidden="true" class="marker navbar-menu-outline"></li>
+</ul>
+HTML
+
+node scripts/verify-navigation-output.js "$navigation_parser_output_dir" "index.html=/quoted/"
 
 if verification_output="$(npm run --silent verify:example -- "$empty_output_dir" 2>&1)"; then
   echo "Expected verification to reject an output directory with no generated artifacts." >&2
@@ -52,4 +63,19 @@ if ! grep -Fq "must be a direct /tmp/hugo-theme-imx-* directory" <<<"$traversal_
 fi
 
 npm run build:example:strict -- "$built_output_dir"
-npm run verify:example -- "$built_output_dir"
+
+hugo --source exampleSite \
+  --config hugo.toml,../tests/fixtures/menu-boundary.toml \
+  --destination "$subdir_output_dir" \
+  --cacheDir /tmp/hugo-theme-imx-cache \
+  --baseURL https://example.com/blog/ \
+  --gc \
+  --minify \
+  --noBuildLock \
+  --quiet
+
+node scripts/verify-navigation-output.js "$subdir_output_dir" \
+  "index.html=/blog/" \
+  "posts/index.html=/blog/posts" \
+  "posts/imx-theme-introduction/index.html=/blog/posts/imx-theme-introduction" \
+  "about/index.html=/blog/about/"

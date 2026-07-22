@@ -75,8 +75,32 @@
     <ul class="navbar-menu">
       {{- if .Site.Menus.main -}}
         {{- $currentPage := . -}}
+        {{- $currentURL := $currentPage.RelPermalink -}}
+        {{- $pathMenuURL := "" -}}
+        {{- $pathMenuLength := 0 -}}
         {{- range .Site.Menus.main -}}
-          {{- $active := or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) -}}
+          {{- $candidateURL := .URL | relLangURL -}}
+          {{- $candidatePrefix := $candidateURL -}}
+          {{- if not (hasSuffix $candidatePrefix "/") -}}
+            {{- $candidatePrefix = printf "%s/" $candidatePrefix -}}
+          {{- end -}}
+          {{- $pathMatches := or
+            (eq $currentURL $candidateURL)
+            (eq $currentURL $candidatePrefix)
+            (and (ne $candidateURL $homeURL) (hasPrefix $currentURL $candidatePrefix))
+          -}}
+          {{- if and $pathMatches (gt (len $candidatePrefix) $pathMenuLength) -}}
+            {{- $pathMenuURL = $candidateURL -}}
+            {{- $pathMenuLength = len $candidatePrefix -}}
+          {{- end -}}
+        {{- end -}}
+        {{- range .Site.Menus.main -}}
+          {{- $menuURL := .URL | relLangURL -}}
+          {{- $active := or
+            ($currentPage.IsMenuCurrent "main" .)
+            ($currentPage.HasMenuCurrent "main" .)
+            (eq $menuURL $pathMenuURL)
+          -}}
           <li>
             <a href="{{ .URL | relLangURL }}"{{ if $active }} class="active" aria-current="page"{{ end }}>
               {{ .Name }}
