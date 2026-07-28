@@ -97,6 +97,51 @@ test('static comment demo is clearly labelled and cannot submit comments', async
   expect(giscusRequests).toEqual([]);
 });
 
+test('font pipeline preloads critical faces and applies shared font roles', async ({ page }) => {
+  const preloadHrefs = async () => page.locator('link[rel="preload"][as="font"]')
+    .evaluateAll(links => links.map(link => link.getAttribute('href')));
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  let preloads = await preloadHrefs();
+  expect(preloads).toHaveLength(1);
+  expect(preloads[0]).toMatch(/\/fonts\/imx\/inter-variable\.[a-f0-9]{64}\.woff2$/);
+  await page.evaluate(() => document.fonts.ready);
+  const homeFont = await page.locator('body').evaluate(element => getComputedStyle(element).fontFamily);
+  expect(homeFont.toLowerCase()).toContain('imx inter');
+
+  await page.goto('/about/', { waitUntil: 'domcontentloaded' });
+  preloads = await preloadHrefs();
+  expect(preloads).toHaveLength(1);
+  expect(preloads[0]).toMatch(/\/fonts\/imx\/inter-variable\.[a-f0-9]{64}\.woff2$/);
+
+  await page.goto('/posts/regression-long-article/', { waitUntil: 'domcontentloaded' });
+  preloads = await preloadHrefs();
+  expect(preloads).toHaveLength(2);
+  expect(preloads).toEqual(expect.arrayContaining([
+    expect.stringMatching(/\/fonts\/imx\/inter-variable\.[a-f0-9]{64}\.woff2$/),
+    expect.stringMatching(/\/fonts\/imx\/noto-serif-sc-400-core\.[a-f0-9]{64}\.woff2$/)
+  ]));
+  await page.evaluate(() => document.fonts.ready);
+
+  const articleFonts = await page.evaluate(() => ({
+    body: getComputedStyle(document.body).fontFamily,
+    content: getComputedStyle(document.querySelector('.article-content')).fontFamily,
+    heading: getComputedStyle(document.querySelector('.article-content h2')).fontFamily,
+    interLoaded: document.fonts.check('400 16px "IMX Inter"', 'IMX'),
+    serifLoaded: document.fonts.check('400 16px "IMX Noto Serif SC"', '阅读')
+  }));
+  expect(articleFonts.body.toLowerCase()).toContain('imx inter');
+  expect(articleFonts.content.toLowerCase()).toContain('imx noto serif sc');
+  expect(articleFonts.heading.toLowerCase()).toContain('imx inter');
+  expect(articleFonts.interLoaded).toBe(true);
+  expect(articleFonts.serifLoaded).toBe(true);
+
+  const retiredRequests = await page.evaluate(() => performance.getEntriesByType('resource')
+    .map(entry => entry.name)
+    .filter(url => /noto-serif-sc-(regular|bold)\.woff2$/.test(url)));
+  expect(retiredRequests).toEqual([]);
+});
+
 test('Giscus-enabled build renders the real comment controls and host', async ({ page }) => {
   await page.route('https://giscus.app/client.js', route => route.fulfill({
     status: 200,

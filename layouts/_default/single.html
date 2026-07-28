@@ -1,5 +1,10 @@
 {{ define "body-class" }} is-article-page{{ end }}
 
+{{ define "article-font-preload" }}
+  {{- $articleFont := resources.Get "fonts/imx/noto-serif-sc-400-core.woff2" | fingerprint -}}
+  <link rel="preload" href="{{ $articleFont.RelPermalink }}" integrity="{{ $articleFont.Data.Integrity }}" as="font" type="font/woff2" crossorigin>
+{{ end }}
+
 {{ define "main" }}
 {{- $toc := .TableOfContents -}}
 {{- $showToc := and (in $toc "<li>") (ne .Params.toc false) -}}

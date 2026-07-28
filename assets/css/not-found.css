@@ -28,7 +28,7 @@
   top: 50%;
   width: 150vw;
   color: rgba(var(--color-primary-rgb), 0.055);
-  font-family: 'IMX Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(7rem, 18vw, 19rem);
   font-weight: 860;
   letter-spacing: -0.08em;
@@ -98,7 +98,7 @@
 .not-found-copy h1 {
   margin: 0;
   color: var(--color-text);
-  font-family: var(--imx-article-sans, 'IMX Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-family: var(--font-ui);
   font-size: clamp(3rem, 7vw, 6.8rem);
   font-weight: 860;
   letter-spacing: -0.07em;
@@ -393,4 +393,3 @@ body.is-home[data-theme="dark"] .navbar-menu {
     0 10px 32px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
-

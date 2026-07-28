@@ -86,7 +86,7 @@ my-blog/
 然后安装主题：
 
 ```bash
-hugo mod get github.com/c-x-x/hugo-theme-imx@v1.4.0
+hugo mod get github.com/c-x-x/hugo-theme-imx@v1.4.9
 hugo mod tidy
 ```
 
@@ -611,6 +611,8 @@ go version
 
 它们都应指向最终域名。若 HTML 正常而图片仍是旧版，多半是 CDN 或浏览器缓存；自定义静态图片换文件名比反复刷新更可靠。
 
+主题内置的 Inter 与 Noto Serif SC 不需要额外配置，也不会请求远程字体服务。Hugo 构建时会为字体生成内容指纹；文章页只预加载正文核心子集，其他字符按实际内容加载。普通站点更新主题后重新运行 Hugo 构建即可，不需要安装 Node.js、Python 或手工复制字体。
+
 ## 20. 更新、回滚与排错顺序
 
 更新主题前先提交当前站点，然后执行：
@@ -625,7 +627,7 @@ git diff -- go.mod go.sum
 发现问题时，可以回到已知可用版本：
 
 ```bash
-hugo mod get github.com/c-x-x/hugo-theme-imx@v1.4.0
+hugo mod get github.com/c-x-x/hugo-theme-imx@v1.4.9
 hugo mod tidy
 ```
 

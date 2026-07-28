@@ -7,6 +7,13 @@
 
 /* CSS Variables for Light/Dark Mode */
 :root {
+  --font-ui: 'IMX Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  --font-reading: 'IMX Noto Serif SC', 'IMX Noto Serif SC Fallback', 'Noto Serif SC',
+                  'Source Han Serif SC', 'Songti SC', 'STSong', SimSun, Georgia, serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, Monaco,
+               'Courier New', monospace;
+
   /* Light Mode - 阅读友好的暖白纸感 */
   --color-primary: #7A5A32;
   --color-primary-light: #9B7442;

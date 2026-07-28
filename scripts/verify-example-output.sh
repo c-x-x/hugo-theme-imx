@@ -105,3 +105,89 @@ for (const [url, sourcePath, html] of assets) {
   }
 }
 NODE
+
+node - "$output_dir" <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const outputDir = process.argv[2];
+const fontDir = path.join(outputDir, 'fonts', 'imx');
+const fontFiles = fs.readdirSync(fontDir).filter(file => file.endsWith('.woff2'));
+const expectedFonts = [
+  'inter-variable',
+  'noto-serif-sc-400-core',
+  'noto-serif-sc-400-common',
+  'noto-serif-sc-400-extended',
+  'noto-serif-sc-700-core',
+  'noto-serif-sc-700-common',
+  'noto-serif-sc-700-extended'
+];
+
+for (const basename of expectedFonts) {
+  const matches = fontFiles.filter(file => new RegExp(`^${basename}\\.[a-f0-9]{64}\\.woff2$`).test(file));
+  if (matches.length !== 1) {
+    console.error(`Expected one fingerprinted ${basename} webfont; found ${matches.length}.`);
+    process.exit(1);
+  }
+}
+
+const forbiddenFonts = [
+  'inter-variable.woff2',
+  'noto-serif-sc-regular.woff2',
+  'noto-serif-sc-bold.woff2'
+];
+for (const filename of forbiddenFonts) {
+  if (fontFiles.includes(filename)) {
+    console.error(`Generated site contains an unfingerprinted or retired webfont: ${filename}`);
+    process.exit(1);
+  }
+}
+
+function fontPreloads(relativePath) {
+  const html = fs.readFileSync(path.join(outputDir, relativePath), 'utf8');
+  return [...html.matchAll(/<link\s+rel=preload\s+href=([^\s>]+)[^>]*\sas=font(?:\s|>)/g)]
+    .map(match => match[1]);
+}
+
+const homePreloads = fontPreloads('index.html');
+const aboutPreloads = fontPreloads('about/index.html');
+const articlePreloads = fontPreloads('posts/imx-theme-introduction/index.html');
+const interPattern = /^\/fonts\/imx\/inter-variable\.[a-f0-9]{64}\.woff2$/;
+const articlePattern = /^\/fonts\/imx\/noto-serif-sc-400-core\.[a-f0-9]{64}\.woff2$/;
+
+for (const [page, preloads] of [['home', homePreloads], ['about', aboutPreloads]]) {
+  if (preloads.length !== 1 || !interPattern.test(preloads[0])) {
+    console.error(`${page} must preload only the fingerprinted Inter webfont.`);
+    process.exit(1);
+  }
+}
+if (articlePreloads.length !== 2 ||
+    !articlePreloads.some(url => interPattern.test(url)) ||
+    !articlePreloads.some(url => articlePattern.test(url))) {
+  console.error('Article pages must preload fingerprinted Inter and the Noto Serif SC core partition.');
+  process.exit(1);
+}
+
+const cssFiles = fs.readdirSync(path.join(outputDir, 'css'))
+  .filter(file => /^main\.min\.[a-f0-9]{64}\.css$/.test(file));
+if (cssFiles.length !== 1) {
+  console.error(`Expected one fingerprinted main stylesheet; found ${cssFiles.length}.`);
+  process.exit(1);
+}
+const css = fs.readFileSync(path.join(outputDir, 'css', cssFiles[0]), 'utf8');
+for (const basename of expectedFonts) {
+  if (!new RegExp(`/fonts/imx/${basename}\\.[a-f0-9]{64}\\.woff2`).test(css)) {
+    console.error(`Main stylesheet does not reference fingerprinted ${basename}.`);
+    process.exit(1);
+  }
+}
+if (!css.includes('--font-ui:') || !css.includes('--font-reading:') || !css.includes('--font-mono:')) {
+  console.error('Main stylesheet is missing the shared font-family tokens.');
+  process.exit(1);
+}
+NODE
+
+if grep -Fq "IMX Inter" static/giscus/imx-light.css static/giscus/imx-dark.css; then
+  echo "Giscus iframe themes must not reference a parent-page-only font family." >&2
+  exit 1
+fi

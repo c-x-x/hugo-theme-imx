@@ -4,10 +4,8 @@
 
 body.is-article-page,
 .article-page {
-  --article-reading-font: var(--imx-article-serif, "Iowan Old Style", "Noto Serif SC",
-                          "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif);
-  --article-ui-font: var(--imx-article-sans, -apple-system, BlinkMacSystemFont, "SF Pro Display",
-                     "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif);
+  --article-reading-font: var(--font-reading);
+  --article-ui-font: var(--font-ui);
   --article-measure: 760px;
   --article-toc-measure: clamp(150px, 13vw, 190px);
   --article-layout-gap: clamp(1.35rem, 2.6vw, 2.85rem);
@@ -302,6 +300,7 @@ body.is-article-page .sidebar-toggle:hover {
   letter-spacing: 0.01em;
   color: var(--article-ink);
   font-kerning: normal;
+  font-synthesis: none;
   overflow-wrap: break-word;
 }
 
@@ -343,6 +342,7 @@ body.is-article-page .sidebar-toggle:hover {
 
 .article-page .article-content em {
   color: var(--article-ink-secondary);
+  font-style: normal;
 }
 
 .article-page .article-content h2,
@@ -480,7 +480,7 @@ body.is-article-page .sidebar-toggle:hover {
 
 .article-page .article-content code,
 .about-content code {
-  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .article-page .article-content code:not(pre code),

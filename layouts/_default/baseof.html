@@ -101,9 +101,28 @@
     }());
   </script>
 
-  <!-- CSS -->
+  <!-- Fonts and CSS -->
+  {{- $interFont := resources.Get "fonts/imx/inter-variable.woff2" | fingerprint -}}
+  {{- $noto400Core := resources.Get "fonts/imx/noto-serif-sc-400-core.woff2" | fingerprint -}}
+  {{- $noto400Common := resources.Get "fonts/imx/noto-serif-sc-400-common.woff2" | fingerprint -}}
+  {{- $noto400Extended := resources.Get "fonts/imx/noto-serif-sc-400-extended.woff2" | fingerprint -}}
+  {{- $noto700Core := resources.Get "fonts/imx/noto-serif-sc-700-core.woff2" | fingerprint -}}
+  {{- $noto700Common := resources.Get "fonts/imx/noto-serif-sc-700-common.woff2" | fingerprint -}}
+  {{- $noto700Extended := resources.Get "fonts/imx/noto-serif-sc-700-extended.woff2" | fingerprint -}}
+  {{- $fontCSS := resources.Get "css/fonts.css" | resources.ExecuteAsTemplate "css/fonts.generated.css" (dict
+    "inter" $interFont
+    "noto400Core" $noto400Core
+    "noto400Common" $noto400Common
+    "noto400Extended" $noto400Extended
+    "noto700Core" $noto700Core
+    "noto700Common" $noto700Common
+    "noto700Extended" $noto700Extended
+  ) -}}
+  <link rel="preload" href="{{ $interFont.RelPermalink }}" integrity="{{ $interFont.Data.Integrity }}" as="font" type="font/woff2" crossorigin>
+  {{ block "article-font-preload" . }}{{ end }}
   {{- $cssSources := slice
     (resources.Get "css/tokens.css")
+    $fontCSS
     (resources.Get "css/base.css")
     (resources.Get "css/layout.css")
     (resources.Get "css/not-found.css")
@@ -128,48 +147,6 @@
   {{- $css := $cssSources | resources.Concat "css/main.css" -}}
   {{- $style := $css | minify | fingerprint -}}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
-  {{- $imxInter := "static/fonts/imx/inter-variable.woff2" -}}
-  {{- $imxSerifRegular := "static/fonts/imx/noto-serif-sc-regular.woff2" -}}
-  {{- $imxSerifBold := "static/fonts/imx/noto-serif-sc-bold.woff2" -}}
-  {{- if or (fileExists $imxInter) (fileExists $imxSerifRegular) (fileExists $imxSerifBold) }}
-  <style>
-    {{- if fileExists $imxInter }}
-    @font-face {
-      font-family: 'IMX Inter';
-      src: url('{{ "fonts/imx/inter-variable.woff2" | relURL }}') format('woff2-variations');
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap;
-    }
-    {{- end }}
-    {{- if fileExists $imxSerifRegular }}
-    @font-face {
-      font-family: 'IMX Noto Serif SC';
-      src: url('{{ "fonts/imx/noto-serif-sc-regular.woff2" | relURL }}') format('woff2');
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-    {{- end }}
-    {{- if fileExists $imxSerifBold }}
-    @font-face {
-      font-family: 'IMX Noto Serif SC';
-      src: url('{{ "fonts/imx/noto-serif-sc-bold.woff2" | relURL }}') format('woff2');
-      font-weight: 700;
-      font-style: normal;
-      font-display: swap;
-    }
-    {{- end }}
-    :root {
-      {{- if fileExists $imxInter }}
-      --imx-article-sans: 'IMX Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'PingFang SC', sans-serif;
-      {{- end }}
-      {{- if or (fileExists $imxSerifRegular) (fileExists $imxSerifBold) }}
-      --imx-article-serif: 'IMX Noto Serif SC', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
-      {{- end }}
-    }
-  </style>
-  {{- end }}
 
   <!-- RSS -->
   {{ with .OutputFormats.Get "rss" }}

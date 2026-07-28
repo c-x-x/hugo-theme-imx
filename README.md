@@ -22,7 +22,7 @@ IMX 是一个面向中文博客的 Hugo 主题，通过 Hugo Module 安装。它
 - 可选的 Giscus 评论
 - SEO、Open Graph、Twitter Card 和 RSS
 - 内置雪花 Logo、头像、文章封面、分享图和 favicon
-- 通用界面优先使用自托管 Inter，文章正文优先使用自托管 Noto Serif SC；均保留系统字体回退，不请求远程字体服务
+- 通用界面、导航和标题使用自托管 Inter，文章正文使用自托管 Noto Serif SC，代码使用等宽字体栈；均保留系统字体回退，不请求远程字体服务
 
 分类页和标签页：
 
@@ -67,7 +67,7 @@ hugo mod tidy
 hugo server
 ```
 
-如果需要固定到某个版本，把 `@latest` 改成对应的 Release 版本号即可，例如 `@v1.0.0`。
+如果需要固定到某个版本，把 `@latest` 改成对应的 Release 版本号即可，例如 `@v1.4.9`。
 
 更新主题：
 
@@ -286,6 +286,8 @@ npm run test:e2e
 
 Playwright 会在 `/tmp` 中启动两份独立示例站服务，其中一份启用测试用 Giscus 配置。测试覆盖五种视口、主要页面、搜索、主题模式、导航、Dock 的合并与恢复、Giscus 主题同步、目录、404 游戏、About 访客完整请求顺序、超时、失败显示与缓存，以及横向溢出。首页、长文章和 About 页分别保留浅色、深色视觉基线；每次测试都会比较差异，并把本次截图保存到 `test-results` 供 CI 下载。
 
+字体子集的重新生成只面向主题维护者。固定工具版本、输入文件校验和具体命令见 [CONTRIBUTING.md](CONTRIBUTING.md)；普通主题使用者不需要安装 Python，也不需要运行该脚本。
+
 ## 目录结构
 
 ```text
@@ -293,6 +295,7 @@ hugo-theme-imx/
 ├── archetypes/
 ├── assets/
 │   ├── css/             # 按 tokens、页面组件、响应式和覆盖顺序拆分
+│   ├── fonts/imx/       # Hugo Pipes 处理的 Inter 与 Noto Serif SC WOFF2
 │   └── js/
 │       ├── core/        # 存储、媒体查询、URL、DOM 与动画通用方法
 │       ├── main.js      # Hugo js.Build 入口
@@ -303,7 +306,7 @@ hugo-theme-imx/
 ├── layouts/
 ├── scripts/                 # 严格构建和生成产物验证
 ├── static/
-│   └── fonts/imx/       # 自托管字体及对应 OFL 许可证
+│   └── fonts/imx/       # 随站点发布的字体说明及 OFL 许可证
 ├── tests/                   # Playwright 与构建门禁回归
 ├── hugo.toml            # Hugo Module 兼容要求
 ├── go.mod
@@ -312,7 +315,7 @@ hugo-theme-imx/
 └── README.md
 ```
 
-模板通过 Hugo Pipes 按固定顺序拼接 CSS，随后压缩并生成指纹；JavaScript 由 Hugo `js.Build` 解析模块、合并、压缩并生成指纹。浏览器最终各加载一个主题 CSS 和一个主题 JavaScript 文件，不要求额外执行 npm 构建。主题自带图片的缓存版本根据文件内容自动生成，替换素材时无需手动维护版本字符串。
+模板通过 Hugo Pipes 按固定顺序拼接 CSS，随后压缩并生成指纹；JavaScript 由 Hugo `js.Build` 解析模块、合并、压缩并生成指纹。字体同样由 Hugo Pipes 发布为带内容指纹的资源，字体声明在拼接前注入实际地址：所有页面预加载 Inter，单篇文章页再预加载 Noto Serif SC 核心正文子集，常用和扩展字符由浏览器按 `unicode-range` 需要加载。浏览器最终仍各加载一个主题 CSS 和一个主题 JavaScript 文件，不要求额外执行 npm 构建。主题自带图片的缓存版本根据文件内容自动生成，替换素材时无需手动维护版本字符串。
 
 ## 参与维护
 

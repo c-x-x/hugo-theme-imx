@@ -139,7 +139,7 @@
 }
 
 .highlight pre code {
-  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.92rem;
   line-height: 1.55;
   font-weight: 400;
@@ -257,7 +257,7 @@
 
 /* Inline Code */
 code {
-  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   background: var(--code-bg);
   color: var(--code-text);
@@ -392,4 +392,3 @@ code {
 .highlight .gs {
   font-weight: 600;
 }
-

@@ -51,6 +51,31 @@ npm run test:e2e
 
 普通主题使用者不需要安装 Node.js；这些依赖只服务于仓库维护和 CI。严格构建会拒绝 Hugo 警告并验证搜索索引、关键页面和默认资源内容哈希。Playwright 使用 Chromium 覆盖五种视口、评论主题同步、搜索、Dock、目录、404 游戏和 About 访客行为，并比较首页、文章页和 About 页的浅色/深色视觉基线。涉及兼容性的改动还应人工抽查 Firefox 与 Safari/WebKit。
 
+## 重新生成字体子集
+
+只有更新 Noto Serif SC 源字体或字符分区规则时才需要重新生成字体。脚本要求 Python 3.10 或更高版本，并固定 fontTools、Brotli 与 Zopfli 版本；输入文件和输出文件都会校验 SHA-256。
+
+当前源文件可从 v1.4.8 取出到仓库外的临时目录：
+
+```bash
+git show v1.4.8:static/fonts/imx/noto-serif-sc-regular.woff2 > /tmp/imx-noto-serif-sc-regular.woff2
+git show v1.4.8:static/fonts/imx/noto-serif-sc-bold.woff2 > /tmp/imx-noto-serif-sc-bold.woff2
+```
+
+建立独立环境并生成 400、700 字重的核心、常用和扩展子集：
+
+```bash
+python3 -m venv /tmp/hugo-theme-imx-fonttools
+/tmp/hugo-theme-imx-fonttools/bin/pip install -r scripts/font-requirements.txt
+/tmp/hugo-theme-imx-fonttools/bin/python scripts/subset-fonts.py \
+  --regular-source /tmp/imx-noto-serif-sc-regular.woff2 \
+  --bold-source /tmp/imx-noto-serif-sc-bold.woff2 \
+  --output-dir assets/fonts/imx \
+  --css-output assets/css/fonts.css
+```
+
+生成后运行 `npm run build:example:strict` 和 `npm run test:e2e`。不要修改输出文件名、`unicode-range` 或校验值来绕过失败；确需升级字体或生成工具时，应核对来源和许可证，并在同一次变更中更新校验、CREDITS 和变更记录。
+
 ## Pull Request
 
 PR 说明中请写清：

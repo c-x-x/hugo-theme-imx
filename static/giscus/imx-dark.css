@@ -31,13 +31,14 @@ main {
 .gsc-comment-box,
 .gsc-reactions,
 .gsc-timeline {
-  font-family: "IMX Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+               "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
 }
 
 .gsc-comments-count {
   color: #eeeae3;
   font-size: 1.08rem;
-  font-weight: 760;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 
