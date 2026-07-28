@@ -98,6 +98,14 @@ test('static comment demo is clearly labelled and cannot submit comments', async
 });
 
 test('font pipeline preloads critical faces and applies shared font roles', async ({ page }) => {
+  await page.route(/https:\/\/(ipwho\.is|ipapi\.co|freeipapi\.com|api\.ip\.sb)\//, route => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(visitorPayload())
+    });
+  });
+
   const preloadHrefs = async () => page.locator('link[rel="preload"][as="font"]')
     .evaluateAll(links => links.map(link => link.getAttribute('href')));
 
