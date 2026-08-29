@@ -60,6 +60,92 @@ test('search replays a query entered before the index finishes loading', async (
   await expect(page).toHaveURL(/\/posts\/imx-theme-introduction\/$/);
 });
 
+test('search ranks fields, supports one Chinese character and restores the article list', async ({ page }) => {
+  await page.route('**/index.json', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify([
+      {
+        title: '普通技术笔记',
+        summary: '正文命中示例',
+        content: '使用 Hugo 构建博客',
+        permalink: '/posts/content-match/',
+        date: '2026-08-29T08:00:00+08:00',
+        categories: [],
+        tags: []
+      },
+      {
+        title: 'Hugo 入门指南',
+        summary: '标题命中示例',
+        content: '',
+        permalink: '/posts/title-match/',
+        date: '2026-08-27T08:00:00+08:00',
+        categories: [],
+        tags: []
+      },
+      {
+        title: '自动发布流程',
+        summary: '分类命中示例',
+        content: '',
+        permalink: '/posts/category-match/',
+        date: '2026-08-28T08:00:00+08:00',
+        categories: ['部署'],
+        tags: ['Hugo']
+      }
+    ])
+  }));
+
+  await page.goto('/posts/', { waitUntil: 'domcontentloaded' });
+  const input = page.locator('.search-input');
+
+  await input.fill('Hugo');
+  await expect(page.locator('.search-result-item')).toHaveCount(3);
+  await expect(page.locator('.search-result-item h2')).toHaveText([
+    'Hugo 入门指南',
+    '自动发布流程',
+    '普通技术笔记'
+  ]);
+  await expect(page.locator('.search-page-content')).toBeHidden();
+  await expect(input).toHaveAttribute('aria-expanded', 'true');
+
+  await page.locator('.search-clear').click();
+  await expect(page.locator('.search-page-content')).toBeVisible();
+  await expect(page.locator('.search-results')).toBeHidden();
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+
+  await input.fill('部');
+  await expect(page.locator('.search-result-item')).toHaveCount(1);
+  await expect(page.locator('.search-result-item h2')).toHaveText('自动发布流程');
+});
+
+test('mobile search results fit narrow screens and clear back to the article grid', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/posts/', { waitUntil: 'domcontentloaded' });
+  await page.locator('.search-input').fill('Hugo');
+  await expect(page.locator('.search-result-item').first()).toBeVisible();
+
+  const layout = await page.evaluate(() => {
+    const results = document.querySelector('.search-results').getBoundingClientRect();
+    const clear = document.querySelector('.search-clear').getBoundingClientRect();
+
+    return {
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      resultsLeft: results.left,
+      resultsRight: results.right,
+      clearRight: clear.right,
+      viewportWidth: window.innerWidth
+    };
+  });
+
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.resultsLeft).toBeGreaterThanOrEqual(8);
+  expect(layout.resultsRight).toBeLessThanOrEqual(layout.viewportWidth);
+  expect(layout.clearRight).toBeLessThanOrEqual(layout.viewportWidth);
+
+  await page.locator('.search-clear').click();
+  await expect(page.locator('.featured-grid')).toBeVisible();
+});
+
 test('mobile TOC exposes and synchronizes its accessible state', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/posts/imx-theme-introduction/', { waitUntil: 'domcontentloaded' });

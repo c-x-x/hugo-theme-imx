@@ -5,7 +5,11 @@
 {{- $defaultImagePath := "/images/imx/default-cover.webp" -}}
 {{- $defaultImage := .Site.Params.defaultImage | default $defaultImagePath -}}
 {{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
-{{- $posts := where .Site.RegularPages "Type" "in" $mainSections -}}
+{{- $posts := (where .Site.RegularPages "Type" "in" $mainSections).ByDate.Reverse -}}
+{{- $featuredPosts := where $posts "Params.featured" true -}}
+{{- if eq (len $featuredPosts) 0 -}}
+  {{- $featuredPosts = first 3 $posts -}}
+{{- end -}}
 
 <!-- Hero Section - 特色展示区 -->
 <section class="hero imx-home-entry-hero" data-home-entry data-home-title="{{ .Site.Title }}">
@@ -51,7 +55,7 @@
     <h2 class="section-title">精选文章</h2>
 
     <div class="featured-grid">
-      {{ range first 3 $posts }}
+      {{ range first 3 $featuredPosts }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
         {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}
@@ -112,7 +116,7 @@
     <h2 class="section-title">最新文章</h2>
 
     <div class="featured-grid">
-      {{ range first 6 (after 3 $posts) }}
+      {{ range first 6 $posts }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
         {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}

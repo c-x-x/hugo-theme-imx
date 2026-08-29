@@ -377,15 +377,6 @@
     box-shadow: 0 4px 16px var(--navbar-indicator-glow);
   }
 
-  .search-container {
-    margin: 1.5rem auto;
-  }
-
-  .search-input {
-    padding: 0.9rem 2.8rem 0.9rem 1.15rem;
-    font-size: 0.95rem;
-  }
-
   .footer {
     margin-top: 2rem;
     padding: 2.25rem 1rem 1.6rem;

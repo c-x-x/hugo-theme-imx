@@ -4,21 +4,39 @@
 {{- $pages := .RegularPagesRecursive.ByDate.Reverse -}}
 {{- $paginator := .Paginate $pages -}}
 
-<section class="featured-section">
+<section class="featured-section" data-search-page>
   <div class="container">
     <h1 class="section-title">{{ .Title }}</h1>
 
     <!-- Search Bar -->
     <div class="search-container">
-      <input type="text" class="search-input" placeholder="搜索文章..." aria-label="搜索">
-      <svg class="search-icon" width="20" height="20" fill="currentColor"><use href="#icon-search"></use></svg>
-      <div class="search-results"></div>
+      <div class="search-field">
+        <svg class="search-icon" width="20" height="20" fill="currentColor" aria-hidden="true"><use href="#icon-search"></use></svg>
+        <input
+          type="search"
+          class="search-input"
+          role="combobox"
+          aria-autocomplete="list"
+          placeholder="搜索标题、正文、分类或标签..."
+          aria-label="搜索文章"
+          aria-controls="search-results"
+          aria-describedby="search-hint"
+          aria-expanded="false"
+          autocomplete="off"
+          enterkeyhint="search">
+        <button class="search-clear" type="button" aria-label="清除搜索" title="清除搜索">
+          <svg width="18" height="18" fill="currentColor" aria-hidden="true"><use href="#icon-close"></use></svg>
+        </button>
+      </div>
+      <p class="search-hint" id="search-hint">支持中文单字；英文、数字至少输入两个字符</p>
+      <div class="search-results" id="search-results" aria-live="polite" aria-busy="true"></div>
     </div>
 
-    <!-- Posts Grid -->
-    <div class="featured-grid">
-      {{ range $paginator.Pages }}
-      <article class="post-card">
+    <div class="search-page-content">
+      <!-- Posts Grid -->
+      <div class="featured-grid">
+        {{ range $paginator.Pages }}
+        <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
         {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}
         <img src="{{ $imageURL }}" alt="{{ .Title }}" class="post-card-image" width="1600" height="900" loading="lazy">
@@ -64,11 +82,12 @@
           </div>
           {{ end }}
         </div>
-      </article>
-      {{ end }}
-    </div>
+        </article>
+        {{ end }}
+      </div>
 
-    {{ partial "pagination.html" $paginator }}
+      {{ partial "pagination.html" $paginator }}
+    </div>
   </div>
 </section>
 

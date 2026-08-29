@@ -136,16 +136,19 @@ export function initHomeEntryHero() {
   const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let renderFrame = 0;
   let heroResizeFrame = 0;
+  let heroResizeTimer = 0;
   let typedTimer = 0;
   let glyphFrame = 0;
   let glyphContext = null;
   let glyphRows = [];
+  let glyphCanvasDirty = true;
   let glyphWidth = 1;
   let glyphHeight = 1;
   let glyphSpeed = 0.85;
   let glyphTargetSpeed = 0.85;
   let glyphPointer = { x: 1, y: 1 };
   let glyphLastFrameTime = 0;
+  let glyphLastPaintTime = 0;
   let glyphAccentColor = '37, 99, 235';
   let glyphGlowCenterAlpha = 0.045;
   let glyphGlowMiddleAlpha = 0.015;
@@ -188,9 +191,10 @@ export function initHomeEntryHero() {
 
   function prepareCanvas(canvas) {
     const rect = hero.getBoundingClientRect();
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
+    const pixelRatioLimit = width <= 768 ? 1.25 : 1.5;
+    const ratio = Math.min(window.devicePixelRatio || 1, pixelRatioLimit);
 
     if (canvas.width !== Math.round(width * ratio)) {
       canvas.width = Math.round(width * ratio);
@@ -267,10 +271,23 @@ export function initHomeEntryHero() {
       glyphContext = context;
     }
 
+    const glyphFrameInterval = 1000 / 60;
+    const timeSincePaint = glyphLastPaintTime > 0
+      ? timestamp - glyphLastPaintTime
+      : glyphFrameInterval;
+
+    if (timeSincePaint < glyphFrameInterval - 1) {
+      if (canAnimateHomeEntry()) {
+        glyphFrame = window.requestAnimationFrame(drawGlyphFrame);
+      }
+      return;
+    }
+
     const elapsed = glyphLastFrameTime > 0 ? timestamp - glyphLastFrameTime : 1000 / 60;
     const frameScale = Math.min(Math.max(elapsed / (1000 / 60), 0.25), 3);
     const speedBlend = 1 - Math.pow(1 - 0.055, frameScale);
     glyphLastFrameTime = timestamp;
+    glyphLastPaintTime = timestamp;
 
     context.clearRect(0, 0, glyphWidth, glyphHeight);
     glyphSpeed += (glyphTargetSpeed - glyphSpeed) * speedBlend;
@@ -307,6 +324,17 @@ export function initHomeEntryHero() {
     window.cancelAnimationFrame(glyphFrame);
     glyphFrame = 0;
     glyphLastFrameTime = 0;
+    glyphLastPaintTime = 0;
+  }
+
+  function startGlyphAnimation() {
+    if (glyphFrame || !canAnimateHomeEntry()) {
+      return;
+    }
+
+    glyphLastFrameTime = 0;
+    glyphLastPaintTime = 0;
+    glyphFrame = window.requestAnimationFrame(drawGlyphFrame);
   }
 
   function setupGlyphCanvas() {
@@ -317,6 +345,7 @@ export function initHomeEntryHero() {
     window.cancelAnimationFrame(glyphFrame);
     glyphFrame = 0;
     glyphLastFrameTime = 0;
+    glyphLastPaintTime = 0;
 
     const canvasState = prepareCanvas(glyphCanvas);
 
@@ -327,6 +356,7 @@ export function initHomeEntryHero() {
     const { context, width, height } = canvasState;
     const isDark = htmlElement.getAttribute('data-theme') === 'dark';
 
+    glyphCanvasDirty = false;
     glyphWidth = width;
     glyphHeight = height;
     glyphPointer = { x: 0.62 * width, y: 0.36 * height };
@@ -555,15 +585,25 @@ export function initHomeEntryHero() {
   }
 
   function requestHeroResizeRefresh() {
-    if (heroResizeFrame) {
-      return;
+    glyphCanvasDirty = true;
+
+    if (heroResizeTimer) {
+      window.clearTimeout(heroResizeTimer);
     }
 
-    heroResizeFrame = window.requestAnimationFrame(() => {
-      heroResizeFrame = 0;
-      setInitialRevealPoint();
-      requestCanvasRender();
-    });
+    heroResizeTimer = window.setTimeout(() => {
+      heroResizeTimer = 0;
+
+      if (heroResizeFrame) {
+        return;
+      }
+
+      heroResizeFrame = window.requestAnimationFrame(() => {
+        heroResizeFrame = 0;
+        setInitialRevealPoint();
+        requestCanvasRender();
+      });
+    }, 120);
   }
 
   function setHeroPoint(clientX, clientY, propertyX, propertyY, rect = hero.getBoundingClientRect()) {
@@ -627,7 +667,13 @@ export function initHomeEntryHero() {
 
   window.addEventListener('resize', requestHeroResizeRefresh);
 
-  const themeObserver = new MutationObserver(requestCanvasRender);
+  const themeObserver = new MutationObserver(() => {
+    refreshGlyphPaint();
+
+    if (!glyphFrame) {
+      drawGlyphFrame();
+    }
+  });
   themeObserver.observe(htmlElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   function pauseHomeEntryMotion() {
@@ -640,7 +686,11 @@ export function initHomeEntryHero() {
       return;
     }
 
-    requestCanvasRender();
+    if (glyphCanvasDirty || !glyphContext || glyphRows.length === 0) {
+      requestCanvasRender();
+    } else {
+      startGlyphAnimation();
+    }
 
     if (!typedActive) {
       initTypedSubtitle();

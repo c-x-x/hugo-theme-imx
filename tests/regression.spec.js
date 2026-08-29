@@ -304,6 +304,17 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(errors).toEqual([]);
 });
 
+test('homepage latest articles start with the newest publication', async ({ page }) => {
+  await openStablePage(page, '/');
+
+  const latestTitles = await page.locator('.home-recent-section .post-card-title').allTextContents();
+  expect(latestTitles.map(title => title.trim())).toEqual([
+    '留一方安静的屏幕：认识 IMX',
+    '从空目录到上线：hugo-theme-imx 全量配置手册',
+    '把评论留在 GitHub：IMX 主题接入 Giscus'
+  ]);
+});
+
 test('desktop dock merges and restores with normal motion enabled', async ({ page }) => {
   const errors = watchConsole(page);
   await page.emulateMedia({ reducedMotion: 'no-preference' });

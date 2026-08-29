@@ -1,11 +1,11 @@
 {{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
-{{- $pages := where .Site.RegularPages "Type" "in" $mainSections -}}
+{{- $pages := (where .Site.RegularPages "Type" "in" $mainSections).ByDate.Reverse -}}
 {{- $data := slice -}}
 {{- range $pages -}}
   {{- $data = $data | append (dict
     "title" .Title
-    "content" (.Plain | htmlUnescape | truncate 500)
-    "summary" (.Summary | plainify | htmlUnescape)
+    "content" (.Plain | htmlUnescape)
+    "summary" (.Summary | plainify | htmlUnescape | truncate 180)
     "permalink" .RelPermalink
     "date" .Date
     "categories" .Params.categories
