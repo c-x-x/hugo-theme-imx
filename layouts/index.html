@@ -116,7 +116,7 @@
     <h2 class="section-title">最新文章</h2>
 
     <div class="featured-grid">
-      {{ range first 6 $posts }}
+      {{ range first 3 $posts }}
       <article class="post-card">
         {{- $image := .Params.image | default $defaultImage -}}
         {{- $imageURL := partial "theme-asset-url.html" (dict "url" $image "default" $defaultImagePath) -}}

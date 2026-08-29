@@ -304,7 +304,7 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(errors).toEqual([]);
 });
 
-test('homepage latest articles start with the newest publication', async ({ page }) => {
+test('homepage latest articles show exactly the newest three publications', async ({ page }) => {
   await openStablePage(page, '/');
 
   const latestTitles = await page.locator('.home-recent-section .post-card-title').allTextContents();
