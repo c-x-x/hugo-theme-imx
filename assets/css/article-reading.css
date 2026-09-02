@@ -24,6 +24,57 @@ body.is-article-page,
   --article-soft-line: rgba(75, 64, 52, 0.14);
 }
 
+/* Extended Markdown emitted by IMX Post Studio. */
+.article-page .article-content mark {
+  border-radius: 0.18em;
+  padding-inline: 0.08em;
+  color: inherit;
+  background: color-mix(in srgb, #ffd84d 58%, transparent);
+}
+
+.article-page .article-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.35rem;
+}
+
+.article-page .article-content blockquote.callout {
+  border: 1px solid color-mix(in srgb, var(--article-accent) 34%, var(--article-soft-line));
+  border-left: 4px solid var(--article-accent);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: color-mix(in srgb, var(--article-accent) 8%, var(--article-surface));
+}
+
+.article-page .article-content .callout-title {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--article-ink);
+}
+
+.article-page .article-content blockquote.callout > p { margin: 0.35rem 0 0; }
+.article-page .article-content blockquote.callout[data-callout='warning'],
+.article-page .article-content blockquote.callout[data-callout='caution'] { border-left-color: #c46b28; }
+
+.article-page .article-content .mermaid {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--article-soft-line);
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+  background: var(--article-surface);
+}
+
+.article-page .article-content .mermaid svg {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.article-page .article-content .mermaid[data-mermaid-state='error'] { color: #b33a2b; }
+
 [data-theme="dark"] body.is-article-page,
 [data-theme="dark"] .article-page {
   --article-page-bg: #171716;
