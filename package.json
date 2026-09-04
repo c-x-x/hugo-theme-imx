@@ -11,6 +11,6 @@
     "test": "npm run check:js && npm run test:build-validation && npm run test:e2e"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1"
+    "@playwright/test": "1.62.1"
   }
 }
