@@ -41,6 +41,8 @@ require_content "categories/主题指南/index.html" "主题指南"
 require_content "categories/主题指南/index.html" "/posts/imx-configuration-deployment-guide/"
 require_content "tags/hugo/index.html" "Hugo"
 require_content "tags/hugo/index.html" "/posts/imx-theme-introduction/"
+require_content "posts/regression-long-article/index.html" "class=mermaid"
+require_content "posts/regression-long-article/index.html" "data-mermaid-source"
 node scripts/verify-navigation-output.js "$output_dir" \
   "index.html=/" \
   "posts/index.html=/posts/" \

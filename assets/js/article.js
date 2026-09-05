@@ -51,11 +51,12 @@ export function initArticleMarkdownLayout() {
     });
   }
 
-  const mermaidNodes = [];
+  const mermaidNodes = Array.from(articleContent.querySelectorAll('.mermaid[data-mermaid-source]'));
   articleContent.querySelectorAll('pre code.language-mermaid').forEach((code) => {
     const source = code.textContent ?? '';
     const container = document.createElement('div');
     container.className = 'mermaid';
+    container.dataset.mermaidSource = '';
     container.textContent = source;
     (code.closest('.highlight') ?? code.closest('pre'))?.replaceWith(container);
     mermaidNodes.push(container);

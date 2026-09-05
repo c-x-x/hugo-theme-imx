@@ -9,6 +9,7 @@
 ## 项目依赖
 
 - 页面由 [Hugo](https://gohugo.io/) 构建。
+- 文章流程图由 [Mermaid](https://mermaid.js.org/) 渲染，使用 MIT License。
 - 评论功能按需加载 [Giscus](https://giscus.app/)。
 - GitHub 和邮件图标使用仓库内置 SVG 路径。
 

@@ -1,0 +1,7 @@
+{{- /*
+  Keep Mermaid source out of Hugo's syntax highlighter and emit a stable render
+  target. The source is escaped here; Mermaid reads it back through textContent.
+*/ -}}
+<div class="mermaid" data-mermaid-source{{ with .Attributes.title }} aria-label="{{ . }}"{{ end }}>
+  {{- .Inner | htmlEscape | safeHTML -}}
+</div>

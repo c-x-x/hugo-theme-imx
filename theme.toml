@@ -4,7 +4,7 @@ licenselink = "https://github.com/c-x-x/hugo-theme-imx/blob/main/LICENSE"
 description = "面向中文博客的 Hugo 主题，支持 Hugo Module、响应式布局、文章列表搜索、文章目录和深浅色模式。"
 homepage = "https://github.com/c-x-x/hugo-theme-imx"
 tags = ["blog", "responsive", "hugo-modules", "dark-mode", "search", "chinese"]
-features = ["hugo modules", "responsive", "automatic dark mode", "search", "toc", "code highlighting", "giscus"]
+features = ["hugo modules", "responsive", "automatic dark mode", "search", "toc", "code highlighting", "mermaid", "giscus"]
 min_version = "0.112.0"
 
 [author]
