@@ -306,19 +306,7 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
 
 test('Mermaid fenced blocks render as diagrams on article pages', async ({ page }) => {
   const errors = watchConsole(page);
-  await page.route('https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js', route => route.fulfill({
-    status: 200,
-    contentType: 'application/javascript',
-    body: `window.mermaid={
-      initialize:function(){},
-      run:async function(options){
-        options.nodes.forEach(function(node){
-          node.innerHTML='<svg viewBox="0 0 200 80" role="img" aria-label="Markdown to Hugo flow"><path d="M10 40h180"/></svg>';
-        });
-      }
-    };`
-  }));
-  await openStablePage(page, '/posts/regression-long-article/');
+  await openStablePage(page, '/mermaid-regression/');
 
   const diagram = page.locator('.article-content .mermaid[data-mermaid-source]');
   await expect(diagram).toHaveCount(1);

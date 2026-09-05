@@ -60,11 +60,3 @@ function regressionExample(value) {
 最后一节用于验证页面底部、评论区域边界和页脚之间的间距。示例站默认关闭 Giscus，因此测试不会访问外部评论服务。
 
 完成滚动后，页面仍不应出现未处理的脚本错误或横向溢出。
-
-**流程图回归：**
-
-```mermaid
-flowchart LR
-    A[Markdown] --> B[Hugo]
-    B --> C[Mermaid SVG]
-```
