@@ -327,6 +327,41 @@ test('homepage latest articles show exactly the newest three publications', asyn
   ]);
 });
 
+test('homepage article groups use equal cards and stay centered with fewer featured posts', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openStablePage(page, '/');
+
+  const measurements = await page.evaluate(() => {
+    const getBoxes = selector => [...document.querySelectorAll(selector)].map(card => {
+      const box = card.getBoundingClientRect();
+      return { width: box.width, height: box.height };
+    });
+
+    return {
+      featured: getBoxes('#featured-posts .post-card'),
+      latest: getBoxes('.home-recent-section .post-card')
+    };
+  });
+
+  expect(measurements.featured).toHaveLength(3);
+  expect(measurements.latest).toHaveLength(3);
+  expect(measurements.latest).toEqual(measurements.featured);
+
+  const centering = await page.evaluate(() => {
+    const grid = document.querySelector('#featured-posts .featured-grid');
+    [...grid.querySelectorAll('.post-card')].slice(1).forEach(card => card.remove());
+    const gridBox = grid.getBoundingClientRect();
+    const cardBox = grid.querySelector('.post-card').getBoundingClientRect();
+
+    return {
+      gridCenter: gridBox.left + gridBox.width / 2,
+      cardCenter: cardBox.left + cardBox.width / 2
+    };
+  });
+
+  expect(Math.abs(centering.gridCenter - centering.cardCenter)).toBeLessThan(1);
+});
+
 test('desktop dock merges and restores with normal motion enabled', async ({ page }) => {
   const errors = watchConsole(page);
   await page.emulateMedia({ reducedMotion: 'no-preference' });

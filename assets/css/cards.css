@@ -278,45 +278,6 @@
   display: none;
 }
 
-.home-recent-section .post-card {
-  aspect-ratio: auto;
-  min-height: 0;
-}
-
-.home-recent-section .post-card-image {
-  flex: 0 0 auto;
-  height: clamp(180px, 17vw, 220px);
-}
-
-.home-recent-section .post-card-content {
-  gap: 0.58rem;
-  overflow: visible;
-  padding: clamp(1.05rem, 1.45vw, 1.28rem);
-}
-
-.home-recent-section .post-card-meta {
-  flex-wrap: wrap;
-  overflow: visible;
-  font-size: 0.78rem;
-}
-
-.home-recent-section .post-card-title {
-  font-size: clamp(1.12rem, 1.55vw, 1.35rem);
-  line-height: 1.28;
-}
-
-.home-recent-section .post-card-excerpt {
-  max-height: none;
-  font-size: clamp(0.9rem, 1.05vw, 0.98rem);
-  line-height: 1.58;
-  -webkit-line-clamp: 3;
-}
-
-.home-recent-section .post-card-tags .tag {
-  font-size: 0.78rem;
-  padding: 0.22rem 0.62rem;
-}
-
 .article-tags {
   justify-content: center;
   margin-top: 1rem;

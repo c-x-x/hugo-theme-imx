@@ -150,25 +150,6 @@
     -webkit-line-clamp: 2;
   }
 
-  .home-recent-section .post-card-image {
-    flex-basis: auto;
-    height: 170px;
-  }
-
-  .home-recent-section .post-card-content {
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-
-  .home-recent-section .post-card-title {
-    font-size: 1.16rem;
-  }
-
-  .home-recent-section .post-card-excerpt {
-    font-size: 0.9rem;
-    -webkit-line-clamp: 3;
-  }
-
   .taxonomy-section {
     padding: 2.8rem 1rem 4rem;
   }
@@ -448,11 +429,6 @@
   .post-card-image {
     flex-basis: 30%;
     height: 30%;
-  }
-
-  .home-recent-section .post-card-image {
-    flex-basis: auto;
-    height: 150px;
   }
 
   .article-content {
