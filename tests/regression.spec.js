@@ -316,7 +316,7 @@ test('Mermaid fenced blocks render as diagrams on article pages', async ({ page 
   expect(errors).toEqual([]);
 });
 
-test('homepage latest articles show exactly the newest three publications', async ({ page }) => {
+test('homepage latest articles show the newest publications up to four', async ({ page }) => {
   await openStablePage(page, '/');
 
   const latestTitles = await page.locator('.home-recent-section .post-card-title').allTextContents();
@@ -327,7 +327,7 @@ test('homepage latest articles show exactly the newest three publications', asyn
   ]);
 });
 
-test('homepage article groups use equal cards and stay centered with fewer featured posts', async ({ page }) => {
+test('homepage article groups use equal cards and keep fewer featured posts left aligned', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openStablePage(page, '/');
 
@@ -347,19 +347,19 @@ test('homepage article groups use equal cards and stay centered with fewer featu
   expect(measurements.latest).toHaveLength(3);
   expect(measurements.latest).toEqual(measurements.featured);
 
-  const centering = await page.evaluate(() => {
+  const alignment = await page.evaluate(() => {
     const grid = document.querySelector('#featured-posts .featured-grid');
+    const initialLeft = grid.querySelector('.post-card').getBoundingClientRect().left;
     [...grid.querySelectorAll('.post-card')].slice(1).forEach(card => card.remove());
-    const gridBox = grid.getBoundingClientRect();
     const cardBox = grid.querySelector('.post-card').getBoundingClientRect();
 
     return {
-      gridCenter: gridBox.left + gridBox.width / 2,
-      cardCenter: cardBox.left + cardBox.width / 2
+      initialLeft,
+      remainingLeft: cardBox.left
     };
   });
 
-  expect(Math.abs(centering.gridCenter - centering.cardCenter)).toBeLessThan(1);
+  expect(Math.abs(alignment.initialLeft - alignment.remainingLeft)).toBeLessThan(1);
 });
 
 test('desktop dock merges and restores with normal motion enabled', async ({ page }) => {
