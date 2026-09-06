@@ -3,6 +3,7 @@
    ============================================ */
 
 .post-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   aspect-ratio: 1 / 1;
@@ -208,6 +209,29 @@
 
 .post-card-title a {
   color: inherit;
+}
+
+/* Extend the native title link over the card; keep taxonomy links above it. */
+.post-card-title a::after,
+.taxonomy-post-title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.post-card .tag,
+.taxonomy-post-card .tag,
+.taxonomy-post-kicker a,
+.taxonomy-post-link {
+  position: relative;
+  z-index: 2;
+}
+
+.post-card:focus-within,
+.taxonomy-post-card:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 .post-card-title:hover {

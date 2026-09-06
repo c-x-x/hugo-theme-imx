@@ -222,6 +222,7 @@
 }
 
 .taxonomy-post-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2rem;
@@ -306,4 +307,3 @@
 .taxonomy-post-link:hover span:last-child {
   transform: translateX(4px);
 }
-
