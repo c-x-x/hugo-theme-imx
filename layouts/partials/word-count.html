@@ -1,0 +1,8 @@
+{{- /* Count CJK characters individually and non-CJK letter/number groups as words. */ -}}
+{{- $plain := .Plain | htmlUnescape -}}
+{{- $cjkPattern := `[\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]` -}}
+{{- $cjkCount := len (findRE $cjkPattern $plain) -}}
+{{- $nonCJK := replaceRE $cjkPattern " " $plain -}}
+{{- $wordPattern := `[\p{L}\p{N}]+(['’_-][\p{L}\p{N}]+)*` -}}
+{{- $wordCount := len (findRE $wordPattern $nonCJK) -}}
+{{- add $cjkCount $wordCount -}}

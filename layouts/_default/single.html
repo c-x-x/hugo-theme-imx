@@ -43,7 +43,7 @@
         阅读时长 {{ .ReadingTime }} 分钟
       </span>
       {{ end }}
-      <span>{{ .WordCount }} 字</span>
+      <span>{{ partial "word-count.html" . }} 字</span>
     </div>
 
     {{ if .Params.tags }}

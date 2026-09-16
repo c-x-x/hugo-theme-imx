@@ -1,0 +1,19 @@
+.article-page .toc {
+  overflow-x: hidden;
+}
+
+body.is-article-page .article-page .toc a {
+  position: relative;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  padding-left: 3.17rem;
+}
+
+body.is-article-page .article-page .toc a::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  max-width: var(--toc-marker-active-width, 2rem);
+  transform: translateY(-50%);
+}

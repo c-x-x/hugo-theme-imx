@@ -304,6 +304,47 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(errors).toEqual([]);
 });
 
+test('desktop article toc keeps active nested labels inside their text column', async ({ page }) => {
+  await page.setViewportSize({ width: 1038, height: 457 });
+  await openStablePage(page, '/toc-overflow-regression/');
+
+  const skillLink = page.locator('.toc a[href="#skill"]');
+  await expect(skillLink).toBeVisible();
+  await skillLink.evaluate(link => {
+    link.closest('.toc').querySelectorAll('a').forEach(item => item.classList.remove('active'));
+    link.classList.add('active');
+  });
+  await page.addStyleTag({ content: '.article-page .toc a.active::before { content: none !important; }' });
+
+  const tocLayout = await skillLink.evaluate(link => {
+    const toc = link.closest('.toc');
+    const tocRect = toc.getBoundingClientRect();
+    const linkRect = link.getBoundingClientRect();
+    const textNode = document.createTreeWalker(link, NodeFilter.SHOW_TEXT).nextNode();
+    const labelRange = document.createRange();
+    labelRange.selectNodeContents(textNode);
+    const labelRect = labelRange.getBoundingClientRect();
+
+    return {
+      tocLeft: tocRect.left,
+      tocRight: tocRect.right,
+      tocClientWidth: toc.clientWidth,
+      tocScrollWidth: toc.scrollWidth,
+      linkLeft: linkRect.left,
+      linkRight: linkRect.right,
+      labelLeft: labelRect.left,
+      labelRight: labelRect.right
+    };
+  });
+
+  expect(tocLayout.linkLeft).toBeGreaterThanOrEqual(tocLayout.tocLeft - 1);
+  expect(tocLayout.linkRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
+  expect(tocLayout.labelLeft - tocLayout.linkLeft).toBeGreaterThanOrEqual(48);
+  expect(tocLayout.labelRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
+  expect(tocLayout.tocScrollWidth).toBeLessThanOrEqual(tocLayout.tocClientWidth + 1);
+  await expectNoHorizontalOverflow(page);
+});
+
 test('Mermaid fenced blocks render as diagrams on article pages', async ({ page }) => {
   const errors = watchConsole(page);
   await openStablePage(page, '/mermaid-regression/');
