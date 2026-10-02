@@ -10,9 +10,11 @@ import { initSearch } from "./search.js";
 import { initCodeBlocks } from "./code-block.js";
 import { initNavigation } from "./navigation.js";
 import { initLiquidIndicator } from "./liquid-indicator.js";
+import { initFontSwitch } from "./font.js";
 
 initBrowserCompatibility();
 initTheme();
+initFontSwitch();
 initAboutVisitorInfo();
 initHomeEntryHero();
 initSharedDock();

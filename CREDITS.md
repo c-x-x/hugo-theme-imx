@@ -15,6 +15,8 @@
 
 ## 字体
 
+- **霞鹜文楷（LXGW WenKai）v1.522**：LXGW 与 Klee Project Authors；来源为 [官方 v1.522 Release](https://github.com/lxgw/LxgwWenKai/releases/tag/v1.522) 的 Regular、Medium TTF，分别用于 400、700 字重。许可证为 SIL Open Font License 1.1，全文见 `static/fonts/imx/OFL-WenKai.txt`。使用 `scripts/subset-wenkai.py` 和 `scripts/font-requirements.txt` 中的固定工具版本生成 `assets/fonts/imx/wenkai-*.woff2`，输入 SHA-256 在脚本中验证，输出 SHA-256 保存在 `static/fonts/imx/wenkai-sha256.txt`。字体仅在启用隐藏字体切换后按字符分区加载。
+
 - **Inter Variable**：Inter Project Authors，主要设计者 Rasmus Andersson；来源为 [rsms/inter](https://github.com/rsms/inter)；许可证为 SIL Open Font License 1.1；本地文件为 `assets/fonts/imx/inter-variable.woff2`，完整许可证为 `static/fonts/imx/OFL-Inter.txt`。
 - **Noto Serif SC**：Google、Adobe 与 Noto CJK 项目贡献者；来源为 [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) 和 [Google Fonts 的 Noto Serif SC 分发目录](https://github.com/google/fonts/tree/main/ofl/notoserifsc)；许可证为 SIL Open Font License 1.1。本地 400 与 700 字重位于 `assets/fonts/imx/`，分别拆分为 `core`、`common`、`extended` 三个 WOFF2 文件；完整许可证为 `static/fonts/imx/OFL-Noto-Serif-SC.txt`。
 

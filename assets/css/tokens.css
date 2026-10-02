@@ -61,6 +61,11 @@
 
 }
 
+:root[data-font="wenkai"] {
+  --font-ui: 'IMX WenKai', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-reading: 'IMX WenKai', 'Songti SC', SimSun, serif;
+}
+
 [data-theme="dark"] {
   /* Dark Mode - 统一文章页灰黑阅读配色 */
   --color-primary: #D4C6B2;

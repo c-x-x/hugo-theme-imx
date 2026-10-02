@@ -1,0 +1,6 @@
+a38e3f93e3c4f237a8eaf492f2699ec3d16561967d837d5d7f4cb1a01c6247c2  assets/fonts/imx/wenkai-400-core.woff2
+1bc5efaf0065bce8cf14d92b195aa86f703772be0c78ce599368e8dea932981f  assets/fonts/imx/wenkai-400-common.woff2
+f1eefcc8986d292e4cb289cce798207dd70a25fb43f0989f828cdd608fc91486  assets/fonts/imx/wenkai-400-extended.woff2
+3c34d54c0cafc839c4fc6ae8690fef15933fa0b3733912a323c38f0c4c62144a  assets/fonts/imx/wenkai-700-core.woff2
+9d84b5ee0d61e092b849e68dc4bc5970944b92cc390a5c62c61ecdcdcf20fb20  assets/fonts/imx/wenkai-700-common.woff2
+7a6348c62a7dd628074caa4ec4595b12fa92b9cb666276be8125210707b77a1b  assets/fonts/imx/wenkai-700-extended.woff2

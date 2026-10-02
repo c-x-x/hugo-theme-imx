@@ -67,6 +67,11 @@
   <!-- Apply the saved theme before rendering to avoid a light-theme flash. -->
   <script>
     (function () {
+      try {
+        document.documentElement.dataset.font = localStorage.getItem('imxFont') === 'wenkai' ? 'wenkai' : 'default';
+      } catch (error) {
+        document.documentElement.dataset.font = 'default';
+      }
       function updateFavicon(theme) {
         var favicons = window.__IMX_FAVICONS__;
         var favicon = document.querySelector('link[data-imx-favicon]');
@@ -123,6 +128,7 @@
   {{- $cssSources := slice
     (resources.Get "css/tokens.css")
     $fontCSS
+    (resources.Get "css/wenkai.css" | resources.ExecuteAsTemplate "css/wenkai.generated.css" .)
     (resources.Get "css/base.css")
     (resources.Get "css/layout.css")
     (resources.Get "css/not-found.css")
