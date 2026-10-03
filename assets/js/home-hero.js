@@ -144,6 +144,7 @@ export function initHomeEntryHero() {
   let glyphCanvasDirty = true;
   let glyphWidth = 1;
   let glyphHeight = 1;
+  let glyphPixelRatio = 1;
   let glyphSpeed = 0.85;
   let glyphTargetSpeed = 0.85;
   let glyphPointer = { x: 1, y: 1 };
@@ -196,6 +197,12 @@ export function initHomeEntryHero() {
     const pixelRatioLimit = width <= 768 ? 1.25 : 1.5;
     const ratio = Math.min(window.devicePixelRatio || 1, pixelRatioLimit);
 
+    // Font/Dock updates also dispatch resize; keep the current rows and phase
+    // when the backing surface does not actually need to change.
+    if (glyphContext && width === glyphWidth && height === glyphHeight && ratio === glyphPixelRatio) {
+      return { unchanged: true };
+    }
+
     if (canvas.width !== Math.round(width * ratio)) {
       canvas.width = Math.round(width * ratio);
     }
@@ -218,7 +225,7 @@ export function initHomeEntryHero() {
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, width, height);
 
-    return { context, width, height };
+    return { context, width, height, ratio };
   }
 
   function refreshGlyphGlow() {
@@ -307,7 +314,10 @@ export function initHomeEntryHero() {
     if (glyphGlowGradient) {
       context.globalCompositeOperation = 'lighter';
       context.fillStyle = glyphGlowGradient;
-      context.fillRect(0, 0, glyphWidth, glyphHeight);
+      // The gradient is fully transparent outside its radius. Avoid blending
+      // those pixels across the entire screen on every animation frame.
+      const radius = 0.34 * Math.max(glyphWidth, glyphHeight);
+      context.fillRect(glyphPointer.x - radius, glyphPointer.y - radius, radius * 2, radius * 2);
       context.globalCompositeOperation = 'source-over';
     }
 
@@ -342,23 +352,27 @@ export function initHomeEntryHero() {
       return;
     }
 
+    const canvasState = prepareCanvas(glyphCanvas);
+    if (!canvasState) {
+      return;
+    }
+    glyphCanvasDirty = false;
+    if (canvasState.unchanged) {
+      startGlyphAnimation();
+      return;
+    }
+
     window.cancelAnimationFrame(glyphFrame);
     glyphFrame = 0;
     glyphLastFrameTime = 0;
     glyphLastPaintTime = 0;
 
-    const canvasState = prepareCanvas(glyphCanvas);
-
-    if (!canvasState) {
-      return;
-    }
-
-    const { context, width, height } = canvasState;
+    const { context, width, height, ratio } = canvasState;
     const isDark = htmlElement.getAttribute('data-theme') === 'dark';
 
-    glyphCanvasDirty = false;
     glyphWidth = width;
     glyphHeight = height;
+    glyphPixelRatio = ratio;
     glyphPointer = { x: 0.62 * width, y: 0.36 * height };
     glyphSpeed = 0.85;
     glyphTargetSpeed = 0.85;
