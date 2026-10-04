@@ -2,6 +2,54 @@ const { test, expect } = require('@playwright/test');
 
 test.use({ reducedMotion: 'no-preference' });
 
+for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
+  test(`entry shows its background immediately and gently introduces content at ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.imx-home-entry-ripple-ring')).toHaveCount(0);
+    const content = page.locator('.imx-home-entry-content');
+    await expect(content).toHaveCSS('animation-duration', '0.4s');
+    await expect(content).toHaveCSS('animation-delay', '0s');
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(theme => { document.documentElement.dataset.theme = theme; }, theme);
+      const layers = await page.locator('.imx-home-entry-layer').evaluateAll(elements =>
+        elements.map(element => {
+          const style = getComputedStyle(element);
+          return { clip: style.clipPath, animation: style.animationName, opacity: Number(style.opacity) };
+        }));
+      for (const layer of layers) {
+        expect(layer.clip).toBe('none');
+        expect(layer.animation).toBe('none');
+        expect(layer.opacity).toBeGreaterThan(0);
+      }
+    }
+    await expect(content).toHaveCSS('opacity', '1');
+    await expect(content).toHaveCSS('transform', 'none');
+    await expect(page.locator('.hero-title')).toBeVisible();
+    await expect(page.locator('.hero-action-primary')).toBeVisible();
+  });
+}
+
+test('subtitle is readable during entry before its typing loop begins', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  const subtitle = page.locator('[data-home-typed]');
+  const full = await subtitle.getAttribute('aria-label');
+  await expect(subtitle).toHaveText(full);
+  await page.clock.runFor(450);
+  await expect(subtitle).toHaveText(full);
+  await page.clock.runFor(1600);
+  await expect(subtitle).not.toHaveText(full);
+});
+
+test('reduced motion presents home content without entrance effects', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('.imx-home-entry-content')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.imx-home-entry-content')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.imx-home-entry-grid')).toHaveCSS('clip-path', 'none');
+});
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.heroProbe = { rows: [], measures: 0, paints: 0, compare: false, difference: null };

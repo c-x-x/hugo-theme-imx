@@ -23,10 +23,6 @@
       linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.28) 100%);
   }
 
-  .imx-home-entry-ripple-ring {
-    width: 18rem;
-    height: 18rem;
-  }
 
   .hero-content {
     display: flex;

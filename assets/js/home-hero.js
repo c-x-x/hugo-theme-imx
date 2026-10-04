@@ -580,8 +580,13 @@ export function initHomeEntryHero() {
       schedule(deleteNext, 34 + Math.random() * 24);
     }
 
-    typedSubtitle.textContent = '';
-    schedule(typeNext, 880);
+    // Present the full subtitle during entry; start the existing typing loop
+    // only after the reader has had time to see the initial content.
+    current.push(...chars);
+    index = chars.length;
+    typoFixed = true;
+    setSubtitleText();
+    schedule(deleteNext, 1850);
   }
 
   function requestCanvasRender() {
@@ -614,7 +619,6 @@ export function initHomeEntryHero() {
 
       heroResizeFrame = window.requestAnimationFrame(() => {
         heroResizeFrame = 0;
-        setInitialRevealPoint();
         requestCanvasRender();
       });
     }, 120);
@@ -632,25 +636,8 @@ export function initHomeEntryHero() {
     hero.style.setProperty(propertyY, `${y.toFixed(2)}%`);
   }
 
-  function setInitialRevealPoint() {
-    const anchor = hero.querySelector('.hero-avatar') || hero.querySelector('.hero-title');
-    const rect = anchor ? anchor.getBoundingClientRect() : hero.getBoundingClientRect();
-
-    setHeroPoint(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2,
-      '--imx-home-entry-x',
-      '--imx-home-entry-y'
-    );
-  }
-
-  setInitialRevealPoint();
   requestCanvasRender();
   initTypedSubtitle();
-
-  window.requestAnimationFrame(() => {
-    hero.classList.add('imx-home-entry-started');
-  });
 
   hero.addEventListener('pointermove', event => {
     if (event.pointerType === 'touch') {

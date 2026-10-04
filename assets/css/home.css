@@ -7,8 +7,6 @@
    ============================================ */
 
 .hero {
-  --imx-home-entry-x: 50%;
-  --imx-home-entry-y: 42%;
   --imx-home-pointer-x: 50%;
   --imx-home-pointer-y: 45%;
   --imx-home-glyph-opacity: 1;
@@ -61,8 +59,7 @@
   opacity: 0.58;
 }
 
-.imx-home-entry-layer,
-.imx-home-entry-ripple-ring {
+.imx-home-entry-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -73,7 +70,6 @@
 }
 
 .imx-home-entry-glyph-canvas {
-  --imx-home-entry-final-opacity: var(--imx-home-glyph-opacity);
   width: 100%;
   height: 100%;
   z-index: 0;
@@ -90,7 +86,7 @@
 }
 
 .imx-home-entry-ambient {
-  --imx-home-entry-final-opacity: var(--imx-home-ambient-opacity);
+  opacity: var(--imx-home-ambient-opacity);
   background:
     radial-gradient(circle at 16% 12%, rgba(219, 234, 254, 0.26), transparent 30%),
     radial-gradient(circle at 88% 22%, rgba(226, 232, 240, 0.22), transparent 34%),
@@ -107,7 +103,7 @@
 }
 
 .imx-home-entry-grid {
-  --imx-home-entry-final-opacity: var(--imx-home-grid-opacity);
+  opacity: var(--imx-home-grid-opacity);
   background-image:
     linear-gradient(rgba(148, 163, 184, 0.42) 1px, transparent 1px),
     linear-gradient(90deg, rgba(148, 163, 184, 0.34) 1px, transparent 1px);
@@ -128,26 +124,6 @@
   background:
     radial-gradient(ellipse at 48% 62%, rgba(10, 10, 11, 0.16), rgba(10, 10, 11, 0.06) 26%, transparent 58%),
     linear-gradient(180deg, rgba(10, 10, 11, 0), rgba(10, 10, 11, 0.06) 44%, rgba(10, 10, 11, 0.32) 100%);
-}
-
-.imx-home-entry-ripple-ring {
-  top: var(--imx-home-entry-y);
-  left: var(--imx-home-entry-x);
-  z-index: 5;
-  inset: auto;
-  width: 28rem;
-  height: 28rem;
-  border-radius: 999px;
-  background:
-    radial-gradient(
-      circle,
-      transparent 0 38%,
-      rgba(var(--color-primary-rgb), 0.22) 43%,
-      rgba(var(--color-primary-rgb), 0.1) 54%,
-      transparent 68%
-    );
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.05);
 }
 
 .hero-content {
@@ -292,85 +268,22 @@
   box-shadow: 0 12px 40px var(--color-shadow);
 }
 
-@keyframes imxHomeEntryRippleReveal {
-  0% {
-    clip-path: circle(0 at var(--imx-home-entry-x) var(--imx-home-entry-y));
-    opacity: 0;
-  }
-  58% {
-    opacity: var(--imx-home-entry-final-opacity);
-  }
-  100% {
-    clip-path: circle(150vmax at var(--imx-home-entry-x) var(--imx-home-entry-y));
-    opacity: var(--imx-home-entry-final-opacity);
-  }
-}
-
-@keyframes imxHomeEntryRippleRing {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.05);
-  }
-  28% {
-    opacity: 0.46;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(4.9);
-  }
-}
-
+/* The background is visible immediately. Only the content enters, using
+   compositor-friendly properties and no delayed/full-screen reveal. */
 @keyframes imxHomeEntryContentRise {
-  0% {
+  from {
     opacity: 0;
-    transform: translateY(48px);
+    transform: translateY(12px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .imx-home-entry-hero .imx-home-entry-reveal-layer {
-    clip-path: circle(0 at var(--imx-home-entry-x) var(--imx-home-entry-y));
-    opacity: 0;
-  }
-
-  .imx-home-entry-hero .imx-home-entry-content {
-    opacity: 0;
-    transform: translateY(48px);
-  }
-
-  .imx-home-entry-hero.imx-home-entry-started .imx-home-entry-reveal-layer {
-    animation: imxHomeEntryRippleReveal 0.88s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .imx-home-entry-hero.imx-home-entry-started .imx-home-entry-ripple-ring {
-    animation: imxHomeEntryRippleRing 0.92s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .imx-home-entry-hero.imx-home-entry-started .imx-home-entry-content {
-    animation: imxHomeEntryContentRise 0.68s cubic-bezier(0.16, 1, 0.3, 1) 0.58s both;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .imx-home-entry-hero .imx-home-entry-reveal-layer,
-  .imx-home-entry-hero .imx-home-entry-content {
-    clip-path: none !important;
-    filter: none !important;
-    opacity: var(--imx-home-entry-final-opacity, 1) !important;
-    animation: none !important;
-    transform: none !important;
-  }
-
-  .imx-home-entry-hero .imx-home-entry-content {
-    opacity: 1 !important;
-  }
-
-  .imx-home-entry-ripple-ring {
-    display: none;
+  .imx-home-entry-content {
+    animation: imxHomeEntryContentRise 400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 }
 
