@@ -148,4 +148,3 @@ test('real prefetch warms HTTP cache and a reload receives updated HTML', async 
     await new Promise(resolve => server.close(resolve));
   }
 });
-
