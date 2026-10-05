@@ -50,6 +50,9 @@
   });
 
   window.addEventListener('pagereveal', event => {
+    // Skipping an animation rejects ready; this is an expected fallback,
+    // rather than an unhandled application error.
+    event.viewTransition?.ready.catch(() => {});
     if (root.classList.contains('imx-page-loading')) event.viewTransition?.skipTransition();
   });
 

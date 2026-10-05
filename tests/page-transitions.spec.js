@@ -52,3 +52,27 @@ test('reduced motion keeps internal navigation free of page transitions', async 
   await expect.poll(() => page.evaluate(() => window.transitionObserved)).toBe(false);
   await expect(page.locator('main')).toBeVisible();
 });
+
+test('cold navigation skips the native transition without an unhandled rejection', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.route('**/tags/', async route => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace('<head>', `<head><script>
+      addEventListener('pagereveal', event => {
+        window.coldTransitionObserved = Boolean(event.viewTransition && document.documentElement.classList.contains('imx-page-loading'));
+      });
+    </script>`);
+    await route.fulfill({ response, body });
+  });
+  await ready(page);
+  await expect(page.locator('[data-page-loader]')).toHaveCount(0);
+  await page.evaluate(() => sessionStorage.removeItem('imxSiteReady'));
+  await page.locator('.navbar-menu a[href="/tags/"]').click();
+  await expect(page).toHaveURL(/\/tags\/$/);
+  await expect.poll(() => page.evaluate(() => window.coldTransitionObserved)).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('data-imx-page-state', 'ready');
+  await expect(page.locator('main')).toBeVisible();
+  expect(errors).toEqual([]);
+});
