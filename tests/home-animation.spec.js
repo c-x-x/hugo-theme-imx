@@ -3,9 +3,10 @@ const { test, expect } = require('@playwright/test');
 test.use({ reducedMotion: 'no-preference' });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
-  test(`entry shows its background immediately and gently introduces content at ${viewport.width}px`, async ({ page }) => {
+  test(`entry gently introduces content after loading at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).not.toHaveClass(/imx-page-loading/);
     await expect(page.locator('.imx-home-entry-ripple-ring')).toHaveCount(0);
     const content = page.locator('.imx-home-entry-content');
     await expect(content).toHaveCSS('animation-duration', '0.4s');
@@ -33,6 +34,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 
 test('subtitle is readable during entry before its typing loop begins', async ({ page }) => {
   await page.clock.install();
   await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.clock.runFor(700);
+  await expect(page.locator('html')).not.toHaveClass(/imx-page-loading/);
   const subtitle = page.locator('[data-home-typed]');
   const full = await subtitle.getAttribute('aria-label');
   await expect(subtitle).toHaveText(full);
@@ -52,6 +55,11 @@ test('reduced motion presents home content without entrance effects', async ({ p
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      if (type === 'webgl') return null;
+      return getContext.call(this, type, ...args);
+    };
     window.heroProbe = { rows: [], measures: 0, paints: 0, compare: false, difference: null };
     const prototype = CanvasRenderingContext2D.prototype;
     const fillText = prototype.fillText;

@@ -37,6 +37,17 @@ module.exports = defineConfig({
     browserName: process.env.PLAYWRIGHT_BROWSER || 'chromium',
     colorScheme: 'light',
     reducedMotion: 'reduce',
+    // RenderDocument is disabled by Playwright's defaults, which stalls native
+    // cross-document transitions. Keep its other feature overrides unchanged.
+    launchOptions: (process.env.PLAYWRIGHT_BROWSER || 'chromium') === 'chromium' ? {
+      args: ['--disable-features=' + [
+        'AvoidUnnecessaryBeforeUnloadCheckSync', 'BoundaryEventDispatchTracksNodeRemoval',
+        'DestroyProfileOnBrowserClose', 'DialMediaRouteProvider', 'GlobalMediaControls',
+        'HttpsUpgrades', 'LensOverlay', 'MediaRouter', 'PaintHolding',
+        'ThirdPartyStoragePartitioning', 'Translate', 'AutoDeElevate', 'OptimizationHints',
+        'msForceBrowserSignIn', 'msEdgeUpdateLaunchServicesPreferredVersion'
+      ].join(',')]
+    } : undefined,
     trace: 'retain-on-failure'
   },
   webServer: webServers

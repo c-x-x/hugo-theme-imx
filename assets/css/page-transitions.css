@@ -1,0 +1,17 @@
+/* Native multi-page navigation; unsupported browsers keep ordinary navigation. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+.navbar { view-transition-name: imx-navigation; }
+::view-transition-group(imx-navigation) { animation-duration: 160ms; }
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+  animation-timing-function: ease-out;
+}
+::view-transition-old(imx-navigation),
+::view-transition-new(imx-navigation) { animation-duration: 160ms; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*) { animation: none; }
+}

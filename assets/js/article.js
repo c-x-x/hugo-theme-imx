@@ -1,4 +1,6 @@
-export function initArticleMarkdownLayout() {
+import { loadArticleResources } from './article-resources.js';
+
+export async function initArticleMarkdownLayout() {
   const articleContent = document.querySelector('.article-content');
 
   if (!articleContent) {
@@ -36,6 +38,8 @@ export function initArticleMarkdownLayout() {
     blockquote.prepend(title);
   });
 
+  await loadArticleResources(articleContent, Boolean(articleContent.querySelector('.mermaid[data-mermaid-source], pre code.language-mermaid')));
+
   if (typeof window.renderMathInElement === 'function') {
     window.renderMathInElement(articleContent, {
       delimiters: [
@@ -69,7 +73,7 @@ export function initArticleMarkdownLayout() {
       suppressErrorRendering: true,
       theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'neutral',
     });
-    window.mermaid.run({ nodes: mermaidNodes }).catch(() => {
+    await window.mermaid.run({ nodes: mermaidNodes }).catch(() => {
       mermaidNodes.forEach((node) => {
         if (node.querySelector('svg')) return;
         node.textContent = 'Mermaid 语法有误，无法渲染图表。';

@@ -1,3 +1,4 @@
+import { createGlyphGPU } from "./home-glyph-gpu.js";
 import { htmlElement } from "./core/dom.js";
 import { onMediaQueryChange } from "./core/media-query.js";
 
@@ -140,6 +141,8 @@ export function initHomeEntryHero() {
   let typedTimer = 0;
   let glyphFrame = 0;
   let glyphContext = null;
+  let glyphGPU = null;
+  let glyphGPUFailed = false;
   let glyphRows = [];
   let glyphCanvasDirty = true;
   let glyphWidth = 1;
@@ -296,7 +299,7 @@ export function initHomeEntryHero() {
     glyphLastFrameTime = timestamp;
     glyphLastPaintTime = timestamp;
 
-    context.clearRect(0, 0, glyphWidth, glyphHeight);
+    if (!glyphGPU) context.clearRect(0, 0, glyphWidth, glyphHeight);
     glyphSpeed += (glyphTargetSpeed - glyphSpeed) * speedBlend;
 
     for (let index = 0; index < glyphRows.length; index += 1) {
@@ -307,11 +310,15 @@ export function initHomeEntryHero() {
         row.x += row.width / 2;
       }
 
-      context.fillStyle = row.fillStyle;
-      context.fillText(row.content, row.x, row.y);
+      if (!glyphGPU) {
+        context.fillStyle = row.fillStyle;
+        context.fillText(row.content, row.x, row.y);
+      }
     }
 
-    if (glyphGlowGradient) {
+    if (glyphGPU) glyphGPU.draw(glyphPointer, htmlElement.getAttribute('data-theme') === 'dark');
+
+    if (!glyphGPU && glyphGlowGradient) {
       context.globalCompositeOperation = 'lighter';
       context.fillStyle = glyphGlowGradient;
       // The gradient is fully transparent outside its radius. Avoid blending
@@ -327,7 +334,7 @@ export function initHomeEntryHero() {
   }
 
   function canAnimateHomeEntry() {
-    return heroVisible && documentVisible && !reduceMotionQuery.matches;
+    return heroVisible && documentVisible && !reduceMotionQuery.matches && window.__IMX_PAGE_READY__ !== false;
   }
 
   function stopGlyphAnimation() {
@@ -393,6 +400,23 @@ export function initHomeEntryHero() {
       };
     });
     refreshGlyphPaint();
+    glyphGPU?.dispose();
+    glyphGPU = null;
+    if (!glyphGPUFailed) {
+      glyphGPU = createGlyphGPU(glyphCanvas, glyphRows, width, height, ratio, context.font, () => {
+        glyphGPU = null;
+        glyphGPUFailed = true;
+        hero.dataset.glyphRenderer = 'canvas';
+        stopGlyphAnimation();
+        if (canAnimateHomeEntry()) drawGlyphFrame();
+      });
+    }
+    hero.dataset.glyphRenderer = glyphGPU ? 'webgl' : 'canvas';
+    // Upload and draw the first frame under the loader, without starting motion.
+    if (glyphGPU) glyphGPU.draw(glyphPointer, isDark);
+    else {
+      glyphRows.forEach(row => { context.fillStyle = row.fillStyle; context.fillText(row.content, row.x, row.y); });
+    }
 
     if (canAnimateHomeEntry()) {
       drawGlyphFrame();
@@ -491,7 +515,7 @@ export function initHomeEntryHero() {
     typedSubtitle.setAttribute('aria-label', originalText);
     typedSubtitle.setAttribute('aria-live', 'off');
 
-    if (reduceMotionQuery.matches || !heroVisible || !documentVisible) {
+    if (reduceMotionQuery.matches || !heroVisible || !documentVisible || window.__IMX_PAGE_READY__ === false) {
       stopTypedSubtitle(false);
       typedSubtitle.textContent = originalText;
       return;
@@ -636,7 +660,9 @@ export function initHomeEntryHero() {
     hero.style.setProperty(propertyY, `${y.toFixed(2)}%`);
   }
 
-  requestCanvasRender();
+  window.__IMX_HOME_READY__ = document.fonts.ready.then(() => {
+    if (!reduceMotionQuery.matches) setupGlyphCanvas();
+  }).catch(() => {});
   initTypedSubtitle();
 
   hero.addEventListener('pointermove', event => {
@@ -683,7 +709,7 @@ export function initHomeEntryHero() {
   }
 
   function resumeHomeEntryMotion() {
-    if (!heroVisible || !documentVisible) {
+    if (!heroVisible || !documentVisible || window.__IMX_PAGE_READY__ === false) {
       return;
     }
 
@@ -697,6 +723,8 @@ export function initHomeEntryHero() {
       initTypedSubtitle();
     }
   }
+
+  document.addEventListener('imx:page-ready', resumeHomeEntryMotion);
 
   if ('IntersectionObserver' in window) {
     const heroObserver = new IntersectionObserver((entries) => {

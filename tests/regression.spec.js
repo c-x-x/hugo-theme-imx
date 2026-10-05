@@ -61,6 +61,7 @@ async function disableMotion(page) {
 
 async function openStablePage(page, route) {
   await page.goto(route, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('html')).not.toHaveClass(/imx-page-loading/);
   await disableMotion(page);
 }
 
@@ -430,6 +431,7 @@ test('404 game starts from keyboard and resets its visible state', async ({ page
   await expect(start).toHaveText('开始');
   await expect(page.locator('[data-404-score]')).toHaveText('0');
   await expect(page.locator('[data-404-lives]')).toHaveText('3');
+  await expect(canvas).toBeVisible();
   await canvas.focus();
   await page.keyboard.press('Space');
   await expect(start).toHaveText('进行中');

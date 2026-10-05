@@ -106,6 +106,10 @@
     }());
   </script>
 
+  <!-- Start the global loader before any content or external resources render. -->
+  <style>{{ (resources.Get "css/page-loader.css").Content | safeCSS }}</style>
+  <script>{{ (resources.Get "js/page-loader.js").Content | safeJS }}</script>
+
   <!-- Fonts and CSS -->
   {{- $interFont := resources.Get "fonts/imx/inter-variable.woff2" | fingerprint -}}
   {{- $noto400Core := resources.Get "fonts/imx/noto-serif-sc-400-core.woff2" | fingerprint -}}
@@ -148,15 +152,13 @@
     (resources.Get "css/toc-overflow.css")
     (resources.Get "css/code.css")
     (resources.Get "css/loading.css")
+    (resources.Get "css/page-transitions.css")
     (resources.Get "css/print.css")
     (resources.Get "css/code-toolbar.css")
   -}}
   {{- $css := $cssSources | resources.Concat "css/main.css" -}}
   {{- $style := $css | minify | fingerprint -}}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}">
-  {{ if .IsPage }}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" integrity="sha384-nH0MfJ44wi1dd7w6jinlyBgljjS8EJAh2JBoRad8a3VDw2K69vfaaqm4WnR+gXtA" crossorigin="anonymous">
-  {{ end }}
 
   <!-- RSS -->
   {{ with .OutputFormats.Get "rss" }}
@@ -219,6 +221,10 @@
   </svg>
 </head>
 <body class="{{ if .IsHome }}is-home{{ end }}{{ block "body-class" . }}{{ end }}" data-search-index="{{ "index.json" | relLangURL }}">
+  <div class="imx-page-loader" data-page-loader role="status" aria-label="正在加载页面">
+    <div class="imx-page-loader-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <div class="imx-page-content" data-page-content>
   {{ partial "header.html" . }}
 
   <main class="main-wrapper{{ if .IsHome }} main-wrapper-home{{ end }}">
@@ -226,13 +232,9 @@
   </main>
 
   {{ partial "footer.html" . }}
+  </div>
 
   <!-- JavaScript -->
-  {{ if .IsPage }}
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.js" integrity="sha384-CwjPRVHTvLiMBFjEoij+QZViMV5rhTOIp7CJzl24JEqpRDA1sJFHVXXLURktbYYp" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/contrib/auto-render.min.js" integrity="sha384-bjyGPfbij8/NDKJhSGZNP/khQVgtHUE5exjm4Ydllo42FwIgYsdLO2lXGmRBf5Mz" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js" integrity="sha384-EOXBFmc3gx5mb+vn0vPvvGqACToJD24hhacX5Yx+8NUUQrHIle/Qi5Bg9o3zKwW2" crossorigin="anonymous"></script>
-  {{ end }}
   {{ $js := resources.Get "js/main.js" }}
   {{ $script := $js | js.Build (dict "target" "es2018" "minify" true) | fingerprint }}
   <script defer src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
