@@ -178,16 +178,17 @@ export function initSharedDock() {
       lastDockGroupShift === '0px' &&
       lastDockShellScaleX === '1.0000' &&
       lastDockShellX === '0px' &&
-      lastDockVisualKey === '0.000|0.000|0.9000|1.0000|0.800|0.140|0.110|0.280|1.000' &&
+      lastDockVisualKey === '0.000|0.000|0.9000|1.0000|0.800|0.140|0.110|0.280|1.000|0.000' &&
       !dockAttracting
     ) {
       return;
     }
 
     lastDockAttraction = 0;
-    lastDockVisualKey = '0.000|0.000|0.9000|1.0000|0.800|0.140|0.110|0.280|1.000';
+    lastDockVisualKey = '0.000|0.000|0.9000|1.0000|0.800|0.140|0.110|0.280|1.000|0.000';
     navbar.style.setProperty('--home-dock-attraction', '0.000');
     navbar.style.setProperty('--home-dock-shell-opacity', '0.000');
+    navbar.style.setProperty('--home-dock-shell-surface-opacity', '0.000');
     navbar.style.setProperty('--home-dock-shell-scale-x', '1.0000');
     navbar.style.setProperty('--home-dock-shell-scale-y', '0.9000');
     navbar.style.setProperty('--home-dock-part-scale', '1.0000');
@@ -231,7 +232,10 @@ export function initSharedDock() {
     const partBorderAlpha = 0.14 * partPresence;
     const partShadowAlpha = 0.11 * partPresence;
     const partDarkShadowAlpha = 0.28 * partPresence;
-    const partOverlayAlpha = partPresence;
+    // The expanding outline crosses empty gaps. Keep those gaps clear until
+    // the three parts arrive, then hand their surfaces to the joined shell.
+    const shellSurfaceOpacity = smoothStep(0.94, 1, attraction);
+    const partOverlayAlpha = 1 - shellSurfaceOpacity;
     const key = [
       attraction.toFixed(3),
       shellOpacity.toFixed(3),
@@ -241,7 +245,8 @@ export function initSharedDock() {
       partBorderAlpha.toFixed(3),
       partShadowAlpha.toFixed(3),
       partDarkShadowAlpha.toFixed(3),
-      partOverlayAlpha.toFixed(3)
+      partOverlayAlpha.toFixed(3),
+      shellSurfaceOpacity.toFixed(3)
     ].join('|');
 
     if (key === lastDockVisualKey) {
@@ -251,6 +256,7 @@ export function initSharedDock() {
     lastDockVisualKey = key;
     navbar.style.setProperty('--home-dock-attraction', attraction.toFixed(3));
     navbar.style.setProperty('--home-dock-shell-opacity', shellOpacity.toFixed(3));
+    navbar.style.setProperty('--home-dock-shell-surface-opacity', shellSurfaceOpacity.toFixed(3));
     navbar.style.setProperty('--home-dock-shell-scale-y', shellScaleY.toFixed(4));
     navbar.style.setProperty('--home-dock-part-scale', partScale.toFixed(4));
     navbar.style.setProperty('--home-dock-part-bg-alpha', partBgAlpha.toFixed(3));

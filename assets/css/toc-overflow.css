@@ -18,39 +18,59 @@ body.is-article-page .article-page .toc a::before {
   transform: translateY(-50%);
 }
 
+/* Keep the original dash language; hierarchy stays deliberately subtle. */
 body.is-article-page .article-page .toc nav ul ul {
-  padding-left: 0.75rem;
+  padding-left: 0.45rem;
 }
 
-body.is-article-page .article-page .toc a[data-toc-level] {
-  padding-left: 2.15rem;
-  opacity: 0.8;
+body.is-article-page .article-page .toc a[data-toc-level="2"] {
+  --toc-marker-width: 0.8rem;
+  --toc-marker-active-width: 2.4rem;
 }
 
-body.is-article-page .article-page .toc a[data-toc-level]::before {
-  content: attr(data-toc-level) '级';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 1.65rem;
-  height: 1.15rem;
-  border: 1px solid rgba(var(--article-accent-rgb), 0.22);
-  border-radius: 0.25rem;
-  background: transparent;
-  font-size: 0.6rem;
-  font-weight: 500;
-  line-height: 1;
-  transition: background-color 0.16s ease, border-color 0.16s ease;
+body.is-article-page .article-page .toc a[data-toc-level="3"] {
+  --toc-marker-width: 0.64rem;
+  --toc-marker-active-width: 2rem;
 }
 
-body.is-article-page .article-page .toc a[data-toc-level]:hover,
-body.is-article-page .article-page .toc a[data-toc-level].active {
-  opacity: 1;
+body.is-article-page .article-page .toc a[data-toc-level="4"] {
+  --toc-marker-width: 0.48rem;
+  --toc-marker-active-width: 1.65rem;
 }
 
-body.is-article-page .article-page .toc a[data-toc-level]:hover::before,
-body.is-article-page .article-page .toc a[data-toc-level].active::before {
-  border-color: rgba(var(--article-accent-rgb), 0.5);
-  background: rgba(var(--article-accent-rgb), 0.1);
+body.is-article-page .article-page .toc a[data-toc-level="5"] {
+  --toc-marker-width: 0.4rem;
+  --toc-marker-active-width: 1.4rem;
+}
+
+body.is-article-page .article-page .toc a[data-toc-level="6"] {
+  --toc-marker-width: 0.32rem;
+  --toc-marker-active-width: 1.2rem;
+}
+
+body.is-article-page .article-page .toc a::before {
+  transform-origin: left center;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.is-article-page .article-page .toc a:hover::before {
+    animation: toc-dash-wave 620ms ease-out both;
+  }
+
+  body.is-article-page .article-page .toc li:has(> a:hover) + li > a::before,
+  body.is-article-page .article-page .toc li:has(+ li > a:hover) > a::before {
+    animation: toc-dash-echo 520ms 60ms ease-out both;
+  }
+}
+
+@keyframes toc-dash-wave {
+  0% { transform: translateY(-50%) scaleX(1); }
+  35% { transform: translateY(-50%) scaleX(1.12); }
+  65% { transform: translateY(-50%) scaleX(0.97); }
+  100% { transform: translateY(-50%) scaleX(1); }
+}
+
+@keyframes toc-dash-echo {
+  0%, 100% { transform: translateY(-50%) scaleX(1); }
+  45% { transform: translateY(-50%) scaleX(1.15); }
 }

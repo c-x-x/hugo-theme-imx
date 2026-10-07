@@ -178,7 +178,8 @@
   color: var(--color-text-muted);
 }
 
-.post-card-meta span {
+.post-card-meta span,
+.post-card-meta .post-card-category {
   display: flex;
   align-items: center;
   flex: 0 1 auto;
@@ -187,6 +188,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.post-card-meta .post-card-category {
+  position: relative;
+  z-index: 2;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.post-card-meta .post-card-category:hover,
+.post-card-meta .post-card-category:focus-visible {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .post-card-meta span:nth-child(n + 4) {

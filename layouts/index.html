@@ -66,11 +66,11 @@
               <svg width="16" height="16" fill="currentColor"><use href="#icon-calendar"></use></svg>
               {{ .Date.Format "2006-01-02" }}
             </span>
-            {{ if .Params.categories }}
-            <span>
+            {{ range first 1 (.GetTerms "categories") }}
+            <a class="post-card-category" href="{{ .RelPermalink }}">
               <svg width="16" height="16" fill="currentColor"><use href="#icon-folder"></use></svg>
-              {{ index .Params.categories 0 }}
-            </span>
+              {{ .LinkTitle }}
+            </a>
             {{ end }}
             {{ if .ReadingTime }}
             <span>

@@ -305,6 +305,21 @@ test('theme modes, desktop dock, mobile menu and article toc remain operational'
   expect(errors).toEqual([]);
 });
 
+test('card categories open their archive above the whole-card article link', async ({ page }) => {
+  for (const width of [1440, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const path of ['/', '/posts/']) {
+      await openStablePage(page, path);
+      const category = page.locator('.post-card-category').first();
+      const title = (await category.textContent()).trim();
+      const href = await category.getAttribute('href');
+      await category.click();
+      await expect(page).toHaveURL(new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
+      await expect(page.locator('h1')).toHaveText(title);
+    }
+  }
+});
+
 test('desktop article toc keeps active nested labels inside their text column', async ({ page }) => {
   await page.setViewportSize({ width: 1038, height: 457 });
   await openStablePage(page, '/toc-overflow-regression/');
@@ -340,7 +355,7 @@ test('desktop article toc keeps active nested labels inside their text column', 
 
   expect(tocLayout.linkLeft).toBeGreaterThanOrEqual(tocLayout.tocLeft - 1);
   expect(tocLayout.linkRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
-  expect(tocLayout.labelLeft - tocLayout.linkLeft).toBeGreaterThanOrEqual(32);
+  expect(tocLayout.labelLeft - tocLayout.linkLeft).toBeGreaterThanOrEqual(48);
   expect(tocLayout.labelRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
   expect(tocLayout.tocScrollWidth).toBeLessThanOrEqual(tocLayout.tocClientWidth + 1);
   await expectNoHorizontalOverflow(page);
@@ -440,6 +455,39 @@ test('404 game starts from keyboard and resets its visible state', async ({ page
   await expect(page.locator('[data-404-score]')).toHaveText('0');
   await expect(page.locator('[data-404-lives]')).toHaveText('3');
   expect(errors).toEqual([]);
+});
+
+test('desktop dock extensions stay clear while its parts are approaching', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const mode of ['light', 'dark']) {
+    await openStablePage(page, '/');
+    await page.evaluate(theme => {
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.scrollBehavior = 'auto';
+      const hero = document.querySelector('[data-home-entry]');
+      const featured = document.querySelector('#featured-posts');
+      const top = hero.getBoundingClientRect().top + window.scrollY;
+      const range = Math.max(featured.getBoundingClientRect().top + window.scrollY - top, innerHeight);
+      window.scrollTo(0, top + range * 0.42);
+    }, mode);
+    const navbar = page.locator('.navbar');
+    await expect.poll(() => navbar.evaluate(element =>
+      parseFloat(element.style.getPropertyValue('--home-dock-attraction')))).toBeGreaterThan(0.4);
+    await expect.poll(() => navbar.evaluate(element =>
+      parseFloat(element.style.getPropertyValue('--home-dock-attraction')))).toBeLessThan(0.7);
+    const rgb = mode === 'light' ? '251, 250, 247' : '23, 23, 22';
+    const alpha = mode === 'light' ? '0.68' : '0.72';
+    await expect(page.locator('.navbar-dock-shell')).toHaveCSS('background-color', `rgba(${rgb}, 0)`);
+    for (const selector of ['.navbar-brand', '.navbar-menu', '.navbar-actions']) {
+      await expect(page.locator(selector)).toHaveCSS('background-color', `rgba(${rgb}, ${alpha})`);
+    }
+    const brand = await page.locator('.navbar-brand').boundingBox();
+    const menu = await page.locator('.navbar-menu').boundingBox();
+    const actions = await page.locator('.navbar-actions').boundingBox();
+    expect(menu.x - brand.x - brand.width).toBeGreaterThan(15);
+    expect(actions.x - menu.x - menu.width).toBeGreaterThan(15);
+  }
 });
 
 test('desktop dock uses one translucent surface on every page', async ({ page }) => {
