@@ -89,6 +89,9 @@ body.is-article-page,
 }
 
 body.is-article-page {
+  /* Safari treats hidden horizontal overflow as a sticky scroll container.
+     Clip horizontal spill without changing the viewport scroll reference. */
+  overflow-x: clip;
   background: var(--article-page-bg);
 }
 

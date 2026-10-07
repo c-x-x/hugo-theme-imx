@@ -251,6 +251,13 @@ export function initToc() {
       }
     });
 
+    headings.forEach(heading => {
+      const link = getTocLinkForHeading(heading);
+      if (link) {
+        link.dataset.tocLevel = heading.tagName.slice(1);
+      }
+    });
+
     updateTocByScroll(true);
     window.addEventListener('scroll', () => requestTocUpdate(false), { passive: true });
     window.addEventListener('resize', () => requestTocUpdate(true, true));

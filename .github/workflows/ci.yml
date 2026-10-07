@@ -55,9 +55,9 @@ jobs:
         if: matrix.playwright
         run: npm ci
 
-      - name: Install Chromium
+      - name: Install Chromium and WebKit
         if: matrix.playwright
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Check JavaScript syntax
         run: npm run check:js
@@ -68,6 +68,10 @@ jobs:
       - name: Run browser regression tests
         if: matrix.playwright
         run: npm run test:e2e
+
+      - name: Verify WebKit TOC positioning
+        if: matrix.playwright
+        run: PLAYWRIGHT_BROWSER=webkit npx playwright test tests/toc-position.spec.js --output=/tmp/imx-webkit-toc-results
 
       - name: Verify repository output
         run: |

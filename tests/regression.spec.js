@@ -340,7 +340,7 @@ test('desktop article toc keeps active nested labels inside their text column', 
 
   expect(tocLayout.linkLeft).toBeGreaterThanOrEqual(tocLayout.tocLeft - 1);
   expect(tocLayout.linkRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
-  expect(tocLayout.labelLeft - tocLayout.linkLeft).toBeGreaterThanOrEqual(48);
+  expect(tocLayout.labelLeft - tocLayout.linkLeft).toBeGreaterThanOrEqual(32);
   expect(tocLayout.labelRight).toBeLessThanOrEqual(tocLayout.tocRight + 1);
   expect(tocLayout.tocScrollWidth).toBeLessThanOrEqual(tocLayout.tocClientWidth + 1);
   await expectNoHorizontalOverflow(page);

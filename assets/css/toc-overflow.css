@@ -17,3 +17,40 @@ body.is-article-page .article-page .toc a::before {
   max-width: var(--toc-marker-active-width, 2rem);
   transform: translateY(-50%);
 }
+
+body.is-article-page .article-page .toc nav ul ul {
+  padding-left: 0.75rem;
+}
+
+body.is-article-page .article-page .toc a[data-toc-level] {
+  padding-left: 2.15rem;
+  opacity: 0.8;
+}
+
+body.is-article-page .article-page .toc a[data-toc-level]::before {
+  content: attr(data-toc-level) '级';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.65rem;
+  height: 1.15rem;
+  border: 1px solid rgba(var(--article-accent-rgb), 0.22);
+  border-radius: 0.25rem;
+  background: transparent;
+  font-size: 0.6rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+body.is-article-page .article-page .toc a[data-toc-level]:hover,
+body.is-article-page .article-page .toc a[data-toc-level].active {
+  opacity: 1;
+}
+
+body.is-article-page .article-page .toc a[data-toc-level]:hover::before,
+body.is-article-page .article-page .toc a[data-toc-level].active::before {
+  border-color: rgba(var(--article-accent-rgb), 0.5);
+  background: rgba(var(--article-accent-rgb), 0.1);
+}
