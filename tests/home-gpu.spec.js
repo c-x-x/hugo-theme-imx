@@ -33,7 +33,7 @@ test('text texture is prepared before reveal and reused for animation, theme and
   expect(await page.evaluate(() => gpuProbe.uploads)).toBe(prepared.uploads);
   expect(await page.evaluate(() => gpuProbe.text)).toBe(prepared.text);
   await expect.poll(() => page.evaluate(() => gpuProbe.draws)).toBeGreaterThan(10);
-  await page.locator('.navbar-logo-wrap').click({ clickCount: 3 });
+  await page.locator('[data-font-switch-avatar]').click({ clickCount: 3 });
   await expect(page.locator('html')).toHaveAttribute('data-font', 'wenkai');
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(350);

@@ -129,7 +129,7 @@ test('home animation survives font changes, pauses offscreen and resizes when ne
   await expect.poll(() => page.evaluate(() => heroProbe.paints)).toBeGreaterThan(2);
   const measures = await page.evaluate(() => heroProbe.measures);
   // WenKai signals a resize after font loading; this must not randomize the background.
-  await page.locator('.navbar-logo-wrap').click({ clickCount: 3 });
+  await page.locator('[data-font-switch-avatar]').click({ clickCount: 3 });
   await expect(page.locator('html')).toHaveAttribute('data-font', 'wenkai');
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(350);

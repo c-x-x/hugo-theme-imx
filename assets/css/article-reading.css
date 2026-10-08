@@ -210,7 +210,7 @@ body.is-article-page .sidebar-toggle:hover {
 .article-page .article-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(190px, var(--article-toc-measure));
-  gap: var(--article-layout-gap);
+  gap: 0.5rem var(--article-layout-gap);
   width: var(--article-shell-width);
   max-width: none;
   margin: 0 auto;
@@ -230,7 +230,8 @@ body.is-article-page .sidebar-toggle:hover {
 }
 
 .article-page .article-title {
-  max-width: 12.8em;
+  grid-column: 1 / -1;
+  max-width: none;
   margin: 0 0 1.25rem;
   font-family: var(--article-ui-font);
   font-size: clamp(2.25rem, 4.1vw, 4.15rem);

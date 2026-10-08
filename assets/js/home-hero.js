@@ -197,7 +197,9 @@ export function initHomeEntryHero() {
     const rect = hero.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    const pixelRatioLimit = width <= 768 ? 1.25 : 1.5;
+    // Mobile code text needs retina coverage instead of an upscaled 1.25x
+    // surface. Keep desktop's existing budget and bound very dense displays.
+    const pixelRatioLimit = width <= 768 ? 3 : 1.5;
     const ratio = Math.min(window.devicePixelRatio || 1, pixelRatioLimit);
 
     // Font/Dock updates also dispatch resize; keep the current rows and phase

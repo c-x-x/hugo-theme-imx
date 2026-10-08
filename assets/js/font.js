@@ -1,13 +1,14 @@
+import { celebrateFontSwitch } from "./font-confetti.js";
 import { setStorageItem } from "./core/storage.js";
 
-// Keep the gesture on the home-page logo; the brand link elsewhere stays native.
+// The home avatar holds the hidden gesture; brand links stay native.
 export function initFontSwitch() {
   if (!document.body.classList.contains('is-home')) return;
-  const logo = document.querySelector('.navbar-brand .navbar-logo-wrap');
-  if (!logo) return;
+  const avatar = document.querySelector('[data-font-switch-avatar]');
+  if (!avatar) return;
 
   let clicks = [];
-  logo.addEventListener('click', (event) => {
+  avatar.addEventListener('click', (event) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     const now = performance.now();
@@ -20,6 +21,7 @@ export function initFontSwitch() {
     const font = root.dataset.font === 'wenkai' ? 'default' : 'wenkai';
     root.dataset.font = font;
     setStorageItem('imxFont', font);
+    celebrateFontSwitch();
 
     // Font metrics affect the animated navigation geometry.
     requestAnimationFrame(() => {

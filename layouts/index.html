@@ -33,7 +33,9 @@
 
     <div class="hero-brand-row">
       <h1 class="hero-title">{{ .Site.Title }}</h1>
-      <img src="{{ $avatarURL }}" alt="{{ .Site.Title }}" class="hero-avatar" width="96" height="96">
+      <button type="button" class="hero-avatar-button" data-font-switch-avatar aria-label="切换阅读字体">
+        <img src="{{ $avatarURL }}" alt="{{ .Site.Title }}" class="hero-avatar" width="96" height="96">
+      </button>
     </div>
     <div class="hero-actions">
       <a href="#featured-posts" class="hero-action hero-action-primary">开始阅读</a>
