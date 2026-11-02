@@ -221,8 +221,10 @@
   .article-page .article-title {
     max-width: 100%;
     margin-bottom: 1rem;
-    font-size: clamp(2rem, 10vw, 3rem);
-    letter-spacing: -0.045em;
+    font-size: clamp(1.8rem, 6.6vw, 2.2rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   .article-page .article-meta {

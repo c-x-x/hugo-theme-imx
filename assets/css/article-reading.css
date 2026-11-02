@@ -226,11 +226,11 @@ body.is-article-page .sidebar-toggle:hover {
 .article-page.article-page-no-toc .article-header,
 .article-page.article-page-toc-collapsed .article-header {
   grid-template-columns: minmax(0, 1fr);
-  width: min(var(--article-measure), calc(100vw - clamp(2rem, 6vw, 4rem)));
+  width: min(var(--article-measure), calc(100vw - 3rem));
 }
 
 .article-page .article-title {
-  grid-column: 1 / -1;
+  grid-column: 1;
   max-width: none;
   margin: 0 0 1.25rem;
   font-family: var(--article-ui-font);
@@ -239,7 +239,7 @@ body.is-article-page .sidebar-toggle:hover {
   line-height: 1.08;
   letter-spacing: -0.045em;
   color: var(--article-ink);
-  text-wrap: balance;
+  text-wrap: wrap;
 }
 
 .article-page .article-meta {

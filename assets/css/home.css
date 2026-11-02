@@ -583,6 +583,7 @@
 .featured-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, 280px);
+  justify-content: center;
   gap: 2rem;
   max-width: 1216px;
   margin: 0 auto;

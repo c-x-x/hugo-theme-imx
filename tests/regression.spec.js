@@ -384,7 +384,7 @@ test('homepage latest articles show the newest publications up to four', async (
   ]);
 });
 
-test('homepage article groups use equal cards and keep fewer featured posts left aligned', async ({ page }) => {
+test('homepage article groups use equal cards and center fewer featured posts', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openStablePage(page, '/');
 
@@ -406,17 +406,17 @@ test('homepage article groups use equal cards and keep fewer featured posts left
 
   const alignment = await page.evaluate(() => {
     const grid = document.querySelector('#featured-posts .featured-grid');
-    const initialLeft = grid.querySelector('.post-card').getBoundingClientRect().left;
     [...grid.querySelectorAll('.post-card')].slice(1).forEach(card => card.remove());
     const cardBox = grid.querySelector('.post-card').getBoundingClientRect();
+    const gridBox = grid.getBoundingClientRect();
 
     return {
-      initialLeft,
-      remainingLeft: cardBox.left
+      left: cardBox.left - gridBox.left,
+      right: gridBox.right - cardBox.right
     };
   });
 
-  expect(Math.abs(alignment.initialLeft - alignment.remainingLeft)).toBeLessThan(1);
+  expect(Math.abs(alignment.left - alignment.right)).toBeLessThan(1);
 });
 
 test('desktop dock merges and restores with normal motion enabled', async ({ page }) => {
